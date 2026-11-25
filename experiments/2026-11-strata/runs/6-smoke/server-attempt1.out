@@ -1,0 +1,27 @@
+loading the model (the first start takes a minute or two) ...
+[strata] starting the engine: reading the model's weights ...
+Traceback (most recent call last):
+  File "/home/llama/strata/v0.2.21/src/terminal/serve/server.py", line 9826, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/llama/strata/v0.2.21/src/terminal/serve/server.py", line 9011, in main
+    return _main(argv, lifecycle_event=lifecycle_event, interrupt_exit_code=interrupt_exit_code)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/llama/strata/v0.2.21/src/terminal/serve/server.py", line 9477, in _main
+    engine = start_engine_or_fallback(cfg, exe, effort_end, env, lazy, tok, offline=a.offline, batch_telemetry=a.batch_telemetry)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/llama/strata/v0.2.21/src/terminal/serve/server.py", line 8795, in start_engine_or_fallback
+    return StrataEngine(exe, engine_args(cfg, exe) + (effort_end or []), cwd=cfg.get("cwd"), log=cfg.get("log"), env=env, lazy=lazy,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/llama/strata/v0.2.21/src/terminal/serve/server.py", line 938, in __init__
+    raise EngineDied(why + (f" (see {log})" if log else "") + note +
+serve.server_parts.engines.EngineDied: the engine exited before it was ready (see /home/llama/strata/v0.2.21/logs/1gpu-nodraft.log)
+the engine process ended: exit code 2
+the engine log's last lines:
+  [strata] 2026-11-25 18:43:27 engine started: /home/llama/strata/v0.2.21/build/strata --serve --pack /home/llama/strata/v0.2.21/data/packs/iq3_xxs --native /home/llama/models/qwen3.8-flash-next-gsq-rco-iq3xxs/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00001-of-00002.gguf --ple-gguf /home/llama/models/qwen3.8-flash-next-gsq-rco-iq3xxs/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00002-of-00002.gguf --expert-profile /home/llama/strata/v0.2.21/src/terminal/data/expert-profile.bin --expert-cache auto --prefill auto --suffix-draft 0 --lookup-max-t 0 --max-context 32768 --kv int8 --pool-workers 13
+  strata: sm_120 (Blackwell): 12 speed switches on by default (STRATA_SM120_PERF=0 turns them off, as does STRATA_DEFAULTS=026; a switch you set is kept; ADAPT_FETCH is on because this card has 16 GiB of memory or less, it does not give bit-for-bit the same text, STRATA_ADAPT_FETCH=0 turns it off): HC_UPMIX Q80_ROWS1 EXP_MODE SIDE_MIXER DEQUANT_SIDE QFUSE LFUSE PLE_COMPACT PLE_COPY_STREAM PREFILL_CPU_SHARE_NT PREFILL_NVFP4 ADAPT_FETCH
+  strata generate: NVIDIA (15.5 GiB): --prefill auto stays at 8192 so prompt loans do not cannibalize hot expert slots (#5199; STRATA_NV_CHUNK=16 or 1 raises it)
+  strata generate: memory guard: limit 62.5 GiB (source: meminfo), current 3.3 GiB, reclaimable cache credited 0.0 GiB; available 59.2 GiB (MemAvailable 59.2 GiB), floor 2560 MiB
+  strata generate: PCIe probe: 20.4 GB/s host->device (best of 20.4 20.3 20.3 20.4) -> pcie_frac 0.55 (default 0.55)
+  strata generate: CPU expert kernels: AVX-2
+  strata generate: /home/llama/strata/v0.2.21/data/packs/iq3_xxs is a native (IQ) pack: it needs --native SHARD1, --spec T (T >= 2) and --prefill CHUNK

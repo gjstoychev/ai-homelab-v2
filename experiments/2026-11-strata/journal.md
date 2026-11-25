@@ -156,3 +156,47 @@ Drafting has three settings (engine `--help` and `strata_control/draft_layer.py`
 | `strata-1gpu-mtp.json` | `--spec 4 --spec-min-p 0.5 --mtp <rt>` | the MTP draft layer and prompt lookup: setup's default |
 
 All three: one GPU (`"gpu": 0`), `--max-context 32768`, `--kv int8`, `--pool-workers 13`. Files in `configs/`.
+
+## 6. Smoke test, one GPU (2026-11-25)
+
+**Why:** the engine starts from these files, answers, and its log shows the settings that matter before any measurement.
+
+**Command** (in `~/strata/v0.2.21/src/terminal`):
+
+```bash
+.venv/bin/python serve/server.py --engine strata --config ~/ai-homelab-v2/experiments/2026-11-strata/configs/strata-1gpu-nodraft.json --port 8080 --ready-file ~/strata/v0.2.21/logs/ready
+curl -s http://127.0.0.1:8080/v1/chat/completions -H 'Content-Type: application/json' \
+  -d '{"model":"x","messages":[{"role":"user","content":"What is the capital of Austria? Answer in one short sentence."}],"max_tokens":200,"temperature":0}'
+```
+
+### 6a. First start: refused
+
+**Actual:** the engine stopped at start with exit code 2: "`…/packs/iq3_xxs is a native (IQ) pack: it needs --native SHARD1, --spec T (T >= 2) and --prefill CHUNK`" (`runs/6-smoke/engine-attempt1.log`).
+
+**Cause:** with a native pack the engine always decodes through verify windows, so `--spec` is required even with no drafter. "No drafting" is therefore `--spec 4` with nothing that proposes tokens: no `--mtp`, `--suffix-draft 0`, `--lookup-max-t 0`. Fixed in `configs/strata-1gpu-nodraft.json`. This also answers the plan's question about `--spec 0`: not possible with this pack.
+
+### 6b. Second start: up in 20 s
+
+**Actual** (`runs/6-smoke/engine.log`, `server.out`):
+- **sm_120 defaults:** "12 speed switches on by default … HC_UPMIX Q80_ROWS1 EXP_MODE SIDE_MIXER DEQUANT_SIDE QFUSE LFUSE PLE_COMPACT PLE_COPY_STREAM PREFILL_CPU_SHARE_NT PREFILL_NVFP4 ADAPT_FETCH". `ADAPT_FETCH` "is on because this card has 16 GiB of memory or less, it does not give bit-for-bit the same text" (`STRATA_ADAPT_FETCH=0` turns it off; for the quality check in step 11).
+- **Memory guard:** limit 62.5 GiB, available 59.2 GiB. PCIe probe: 20.4 GB/s host to device.
+- **Pack and weights:** native pack, 1,466 MiB of dense weights in 0.2 s; 300 native projection matrices (1,781 MiB); n-gram table read in place from shard 2 ("PLE direct read probe: 110997 rows/s (fine)"); an "experimental native Q5_K head".
+- **Expert arena:** 39.97 GiB at 4.31 GiB/s, read through the file cache (the files were still partly cached from the checksum check), "cudaHostRegister PORTABLE ok": pinned completely, no "could not be page-locked". No huge pages (`vm.nr_hugepages=0`, THP not requested for a 39 GiB arena).
+- **CPU:** 13 pool workers on logical CPUs 2,4,…,14 (P-cores, one per physical core) and 16–21 (E-cores), the host thread on CPU 0.
+- **Expert cache on GPU 0:** 5,978 of 24,576 slots (24.3 %), 9.67 GiB of VRAM, pre-filled from the shipped profile. The prompt path borrows 2,640 of those slots (4.23 GiB) while a prompt is read. 870 MiB of VRAM free with everything loaded (15,040 MiB used).
+- **Adaptive cache:** "mid-coverage expert cache (5978 of 24576 slots, 24.3%): adaptive defaults every 4 -> 2, swaps 96 -> 192, decay 0.70 -> 0.92".
+- **CPU prompt share:** on for prompt chunks up to 4,864 tokens ("answers can differ slightly … mean KL ~0.004 below 1024 tokens").
+- **Conversation cache:** 5,632 MiB of RAM for up to 4 parked conversations, plus an SSD tier of up to 32 GiB in `data/conversation-spill/`. **It reuses a repeated prompt, so the speed runs turn it off** (`--conversation-cache-mib 0`); otherwise the second request with the same prompt would not read it again.
+- RAM after load: 47 GB used, 14 GB available.
+
+**The request:**
+- Answer: "The capital of Austria is Vienna.", `finish_reason` `stop`. The model thinks first: 34 of the 43 completion tokens are reasoning.
+- Server timings: 65 prompt tokens in 403 ms (161.2 tok/s), 43 generated in 841 ms (**51.1 tok/s**); "drafts accepted 0 of 0", so drafting is really off.
+- "decode expert cache hit rate: 68.5% (14002 hits / 20433 lookups); 207 more read by the GPU over PCIe".
+- The response has llama.cpp-style `timings` (`prompt_n`, `prompt_ms`, `predicted_n`, `predicted_ms`, `draft_n`, `draft_n_accepted`), which the client in step 7 records next to its own clock.
+
+**Route tail skip:** the engine log says nothing about it when it is off. `serve/server.py` sets an unset value to 0 (line 4034 comment: "the route tail skip is Off unless the person turned it on"), and the config sets `0` explicitly. Whether the log names it when it is on is checked in step 9.
+
+**Stop:** SIGTERM to the server: "[strata] stopping … stopped"; RAM and VRAM back to idle (2 GB used, 2 MiB per GPU).
+
+**Verdict:** works after the `--spec` fix. For the measurement configs: `--conversation-cache-mib 0`.

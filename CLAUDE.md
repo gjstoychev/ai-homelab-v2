@@ -5,7 +5,8 @@
 - No Ansible in this repo. Packages, toolkits and drivers are installed by hand on the host, one command at a time, with a dry run (`apt-get -s`) first; Claude gives the commands and the expected output, the user runs them and pastes the result. Reusable steps become plain scripts in `scripts/` or an experiment's `scripts/`.
 - Every change to the host's stack (kernel, driver, CUDA, NCCL, container runtime, engine builds) goes into `docs/stack.md`: the current-state table and a changelog line with the date.
 - Never commit secrets, credentials or IP addresses of the home network.
-- Models live outside the repo (`~/models/`), and so do engine builds (`~/llama.cpp/<tag>/`). `work/` is gitignored, disposable scratch; everything in it must be recreatable from scripts.
+- Models live outside the repo, and so do engine builds (`~/llama.cpp/<tag>/`). `work/` is gitignored, disposable scratch; everything in it must be recreatable from scripts.
+- Models in use are in `~/models/` (NVMe). Models not in use but worth keeping, large ones first, go to the archive `/mnt/models/` (SATA) instead of being deleted: copy, verify `SHA256SUMS` on the target, then delete the source. If the archive lacks space, ask the user before deleting anything. Never run a model from `/mnt/models`; move it back first (`docs/stack.md`, Model storage).
 
 # Experiments
 

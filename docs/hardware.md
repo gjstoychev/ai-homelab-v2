@@ -11,7 +11,9 @@ Two nodes on the same LGA1700 platform (Z690 chipset, 13th/14th gen Intel). `for
 | RAM | 64 GB (2×32 GB) Corsair Vengeance RGB DDR5-6000 CL40 (CMH64GX5M2D6000Z40) |
 | GPU 0 | MSI GeForce RTX 5060 Ti 16 GB — PCIe 5.0 x8, CPU lanes (port 00:01.0) |
 | GPU 1 | MSI GeForce RTX 5060 Ti 16 GB — PCIe 5.0 x8, CPU lanes (port 00:01.1) |
-| System disk | Samsung PM9A1 512 GB NVMe M.2 |
+| System disk | Samsung PM9A1 512 GB NVMe M.2 (PCIe 4.0): OS, `~/models` (models in use) |
+| Model archive | Kingston A400 240 GB SATA SSD (SA400S3), Intel SATA port, mounted at `/mnt/models` |
+| Windows disk | Samsung 860 500 GB SATA SSD, Intel SATA port; a Windows install, not used by Linux |
 | PSU | Fractal Design Ion+ 760W Platinum |
 | Cooling | NZXT Kraken 280 RGB White |
 | Case | NZXT H9 Flow (2023) |
@@ -19,6 +21,8 @@ Two nodes on the same LGA1700 platform (Z690 chipset, 13th/14th gen Intel). `for
 Both GPUs share the CPU's PCIe 5.0 x16 lanes, split x8/x8, so the two slots are equal. There is no NVLink on this card and the driver reports no peer-to-peer support between the cards (`nvidia-smi topo -p2p r`: "chipset not supported"; `nvidia-smi topo -m`: `PHB`), so all GPU-to-GPU traffic goes through host memory. Idle links train down to 2.5 GT/s for power saving, so check `LnkSta` under load.
 
 Firmware state: Intel's default CPU power limits (PL1 65 W, PL2 219 W), Resizable BAR on, console on the CPU's iGPU (UHD 770), both GPUs free for compute.
+
+SATA: the board has 8 ports on the chipset's Intel controller (`00:17.0`) and 2 on an ASMedia ASM1061 (`07:00.0`), which sits behind one PCIe 2.0 x1 lane (about 500 MB/s for both ports together). Both SATA disks are on Intel ports; check with `readlink -f /sys/block/sdX` (`00:17.0` = Intel).
 
 Network: one wired port (`lan0`, Marvell AQtion 10GbE, driver `atlantic`). A direct link to `hero` needs a second NIC or a switch.
 

@@ -20,7 +20,14 @@ Recorded 2026-11-25.
 | Ollama | 0.32.14, installed, disabled at boot; started by hand when needed | v1 (Lab 0b; disabled by its role `ollama` on 2026-11-24) |
 | Python | 3.12.3 | Ubuntu |
 
-Models are in `~/models/<name>/`.
+## Model storage
+
+| Path | Disk | Use |
+|---|---|---|
+| `~/models/<name>/` | NVMe (PM9A1) | Models in use. Engines read from here while they run (mmap, expert tiers on SSD), so active models never run from SATA. |
+| `/mnt/models/<name>/` | SATA (Kingston A400 240 GB), ext4, label `models` | Archive: models not in use but kept for later, the large ones first. Moved back to `~/models` before a run. |
+
+`/mnt/models` is mounted by UUID with `defaults,noatime,nofail` (`/etc/fstab`), so the host still boots without the disk. A model is moved with its `REVISION` and `SHA256SUMS`, and the checksums are verified on the target before the source is deleted.
 
 ## CUDA toolkit on the host
 
@@ -49,6 +56,7 @@ Not built yet.
 
 | Date | Node | Change |
 |---|---|---|
+| 2026-11-25 | formula | Model archive: Samsung 850 120 GB (old Linux install, unused) replaced by a Kingston A400 240 GB SATA SSD, ext4, at `/mnt/models`; Samsung 860 (Windows) moved from the ASMedia controller to an Intel SATA port. Unused Ollama models removed. |
 | 2026-11-25 | formula | Claude Code sandbox turned off (`/etc/claude-code/managed-settings.json`; previous version kept as `managed-settings.json.v1-sandbox`). This repo started. |
 | 2026-11-24 | formula | CUDA 13.0 toolkit and NCCL 2.28.9+cuda13.0 installed by hand; llama.cpp v1.0.0 built; Ollama disabled at boot (experiment `2026-11-llamacpp-flags`). |
 | 2026-11 | formula | Board swap to ASUS ROG Maximus Z690 Formula, both GPUs on CPU lanes (experiment `2026-11-boardswap`). Docker and the NVIDIA Container Toolkit installed by hand for it. |

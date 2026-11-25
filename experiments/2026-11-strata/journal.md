@@ -300,3 +300,28 @@ The engine log of each run is copied to `runs/8-strata-1gpu/<run>.engine.log`.
 - Decode with MTP: prose 77.8 (1.72× llama.cpp), JSON 118.2 (2.79×). The drafted tokens are verified, so the text is still the model's own; only `relaxed`-type options would change that, and none is on.
 
 **Verdict:** Strata is faster than llama.cpp's best configuration on every count, with the whole model and no drafting. Lookup drafting helps only output that repeats itself (JSON). The MTP drafter adds 24 % on prose and 88 % on JSON over no drafting; the video's point holds: structured-output headlines are far above prose.
+
+## 9. Strata, the route tail skip on (2026-11-25)
+
+**Why:** how much speed the skip buys on this machine, and how the log shows it. It was the default on 16 GB NVIDIA cards from engine 0.1.42 to 0.1.62.
+
+**Configs:** `strata-1gpu-mtp-skip7.json` and `strata-1gpu-nodraft-skip7.json`, the step 8 configs with `"STRATA_ROUTE_TAIL_SKIP": "7"`. The no-drafting one is not in the plan; it shows the skip without a drafter.
+
+**Commands:** `scripts/bench-run.sh runs/9-strata-skip {mtp-skip7,nodraft-skip7} 5 -- env -C $S/src/terminal .venv/bin/python serve/server.py --engine strata --config configs/strata-1gpu-<run>.json --port 8080`
+
+**The engine source** (`engine/src/program/generate.cpp`, comment at line 14934): "STRATA_ROUTE_TAIL_SKIP: OFF BY DEFAULT on every backend (owner decision 2026-11-19, engine 0.1.63; 0.1.42 to 0.1.62 set …)", "STRATA_ROUTE_TAIL_SKIP=7 turns it on (KL 0.0126 against exact routing, decode x1.2…". With it on, the log says at start: "STRATA_ROUTE_TAIL_SKIP=7 is ON: a missed expert that every token of a verify window routes at rank 7 or lower is skipped (answers differ slightly)", and after each request "route tail skip: N missed experts skipped … since the start". With it off, the log says nothing, as in steps 6 and 8.
+
+**Expected:** a decode gain of the size the source and the video give (×1.2; 80 against 66 tok/s on an RTX 5080), larger with MTP (longer verify windows give it more to skip).
+
+**Actual** (`runs/9-strata-skip/summary.md`; against step 8 without the skip):
+
+| Run | Kind | Decode t/s, skip off | Decode t/s, skip 7 | Gain | Experts skipped per request | Routed per request |
+|---|---|---|---|---|---|---|
+| no drafting | prose | 62.8 ± 0.1 | 62.7 ± 0.3 | 0 % | about 5,900 (5,300–10,100) | about 116,000 |
+| no drafting | structured | 62.9 ± 0.3 | 63.7 ± 0.4 | +1 % | | |
+| MTP | prose | 77.8 ± 0.9 | 81.6 ± 1.9 | +5 % | about 8,000 (6,700–11,600) | about 145,000 |
+| MTP | structured | 118.2 ± 4.4 | 124.6 ± 3.6 | +5 % | | |
+
+Prompt speed and TTFT unchanged (the skip is a decode path). The decode cache hit rate rises from 90–91 % to 94–96 % (no drafting) and from 86–89 % to 92 % (MTP), because skipped misses are no longer looked up.
+
+**Verdict:** the skip leaves out about 5–6 % of all routed expert computations (about half of the misses) for 0–5 % more speed. On this machine a miss is cheap: 90 % of the routed experts are in the GPU cache, and the 13 CPU workers compute most misses while the GPU works, so leaving them out saves little time. The video's RTX 5080 had a 75 % hit rate, where misses cost more. The quality side (answers with and without the skip) is step 11. All further steps keep the skip off.

@@ -202,3 +202,62 @@ curl -s http://127.0.0.1:8080/v1/chat/completions -H 'Content-Type: application/
 **Verdict:** works after the `--spec` fix. For the measurement configs: `--conversation-cache-mib 0`.
 
 **Configs after step 6:** all three get `--conversation-cache-mib 0` (no parked conversations) and `--prompt-cache 0` (`--help`: "keep N conversation checkpoints between requests (default 6 …); 0 = read every prompt from the start"), so every measured request reads its whole prompt. The four-turn job in step 12 runs with both at their defaults, as an agent would use the server.
+
+## 7. Baseline: llama.cpp on the same GGUF (2026-11-25)
+
+**Why:** the reference Strata must beat: llama.cpp v1.0.0 (build 12359) on exactly these files, with the same client and prompts.
+
+### 7a. Client and runner
+
+New shared scripts (repository `scripts/`, used by this experiment and `2026-11-basalt`):
+- `oai-bench.py`: streamed `/v1/chat/completions`; the lighthouse document of `2026-11-llamacpp-flags` (4,315 prompt tokens with the prose instruction, 4,335 with the structured one) and an instruction that asks for far more than 256 tokens. Prose: "Continue this story … at least 1,500 words". Structured: "a JSON array of 60 objects" with six fixed keys. Temperature 0, seed 42, `max_tokens` 256, thinking off (`chat_template_kwargs.enable_thinking = false`). One warm-up and 5 measured requests per kind. TTFT and decode t/s on the client; the server's own `timings` kept as they come.
+- `bench-run.sh`: starts the server in its own process group, samples `nvidia-smi` every 0.5 s and RAM, the server's RSS and NVMe reads every 1 s, waits for `/health` (Strata: also `"loaded"` not false), runs the client, stops the whole group.
+- `bench-summary.py`: the table below from `results.jsonl` and the sampler files.
+
+Base options of every llama.cpp run, as in `2026-11-llamacpp-flags`: `-np 1 --cache-ram 0 -t 8 -c 8192 -lv 4`.
+
+### 7b. First run: invalid (prompt reuse), and sudo
+
+**Command:** `scripts/bench-run.sh runs/7-llamacpp 1gpu-fit 5 -- env CUDA_VISIBLE_DEVICES=0 llama-server -m <shard 1> <base>`
+
+**Actual:**
+- From the second request on, TTFT was 0.13 s and the server's "prompt" speed about 31 t/s: llama-server reused the document from the slot's KV cache and read only the last tokens. `--cache-ram 0` does not stop that; the request field `cache_prompt: false` does (the client of `2026-11-llamacpp-flags` sent it to `/completion`). Decode was not affected (about 26.5 t/s), but every prompt number after the warm-up was wrong. **Fix:** `oai-bench.py` sends `"cache_prompt": false`. The files are kept as `runs/7-llamacpp/invalid-cached-*`.
+- The runner's first version used sudo when `sudo -n true` succeeded, for a cold page cache and CPU power (RAPL), and it did succeed in Claude Code's shell through a cached sudo ticket of the user's. Claude Code is denied sudo by the managed settings, so this run dropped the page cache and read RAPL as root against that rule. **Fix:** sudo only with `BENCH_SUDO=1`, set by the user in their own shell. The runs below have no page cache drop and no CPU power; their load times come from a partly warm page cache and are not comparable with each other.
+
+### 7c. The four runs
+
+**Commands** (in `experiments/2026-11-strata`, `<base>` as above, `M` = shard 1):
+
+```bash
+scripts/bench-run.sh runs/7-llamacpp 1gpu-fit 5 -- env CUDA_VISIBLE_DEVICES=0 llama-server -m $M <base>
+scripts/bench-run.sh runs/7-llamacpp 1gpu-best 5 -- env CUDA_VISIBLE_DEVICES=0 llama-server -m $M <base> -cmoe --moe-cache-mib 9472 --moe-cache-cpu-share 0 -lm dio -b 4096 -ub 4096
+scripts/bench-run.sh runs/7-llamacpp 2gpu-fit 5 -- llama-server -m $M <base>
+scripts/bench-run.sh runs/7-llamacpp 2gpu-best 5 -- llama-server -m $M <base> -cmoe --moe-cache-mib 23552 --moe-cache-cpu-share 0 -lm dio -b 4096 -ub 4096
+```
+
+"best" is the final configuration of `2026-11-llamacpp-flags`. Its cache (23,552 MiB) was sized for two GPUs. On one GPU it had to be smaller; two load-only starts (`runs/7-llamacpp/probe/`):
+- 11,776 MiB (half of it): "projected to use 17411 MiB of device memory vs. 15710 MiB of free device memory", then `cudaMalloc failed: out of memory` for the MoE cache. One GPU also holds all the dense weights (3,665 MiB) and the larger compute buffer.
+- 9,472 MiB (11,776 minus the 1,701 MiB overshoot and a 512 MiB margin): loads, "CUDA0 MoE cache size = 9468.31 MiB for 40925.00 MiB of host experts", peak 15,356 MiB of VRAM.
+
+On two GPUs the cache was 11,918 MiB (CUDA0) and 11,624 MiB (CUDA1).
+
+**Expected:** "best" well above `--fit` on both counts; two GPUs above one.
+
+**Actual** (`runs/7-llamacpp/summary.md`; every request read its whole prompt, all ran to 256 tokens, the same text on every repetition):
+
+| Run | Kind | TTFT s | Prompt t/s | Decode t/s | VRAM MiB (GPU0 / GPU1) | RSS GiB |
+|---|---|---|---|---|---|---|
+| 1 GPU, `--fit` | prose | 15.53 ± 0.03 | 278.0 ± 0.6 | 28.0 ± 0.7 | 14,882 / – | 44.4 |
+| 1 GPU, `--fit` | structured | 15.69 ± 0.03 | 276.5 ± 0.5 | 27.3 ± 0.7 | | |
+| 1 GPU, best | prose | 4.96 ± 0.01 | 871.7 ± 0.9 | 45.2 ± 0.1 | 15,538 / – | 41.5 |
+| 1 GPU, best | structured | 5.13 ± 0.00 | 846.7 ± 0.4 | 42.4 ± 0.2 | | |
+| 2 GPUs, `--fit` | prose | 10.20 ± 0.04 | 423.5 ± 1.5 | 36.0 ± 0.6 | 14,688 / 14,866 | 44.5 |
+| 2 GPUs, `--fit` | structured | 10.30 ± 0.02 | 421.1 ± 0.8 | 35.9 ± 0.8 | | |
+| 2 GPUs, best | prose | 5.16 ± 0.01 | 837.6 ± 1.6 | 53.1 ± 0.1 | 15,784 / 15,046 | 41.5 |
+| 2 GPUs, best | structured | 5.16 ± 0.01 | 841.9 ± 1.1 | 52.9 ± 0.1 | | |
+
+**Verdict:** as expected in direction:
+- "best" against `--fit`: prompt 3.1× on one GPU and 2.0× on two, decode +61 % (one GPU, prose) and +48 % (two).
+- The second GPU adds 17 % decode with "best" (45.2 → 53.1) and does not help prompts (the cache holds more experts, the prompt path does not use it more).
+- The same configuration in `2026-11-llamacpp-flags` gave 803 / 59.5 t/s on two GPUs, with a different IQ3_XXS file (batiai), the native `/completion` endpoint without a chat template, and 10 requests. These numbers are not mixed with those.
+- Structured output is not faster here: llama.cpp drafts nothing in these runs.

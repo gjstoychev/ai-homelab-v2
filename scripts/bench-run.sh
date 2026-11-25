@@ -14,8 +14,9 @@
 #   .ram.csv  every 1 s: MemAvailable, page cache, RSS of the server's process group, MiB read from the NVMe
 #   .cpu.csv  CPU package power every 1 s (RAPL), only when sudo works without a password prompt
 # and one line per request in OUTDIR/results.jsonl.
-# With `sudo -n` available (the user's shell after `sudo -v`), the page cache is dropped first and CPU power is
-# sampled; without it (Claude Code's shell) both are skipped and .cmd says so.
+# With BENCH_SUDO=1 (the user's own shell, after `sudo -v`) the page cache is dropped first and CPU power is
+# sampled with sudo; without it both are skipped and .cmd says so. Claude Code runs it without BENCH_SUDO: sudo is
+# denied to it by the managed settings, and a cached sudo ticket of the user's must not be used in its place.
 set -euo pipefail
 
 OUT=${1:?usage: $0 OUTDIR LABEL [REPS] -- server command}
@@ -38,15 +39,15 @@ apps=$(nvidia-smi --query-compute-apps=pid,process_name --format=csv,noheader)
 [ -z "$apps" ] || { echo "ABORT: processes on the GPUs: $apps" >&2; exit 1; }
 ! curl -fs "$URL/health" > /dev/null 2>&1 || { echo "ABORT: something answers on $URL" >&2; exit 1; }
 
-SUDO=0; sudo -n true 2>/dev/null && SUDO=1
+SUDO=0; [ "${BENCH_SUDO:-0}" = 1 ] && sudo -n true 2>/dev/null && SUDO=1
 {
   echo "date: $(date -u)"
   echo "label: $LABEL, reps: $REPS"
   echo "kernel: $(uname -r)"
   echo "driver: $(nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -1)"
   nvidia-smi --query-gpu=index,name,pci.bus_id,power.limit --format=csv,noheader | sed 's/^/gpu: /'
-  echo "page cache dropped: $([ $SUDO = 1 ] && echo yes || echo 'no (no sudo)')"
-  echo "cpu power: $([ $SUDO = 1 ] && echo RAPL || echo 'not measured (no sudo)')"
+  echo "page cache dropped: $([ $SUDO = 1 ] && echo yes || echo 'no (BENCH_SUDO not set)')"
+  echo "cpu power: $([ $SUDO = 1 ] && echo RAPL || echo 'not measured (BENCH_SUDO not set)')"
   echo "command: ${CMD[*]}"
 } | tee "$P.cmd"
 # a config file named in the command is copied next to the run

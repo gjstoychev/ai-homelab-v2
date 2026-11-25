@@ -7,7 +7,8 @@
 For each kind of prompt: one warm-up request (rep 0) and REPS measured ones, streamed from /v1/chat/completions.
 Every request: the same long document (the lighthouse text of 2026-11-llamacpp-flags, about 4,300 tokens) and an
 instruction that asks for far more than --max-tokens, temperature 0, seed 42, thinking off
-(chat_template_kwargs.enable_thinking = false: both engines' templates read it), no ignore_eos (Strata has none).
+(chat_template_kwargs.enable_thinking = false: both engines' templates read it), cache_prompt false (llama-server),
+no ignore_eos (Strata has none).
 
 Measured on the client, the same for every engine:
   ttft_s        request sent -> first content in the stream (prompt reading plus the first token)
@@ -68,6 +69,9 @@ def one(url, kind, max_tokens, timeout):
         "stream": True,
         "stream_options": {"include_usage": True},
         "chat_template_kwargs": {"enable_thinking": False},
+        # llama-server reuses a matching prompt prefix from the slot's KV cache unless told not to (--cache-ram 0 does
+        # not stop it); Strata's equivalent is --prompt-cache 0 and --conversation-cache-mib 0 in its config
+        "cache_prompt": False,
     }
     t0 = time.perf_counter()
     first = last = None

@@ -27,7 +27,7 @@ Recorded 2026-11-25.
 | `~/models/<name>/` | NVMe (PM9A1) | Models in use. Engines read from here while they run (mmap, expert tiers on SSD), so active models never run from SATA. |
 | `/mnt/models/<name>/` | SATA (Kingston A400 240 GB), ext4, label `models` | Archive: models not in use but kept for later, the large ones first. Moved back to `~/models` before a run. |
 
-`/mnt/models` is mounted by UUID with `defaults,noatime,nofail` (`/etc/fstab`), so the host still boots without the disk. A model is moved with its `REVISION` and `SHA256SUMS`, and the checksums are verified on the target before the source is deleted.
+`/mnt/models` is mounted by UUID with `defaults,noatime,nofail` (`/etc/fstab`), so the host still boots without the disk. Models are moved with `scripts/move-model.sh <model-dir> <target-parent>`: it copies the directory with its `REVISION` and `SHA256SUMS`, verifies the checksums on the target with O_DIRECT reads (so it reads the disk, not the page cache the copy just filled) and deletes the source only if every file passes.
 
 ## CUDA toolkit on the host
 
@@ -56,6 +56,7 @@ Not built yet.
 
 | Date | Node | Change |
 |---|---|---|
+| 2026-11-25 | formula | DeepSeek-V4-Flash-0731 UD-IQ1_M (81 GB) moved to `/mnt/models` with `scripts/move-model.sh`: copy 351 s (about 250 MB/s), direct-read verification 269 s, all three checksums OK. |
 | 2026-11-25 | formula | Model archive: Samsung 850 120 GB (old Linux install, unused) replaced by a Kingston A400 240 GB SATA SSD, ext4, at `/mnt/models`; Samsung 860 (Windows) moved from the ASMedia controller to an Intel SATA port. Unused Ollama models removed. |
 | 2026-11-25 | formula | Claude Code sandbox turned off (`/etc/claude-code/managed-settings.json`; previous version kept as `managed-settings.json.v1-sandbox`). This repo started. |
 | 2026-11-24 | formula | CUDA 13.0 toolkit and NCCL 2.28.9+cuda13.0 installed by hand; llama.cpp v1.0.0 built; Ollama disabled at boot (experiment `2026-11-llamacpp-flags`). |

@@ -6,7 +6,7 @@
 - Every change to the host's stack (kernel, driver, CUDA, NCCL, container runtime, engine builds) goes into `docs/stack.md`: the current-state table and a changelog line with the date.
 - Never commit secrets, credentials or IP addresses of the home network.
 - Models live outside the repo, and so do engine builds (`~/llama.cpp/<tag>/`). `work/` is gitignored, disposable scratch; everything in it must be recreatable from scripts.
-- Models in use are in `~/models/` (NVMe). Models not in use but worth keeping, large ones first, go to the archive `/mnt/models/` (SATA) instead of being deleted: copy, verify `SHA256SUMS` on the target, then delete the source. If the archive lacks space, ask the user before deleting anything. Never run a model from `/mnt/models`; move it back first (`docs/stack.md`, Model storage).
+- Models in use are in `~/models/` (NVMe). Models not in use but worth keeping, large ones first, go to the archive `/mnt/models/` (SATA) instead of being deleted, with `scripts/move-model.sh` (copy, verify `SHA256SUMS` on the target disk, then delete the source). If the archive lacks space, ask the user before deleting anything. Never run a model from `/mnt/models`; move it back first (`docs/stack.md`, Model storage).
 
 # Experiments
 

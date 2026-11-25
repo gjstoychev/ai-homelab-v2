@@ -4,7 +4,9 @@ Status: **planned** (2026-11-25). Every step with the exact command, expected vs
 
 ## Question
 
-How fast does [Strata](https://github.com/Niko1221/Strata) run Qwen3.8-Flash-Next on `formula` (2× RTX 5060 Ti 16 GB, 64 GB RAM) when it runs the **whole model**, nothing skipped? How does that compare with llama.cpp on the same GGUF file, and what do speculative decoding, the route tail skip and the second card each add?
+How fast does [Strata](https://github.com/Niko1221/Strata) run Qwen3.8-Flash-Next on `formula` (2× RTX 5060 Ti 16 GB, 64 GB RAM) when it runs the **whole model**, nothing skipped? How does that compare with llama.cpp on the same GGUF file, and what do speculative decoding and the route tail skip add?
+
+**Main question (added 2026-11-25): what is the best way to run this model on both cards, and how much more do two cards give than one?** For a single chat, for structured output, for long prompts, and for several requests at once, with each engine's two-GPU modes.
 
 The second half of the comparison is [`2026-11-basalt`](../2026-11-basalt/): Basalt, a fork of Strata rewritten for Blackwell, on the same source quant with the same client and prompts.
 
@@ -91,8 +93,15 @@ Speculative decoding verifies every token, so it changes speed, not the answer. 
 10. **Strata, two GPUs** (`"gpu": [0,1]`, `"layer_split": "auto"`): 8a and 8b again. The log shows the split (for example "layers 0-18 (CUDA0), 19-47 (CUDA1)").
 11. **Quality check.** Ten fixed prompts (facts, arithmetic, code, a JSON schema), greedy, with determinism settings on. Answers compared across llama.cpp, Strata skip off and Strata skip on. The aim is to catch broken or drifting output, not to rank quants.
 12. **Long context and the real job,** with the fastest exact configuration of steps 8–10: time to first token at 32K and 128K (3 runs each), and the four-turn job (3 runs).
-13. **Optional: Unsloth UD-IQ3_XXS** through `iq_pack.py`, to see whether the engine accepts it (format check at start). If it does, the same file is the second Basalt model and both experiments get a second like-for-like pair.
-14. **Write-up:** results table, findings, `docs/stack.md` (Strata build), README index.
+13. **Two GPUs, every mode** (added after step 12; the main question):
+    - a. llama.cpp's two-GPU "best" at long context (32K, 128K) and in the four-turn job: the reference for 12.
+    - b. llama.cpp's other split modes with the MoE cache: `-sm row`, `-sm tensor`, and an uneven `-ts`.
+    - c. Strata's layer split at long context (32K, 128K) against the helper cache of step 12: whether the second card helps prompt reading.
+    - d. Strata's layer split tuned: a manual split point against `auto`, `STRATA_SPLIT_OVERLAP=1`.
+    - e. Several requests at once (2 and 4): aggregate tokens per second for llama.cpp (`-np`) and Strata (`"parallel"`) in their two-GPU modes.
+    - f. The result: the best two-GPU setup per use (one chat, structured output, long prompts, several requests) and what the second card adds in each.
+14. **Optional: Unsloth UD-IQ3_XXS** through `iq_pack.py`, to see whether the engine accepts it (format check at start). If it does, the same file is the second Basalt model and both experiments get a second like-for-like pair.
+15. **Write-up:** results table, findings, `docs/stack.md` (Strata build), README index.
 
 ## Disk
 

@@ -390,4 +390,4 @@ Prompt +6 % without drafting (TTFT 2.32 against 2.45 s), +2 % with MTP. Peak VRA
 **Verdict:**
 - Exact (no drafting), the helper cache is the best way to use the second card here: 66.9 t/s, +7 % over one GPU and +3 % over the layer split, with one-GPU prompt speed.
 - With MTP, the best mode depends on the output: prose is fastest with the helper cache (93.4), JSON with the pipelined layer split (159.2), where accepted windows are long and the guessed next window usually holds.
-- The ranking of all two-card modes is within 3–20 % of each other; none doubles anything. The 161 t/s two-card row on Basalt's site is about the same as Strata's pipelined JSON number, which is a structured-output figure.
+- The ranking of all two-card modes is within 3–20 % of each other; none doubles anything. The 161 t/s two-card row on Basalt's site is not comparable with any number here: Basalt's community decode figure averages chat, prose and structured output, on a different pack and version. `2026-11-basalt` measures Basalt with this client.

@@ -39,6 +39,12 @@ python3 -m venv ~/venvs/hf
 
 **Command:** `scripts/move-model.sh ~/models/qwen3.8-flash-next-iq3xxs /mnt/models`
 
+**Expected:** both shards copied, checksums OK from the SATA disk, the source removed.
+
+**Actual:** copy 1,053 s for 84,960,783,842 bytes (about 81 MB/s: the GSQ-RCO download and the Strata build ran at the same time; the first archive move, DeepSeek, ran at about 250 MB/s alone). Both shards OK, verification 262 s. Free afterwards: NVMe 317 GB (with the download in progress), archive 59 GB.
+
+**Verdict:** as expected.
+
 ### 2b. Download at the pinned revision
 
 **Expected sizes and SHA-256** (Hub API, `paths-info` at `ed59f92082b1e93c0e96d60a8b11aab089b52f09`; both files last changed in `fb6d866`):
@@ -56,6 +62,12 @@ scripts/hf-fetch.sh ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF ed59f92082b1e93c
   IQ3_XXS/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00001-of-00002.gguf \
   IQ3_XXS/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00002-of-00002.gguf
 ```
+
+**Expected:** both files with the sizes and SHA-256 above, read back from the disk.
+
+**Actual:** download 2,329 s (75.8 GB, about 33 MB/s, while the archive move, the Strata build and the MTP fetch also ran). Both files OK; the O_DIRECT check took 48 s. `REVISION`: `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF ed59f92082b1e93c0e96d60a8b11aab089b52f09`.
+
+**Verdict:** as expected.
 
 ## 3. Build (2026-11-25)
 
@@ -101,3 +113,46 @@ What setup does for this model (step 6 of `setup.py`, not the Q2_0, NVFP4 or low
 .venv/bin/python tools/mtp_rt.py --gguf ~/strata/v0.2.21/data/mtp/mtp-q2_0.gguf --out ~/strata/v0.2.21/data/mtp/rt
 cp data/draft_vocab.bin ~/strata/v0.2.21/data/mtp/rt/draft_vocab.bin
 ```
+
+**Expected:** only the MTP tensors fetched, each matching the pinned checkpoint's SHA-256 (`verify` exits 0; 3 = a bad tensor); a packed draft layer in `rt/`.
+
+**Actual:** fetch 556 s (sharing the line with the 75.8 GB model download), `verify` exit 0. `mtp_pack.py` wrote `mtp-q2_0.gguf` with 0.889 GB of tensor data (experts as Q2_0, attention projections as Q8_0, norms F32). `rt/`: `experts.bin` 708 MB, `dense.bin` 116 MB, `dense.txt`, `draft_vocab.bin` 425 KB. The whole `data/mtp` folder is 6.5 GB, most of it the raw BF16 tensors from the fetch, which the engine does not read.
+
+**Verdict:** as expected. The raw tensors stay until the draft layer has been seen working in step 8.
+
+### 4b. Pack
+
+**Command** (in `~/strata/v0.2.21/src/terminal`):
+
+```bash
+.venv/bin/python tools/iq_pack.py --gguf ~/models/qwen3.8-flash-next-gsq-rco-iq3xxs/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00001-of-00002.gguf --out ~/strata/v0.2.21/data/packs/iq3_xxs
+```
+
+**Expected:** a native pack (index, dense weights, tokenizer); the experts stay in the GGUF.
+
+**Actual:** 2 s. "index.txt: 1079 tensors, 302 served natively, 0 in extra.bin, arena 1.43 GiB"; tokenizer vocab 248,320, merges 247,587, pre `qwen35`, EOS 248046. Files: `dense.bin` 1.54 GB, `index.txt`, `native_experts.txt`, `conversions.json`, `tokenizer/`.
+
+**Verdict:** as expected.
+
+## 5. Server configs (2026-11-25)
+
+**Why:** the run configs setup would write, without running setup, and one per drafting setting.
+
+From `strata_control/setup_config.py` and `setup.py` (v0.2.21) for this machine and model:
+- Model arguments: `--pack <pack> --native <shard 1> --ple-gguf <shard 2>` (two shards: the table's shard named).
+- Always: `--expert-profile terminal/data/expert-profile.bin --expert-cache auto --prefill auto`, and with the draft layer `--spec 4 --spec-min-p 0.5 --mtp <rt>`.
+- `--kv int8` above an 8K context (`kv = (a.kv or "int8") if ctx > 8192`).
+- No `--ple-io ram`: that needs RAM of `ram_gb` (60) + the table (28.8) + 16 GB.
+- KV streaming (`--kv-resident 32768`) only from a 64K context; at 128K it needs 54.7 GB of RAM by setup's own function, which this PC has (62.5 GB as setup counts it). Used in step 12.
+- `--pool-workers 13`, from setup's own function on this CPU: "hybrid CPU (8 performance + 12 efficiency cores): 13 CPU expert workers - the performance cores and half of the efficiency cores".
+- `STRATA_ROUTE_TAIL_SKIP`: setup writes `0` only for Unsloth files, but `serve/server.py` sets an unset value to `0` at every engine start (since 0.2.17). Written explicitly here anyway.
+
+Drafting has three settings (engine `--help` and `strata_control/draft_layer.py`):
+
+| Config | Arguments | What drafts |
+|---|---|---|
+| `strata-1gpu-nodraft.json` | `--suffix-draft 0 --lookup-max-t 0`, no `--mtp` | nothing ("0 = off" for both in `--help`) |
+| `strata-1gpu-lookup.json` | `--spec 4`, no `--mtp` | prompt lookup only: what setup writes with the draft layer off |
+| `strata-1gpu-mtp.json` | `--spec 4 --spec-min-p 0.5 --mtp <rt>` | the MTP draft layer and prompt lookup: setup's default |
+
+All three: one GPU (`"gpu": 0`), `--max-context 32768`, `--kv int8`, `--pool-workers 13`. Files in `configs/`.

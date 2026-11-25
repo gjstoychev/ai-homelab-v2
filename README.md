@@ -17,6 +17,8 @@ Full component list and topologies: [`docs/hardware.md`](docs/hardware.md). Kern
 |---|---|---|---|
 | [`2026-11-boardswap`](experiments/2026-11-boardswap/) | What does moving the second GPU from chipset x4 to CPU x8 lanes change? Ollama vs llama.cpp on two cards | done | [Two GPUs, x8/x4 vs x8/x8: does the slot matter?](https://gshell.dev/blog/x8x4-vs-x8x8-local-llm/) |
 | [`2026-11-llamacpp-flags`](experiments/2026-11-llamacpp-flags/) | How fast do 80 GB MoE models run on 32 GB of VRAM, one llama.cpp setting at a time? | done | [llama.cpp: 80 GB MoE models on 32 GB of VRAM](https://gshell.dev/blog/llamacpp-moe-beyond-vram/) |
+| [`2026-11-strata`](experiments/2026-11-strata/) | How fast does Strata run Qwen3.8-Flash-Next with the whole model (no route tail skip), against llama.cpp on the same GGUF? | planned | |
+| [`2026-11-basalt`](experiments/2026-11-basalt/) | Is Basalt, Strata's Blackwell fork, faster on the same weights, and which two-card mode suits two 16 GB cards? | planned | |
 
 Each experiment directory has a `README.md` (question, setup with the full stack, results, findings), a `journal.md` (every step: why, the exact command, expected vs actual) and the scripts and raw output behind every number.
 

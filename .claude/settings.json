@@ -1,0 +1,6 @@
+{
+  "permissions": {
+    "defaultMode": "auto",
+    "allow": ["Read(//etc/**)", "Read(//usr/share/**)", "Read(//sys/**)", "Bash(git add *)", "Bash(git commit *)"]
+  }
+}

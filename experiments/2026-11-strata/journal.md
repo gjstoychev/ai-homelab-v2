@@ -358,3 +358,36 @@ Prompt +6 % without drafting (TTFT 2.32 against 2.45 s), +2 % with MTP. Peak VRA
 - With MTP the gain is larger (+11–12 %): verify windows route more experts per step, so more of them miss on one card.
 - Against llama.cpp on two GPUs, exact against exact: decode +22 % (64.8 against 53.1), prompt 2.2× (1,878 against 838). With MTP: prose 1.62×, JSON 2.5×.
 - For a single user on this machine the second card is worth 3–12 %. The 2× RTX 5060 Ti row on Basalt's site (161 t/s) used Basalt's peer mode, a different way to use the second card; `2026-11-basalt` measures it.
+
+### 10b. Other ways to use the second card (2026-11-25)
+
+**Why:** step 10 used the layer split. Strata's Main/Helper roles (`docs/MULTI_GPU.md`) are the names of that split's cards (Main runs the last stage, the head and the draft layer; of two identical cards the higher number is Main), so step 10 already ran Main = GPU 1, Helper = GPU 0. Two other ways are in the docs:
+- **Helper caches** (`docs/SECOND_GPU.md`, "experimental"): CUDA0 runs every layer, CUDA1 only holds extra experts and computes their rows during decode; results return through pinned host buffers, no P2P needed. `--expert-cache-device1 auto --remote-expert-opt`. This is the closest to Basalt's peer mode.
+- **Pipeline windows** (`--pipeline-windows 2`, opt-in on NVIDIA): on a layer split, the first card starts the next verify window while the last card still verifies this one.
+- Not tried: the peer tier `--peer-device`, which needs NVLink or another peer-to-peer path; these cards have none (`docs/hardware.md`).
+
+**Configs:**
+- `strata-helper-{nodraft,mtp}.json`: the one-GPU configs without `"gpu"`, with `"CUDA_DEVICE_ORDER": "PCI_BUS_ID", "CUDA_VISIBLE_DEVICES": "0,1"` in `env` and `--expert-cache-device1 auto --remote-expert-opt`. Without `"gpu"` the server does not make a layer split: it treats two cards in `"gpu"` as a split unless `--peer-device` is set (`serve/server_parts/engines.py`, `layer_split_of`).
+- `strata-2gpu-mtp-pipe2.json`: the step 10 MTP config with `--pipeline-windows 2`.
+
+**Commands:** `scripts/bench-run.sh runs/10b-strata-2gpu-modes <run> 5 -- env -C $S/src/terminal .venv/bin/python serve/server.py --engine strata --config configs/strata-<run>.json --port 8080`
+
+**Actual** (`runs/10b-strata-2gpu-modes/summary.md`):
+
+| Run | Kind | Prompt t/s | Decode t/s | Against the layer split (step 10) | Against one GPU (step 8) |
+|---|---|---|---|---|---|
+| helper cache, no drafting | prose | 1,757.4 ± 13.4 | 66.9 ± 0.2 | +3 % (64.8) | +7 % (62.8) |
+| helper cache, no drafting | structured | 1,741.6 ± 0.9 | 66.6 ± 0.4 | +3 % | +6 % |
+| helper cache, MTP | prose | 1,721.1 ± 8.0 | 93.4 ± 3.5 | +8 % (86.2) | +20 % (77.8) |
+| helper cache, MTP | structured | 1,715.9 ± 3.4 | 138.3 ± 1.3 | +4 % (132.4) | +17 % (118.2) |
+| layer split, MTP, pipeline windows 2 | prose | 1,777.0 ± 0.7 | 90.6 ± 1.5 | +5 % (86.2) | +16 % |
+| layer split, MTP, pipeline windows 2 | structured | 1,778.9 ± 0.5 | 159.2 ± 4.1 | **+20 %** (132.4) | **+35 %** |
+
+- Helper cache: "CUDA1: 8854 additional experts, 14.44 GiB; results return through pinned host rows". Per request CUDA1 computed about 75,000–78,000 expert entries, two thirds of all routed ("81833 more read by the GPU over PCIe or from another GPU (66.6% of all 122880 routed)"), and the host waited 326–417 ms per request for it. The log: "STRATA_ADAPT_FETCH=2 (the default for this card) is not used in this run (helper GPUs)", "adaptive overlap: off: not with --remote-expert-opt". Prompts run on CUDA0 only (as the docs say), so prompt speed is the one-GPU speed.
+- Pipeline windows: "272 MiB of CUDA0 kept out of the expert cache (the second verifier, the GDN snapshots)"; the split moved to layers 0–23 / 24–47. The log notes "--pipeline-windows 2 on a layer split of two stages without the draft layer on the first card (STRATA_MTP_STAGE0=1 asks for it): the draft chain then shares the last card with its window". Not tried with `STRATA_MTP_STAGE0=1`.
+- All requests read their whole prompt and ran to 256 tokens.
+
+**Verdict:**
+- Exact (no drafting), the helper cache is the best way to use the second card here: 66.9 t/s, +7 % over one GPU and +3 % over the layer split, with one-GPU prompt speed.
+- With MTP, the best mode depends on the output: prose is fastest with the helper cache (93.4), JSON with the pipelined layer split (159.2), where accepted windows are long and the guessed next window usually holds.
+- The ranking of all two-card modes is within 3–20 % of each other; none doubles anything. The 161 t/s two-card row on Basalt's site is about the same as Strata's pipelined JSON number, which is a structured-output figure.

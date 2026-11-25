@@ -21,6 +21,7 @@ produced fewer tokens than asked; it stays in the file and is flagged, not dropp
 import argparse
 import hashlib
 import json
+import os
 import sys
 import time
 import urllib.request
@@ -59,10 +60,10 @@ def stream(url, body, timeout):
             yield time.perf_counter(), json.loads(data)
 
 
-def one(url, kind, max_tokens, timeout):
+def one(url, kind, max_tokens, timeout, tag="", t_ref=None):
     body = {
         "model": "bench",
-        "messages": [{"role": "user", "content": DOCUMENT + "\n\n" + INSTRUCTIONS[kind]}],
+        "messages": [{"role": "user", "content": tag + DOCUMENT + "\n\n" + INSTRUCTIONS[kind]}],
         "max_tokens": max_tokens,
         "temperature": 0,
         "seed": 42,
@@ -112,6 +113,8 @@ def one(url, kind, max_tokens, timeout):
         "usage": usage,
         "timings": timings,
     }
+    if t_ref is not None:                       # concurrent requests: start and end relative to the group's start
+        rec["t_start"], rec["t_end"] = round(t0 - t_ref, 4), round(t_end - t_ref, 4)
     return rec
 
 
@@ -125,7 +128,17 @@ def main():
     ap.add_argument("--max-tokens", type=int, default=256)
     ap.add_argument("--load-s", type=float, default=None)
     ap.add_argument("--timeout", type=float, default=1800)
+    ap.add_argument("--concurrency", default=os.environ.get("BENCH_CONCURRENCY", "1"),
+                    help="N requests at once per repetition, or a list (1,2,4) run one after the other on the same "
+                         "server, each as label-cN; each prompt starts with its own tag, so no two share a prefix")
     a = ap.parse_args()
+    levels = [int(x) for x in str(a.concurrency).split(",")]
+    if levels != [1]:
+        base = a.label
+        for n in levels:
+            a.concurrency, a.label = n, f"{base}-c{n}"
+            concurrent_runs(a)
+        return 0
     with open(a.out, "a") as f:
         for kind in a.kinds.split(","):
             for rep in range(a.reps + 1):
@@ -141,6 +154,28 @@ def main():
                       f" | server: prompt {s.get('prompt_per_second', '-')} t/s, decode {s.get('predicted_per_second', '-')} t/s,"
                       f" drafts {s.get('draft_n_accepted', '-')}/{s.get('draft_n', '-')}"
                       f"{'' if not rec['short'] else '  [finish: ' + str(rec['finish_reason']) + ']'}", flush=True)
+
+
+def concurrent_runs(a):
+    from concurrent.futures import ThreadPoolExecutor
+    with open(a.out, "a") as f, ThreadPoolExecutor(a.concurrency) as pool:
+        for kind in a.kinds.split(","):
+            for rep in range(a.reps + 1):
+                t_ref = time.perf_counter()
+                futs = [pool.submit(one, a.url, kind, a.max_tokens, a.timeout,
+                                    f"Request {rep}.{i} of a batch test.\n\n", t_ref) for i in range(a.concurrency)]
+                recs = [fu.result() for fu in futs]
+                wall = max(r["t_end"] for r in recs)
+                toks = sum(r["completion_tokens"] or 0 for r in recs)
+                for i, r in enumerate(recs):
+                    f.write(json.dumps({"label": a.label, "kind": kind, "rep": rep, "warmup": rep == 0,
+                                        "load_s": a.load_s, "concurrency": a.concurrency, "stream": i,
+                                        "group_wall_s": round(wall, 4), "group_tokens": toks,
+                                        "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), **r}) + "\n")
+                f.flush()
+                print(f"{a.label} {kind:10s} rep {rep}{' (warm-up)' if rep == 0 else '          '} x{a.concurrency}: "
+                      f"{toks} tokens in {wall:.2f} s = {toks / wall:.1f} t/s total; per stream ttft "
+                      f"{[r['ttft_s'] for r in recs]}, decode {[r['decode_tps'] for r in recs]}", flush=True)
 
 
 if __name__ == "__main__":

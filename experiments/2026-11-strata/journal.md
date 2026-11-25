@@ -498,3 +498,51 @@ Decode during the job: 62–73 t/s. The script turn wrote a plausible script, bu
 - Decode does not slow down with a long context behind it (68–72 t/s at 126K against 66.9 at 4K), thanks to KV streaming.
 - The needle came back in all nine long requests and all three jobs.
 - In the job, the first turn (reading the document) is half of the total; with the prompt cache the later turns start in 0.4 s. Of the 33 s, about 16 s are prompt reading and about 17 s are generating 1,064–1,092 tokens.
+
+## 13. Two GPUs, every mode (2026-11-25)
+
+**Why:** the user's main question, added after step 12: the best way to run this model on both cards, and what two cards give over one, per use. Same client, prompts and model as before; caches off for prompt and decode timings, on for the job.
+
+### 13a. llama.cpp on two GPUs at long context, and the job
+
+**Config:** step 7's two-GPU "best" with `-c 131072`. At 131K the MoE cache of 23,552 MiB no longer fits: "projected to use 36517 MiB of device memory vs. 31417 MiB of free device memory", then out of memory for a 2,837 MiB compute buffer (the KV cache alone takes 1,536 + 384 MiB per card). With `--moe-cache-mib 17408` (23,552 minus the overshoot and 512 MiB per card) it loads: caches 8,825 / 8,566 MiB, compute buffers 2,837 / 2,524 MiB, peak VRAM 15,544 / 15,312 MiB (`runs/13a-llamacpp-long/probe/`).
+
+**Commands:** `LONG_MODE=ttft` and `LONG_MODE=job` with `BENCH_CLIENT=scripts/long-bench.py scripts/bench-run.sh runs/13a-llamacpp-long … -- llama-server -m $M <base> -c 131072 -cmoe --moe-cache-mib 17408 --moe-cache-cpu-share 0 -lm dio -b 4096 -ub 4096` (`<base>` with `-c 8192` replaced).
+
+**Actual** (`runs/13a-llamacpp-long/summary.md`): 32,804 tokens: TTFT 39.7 s (828 t/s); 126,574 tokens: 153.4 s (826 t/s); needle 6 of 6. The job: 65.3, 62.2, 65.1 s, the first turn 37.6–39.9 s, the later turns 0.5–0.7 s (llama-server reuses the slot's KV with `cache_prompt`); needle 3 of 3. Decode in the long-prompt runs covers only the 8-token answer and is too noisy to report.
+
+### 13b. llama.cpp's other split modes
+
+**Commands:** `scripts/bench-run.sh runs/13b-llamacpp-modes <label> 5 -- llama-server -m $M <base> … -sm {row,tensor}`.
+
+**Actual:**
+- `-sm row`, with or without the MoE cache: the model does not load ("device CUDA0 does not support split buffers").
+- `-sm tensor` with the MoE cache: loads the weights, then "MoE cache requires a GPU backend". (Before that: "llama_params_fit is not implemented for SPLIT_MODE_TENSOR" and "enabling flash_attn since it is required for SPLIT_MODE_TENSOR".)
+- `-sm tensor` with plain `-cmoe` (experts in RAM, no cache) runs, against `-sm layer` with the same options (`runs/13b-llamacpp-modes/summary.md`):
+
+| Split | Prompt t/s | Decode t/s, prose / JSON | VRAM MiB (GPU0 / GPU1) |
+|---|---|---|---|
+| `-sm tensor -cmoe` | 94.5 / 94.2 | 20.6 / 21.0 | 4,370 / 4,370 |
+| `-sm layer -cmoe` | 627.4 / 614.7 | 22.8 / 22.9 | 3,776 / 3,334 |
+| `-sm layer`, MoE cache 23,552 MiB (step 7 "best") | 837.6 / 841.9 | 53.1 / 52.9 | 15,784 / 15,046 |
+
+**Verdict:** on these cards with this model, llama.cpp's only good two-GPU mode is the layer split with the MoE cache. The tensor split cannot use the cache and reads prompts 6.6× slower than the layer split.
+
+### 13c. Strata's layer split at long context, and the job
+
+**Configs:** `strata-2gpu-nodraft-128k.json` (step 10's layer split, `--max-context 131072 --kv-resident 32768`, caches off), `strata-2gpu-nodraft-128k-cache.json` (the same with Strata's caches, for the job), and `strata-1gpu-nodraft-128k.json` (one GPU, the same context settings) for what the second card adds.
+
+**Actual** (`runs/13c-strata-long/summary.md`; needle found in every request and job):
+
+| Prompt | llama.cpp, 2 GPUs | Strata, 1 GPU | Strata, helper cache (12b) | **Strata, layer split** |
+|---|---|---|---|---|
+| 32,804 tokens: TTFT | 39.7 s | 15.5 s | 15.5 s | **10.5 s** (3,156 t/s) |
+| 126,6xx tokens: TTFT | 153.4 s | 61.8 s | 61.5 s | **36.3 s** (3,513 t/s) |
+| Four-turn job (3 runs) | 62.2–65.3 s | – | 32.8–33.4 s | **28.7–29.4 s** |
+
+Decode with 126K behind it stays at 66–70 t/s on the layer split (as on the helper cache).
+
+**Verdict:**
+- **For long prompts the second card matters:** the layer split reads 1.5× (32K) to 1.7× (126K) faster than one GPU. In step 10, with 4K prompts, it added only 6 %: a long prompt is read in large chunks, and each card streams only its own layers' missing experts.
+- The helper cache reads prompts on CUDA0 alone (`docs/SECOND_GPU.md`: "Prompt prefill still uses CUDA0"), and its long-prompt times equal one GPU's.
+- Against llama.cpp on two GPUs: 4.2× faster to the first token at 126K, and the job in 45 % of the time.

@@ -12,6 +12,9 @@ Measured requests only (the warm-up, rep 0, is left out); mean ± standard devia
   VRAM MiB      peak per GPU over the whole run (.gpu.csv)
   RSS GiB       peak resident memory of the server's process group (.ram.csv)
   short         measured requests that ended before max_tokens (finish_reason other than "length")
+With --concurrency runs (oai-bench.py), "streams" is the number of requests at once; TTFT, prompt and decode are per
+stream, and "total t/s" is every stream's generated tokens over the group's wall time (first request sent -> last
+stream closed), mean over the measured repetitions.
 """
 import csv
 import json
@@ -61,20 +64,24 @@ def main():
             for kind in dict.fromkeys(r["kind"] for r in recs if r["label"] == label):
                 m = [r for r in recs if r["label"] == label and r["kind"] == kind and not r["warmup"]]
                 t = [r.get("timings") or {} for r in m]
+                conc = m[0].get("concurrency", 1) if m else 1
+                groups = {r["rep"]: r["group_tokens"] / r["group_wall_s"] for r in m if r.get("group_wall_s")}
                 dn = sum(x.get("draft_n") or 0 for x in t)
                 da = sum(x.get("draft_n_accepted") or 0 for x in t)
                 rows.append([
-                    f"{d.name}/{label}", kind, str(len(m)),
+                    f"{d.name}/{label}", kind, str(conc), str(len(m)),
                     f"{m[0]['load_s']:.1f}" if m and m[0].get("load_s") is not None else "–",
                     ms([r["ttft_s"] for r in m], 2),
                     ms([x.get("prompt_per_second") for x in t]),
                     ms([r["decode_tps"] for r in m]),
+                    ms(list(groups.values())) if conc > 1 else "–",
                     f"{da}/{dn}" + (f" ({100 * da / dn:.0f} %)" if dn else ""),
                     " / ".join(f"{vram[k]}" for k in sorted(vram)) or "–",
                     f"{rss / 1024:.1f}" if rss else "–",
                     str(sum(1 for r in m if r["short"])),
                 ])
-    head = ["run", "kind", "n", "load s", "TTFT s", "prompt t/s", "decode t/s", "drafts", "VRAM MiB", "RSS GiB", "short"]
+    head = ["run", "kind", "streams", "n", "load s", "TTFT s", "prompt t/s", "decode t/s", "total t/s", "drafts",
+            "VRAM MiB", "RSS GiB", "short"]
     print("| " + " | ".join(head) + " |")
     print("|" + "---|" * len(head))
     for r in rows:

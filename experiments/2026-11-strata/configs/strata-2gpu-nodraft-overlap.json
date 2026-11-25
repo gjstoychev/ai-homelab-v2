@@ -1,0 +1,49 @@
+{
+ "exe": "/home/llama/strata/v0.2.21/build/strata",
+ "args": [
+  "--pack",
+  "/home/llama/strata/v0.2.21/data/packs/iq3_xxs",
+  "--native",
+  "/home/llama/models/qwen3.8-flash-next-gsq-rco-iq3xxs/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00001-of-00002.gguf",
+  "--ple-gguf",
+  "/home/llama/models/qwen3.8-flash-next-gsq-rco-iq3xxs/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00002-of-00002.gguf",
+  "--expert-profile",
+  "/home/llama/strata/v0.2.21/src/terminal/data/expert-profile.bin",
+  "--expert-cache",
+  "auto",
+  "--prefill",
+  "auto",
+  "--spec",
+  "4",
+  "--suffix-draft",
+  "0",
+  "--lookup-max-t",
+  "0",
+  "--max-context",
+  "32768",
+  "--kv",
+  "int8",
+  "--pool-workers",
+  "13",
+  "--conversation-cache-mib",
+  "0",
+  "--prompt-cache",
+  "0"
+ ],
+ "cwd": "/home/llama/strata/v0.2.21/src/terminal",
+ "tokenizer": "/home/llama/strata/v0.2.21/data/packs/iq3_xxs/tokenizer",
+ "model_name": "qwen3.8-flash-next-iq3_xxs",
+ "log": "/home/llama/strata/v0.2.21/logs/2gpu-nodraft-overlap.log",
+ "host": "127.0.0.1",
+ "port": 8080,
+ "gpu": [
+  0,
+  1
+ ],
+ "env": {
+  "STRATA_ROUTE_TAIL_SKIP": "0",
+  "STRATA_SPLIT_OVERLAP": "1"
+ },
+ "mtp": false,
+ "layer_split": "auto"
+}

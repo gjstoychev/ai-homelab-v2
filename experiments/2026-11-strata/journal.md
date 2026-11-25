@@ -261,3 +261,42 @@ On two GPUs the cache was 11,918 MiB (CUDA0) and 11,624 MiB (CUDA1).
 - The second GPU adds 17 % decode with "best" (45.2 → 53.1) and does not help prompts (the cache holds more experts, the prompt path does not use it more).
 - The same configuration in `2026-11-llamacpp-flags` gave 803 / 59.5 t/s on two GPUs, with a different IQ3_XXS file (batiai), the native `/completion` endpoint without a chat template, and 10 requests. These numbers are not mixed with those.
 - Structured output is not faster here: llama.cpp drafts nothing in these runs.
+
+## 8. Strata, one GPU (2026-11-25)
+
+**Why:** Strata against llama.cpp on the same files and prompts, first exact (no drafting), then with each drafter.
+
+**Commands** (in `experiments/2026-11-strata`, `S=~/strata/v0.2.21`; configs from step 5 with both caches off):
+
+```bash
+scripts/bench-run.sh runs/8-strata-1gpu nodraft 5 -- env -C $S/src/terminal .venv/bin/python serve/server.py --engine strata --config configs/strata-1gpu-nodraft.json --port 8080
+scripts/bench-run.sh runs/8-strata-1gpu lookup 5 -- … --config configs/strata-1gpu-lookup.json …
+scripts/bench-run.sh runs/8-strata-1gpu mtp 5 -- … --config configs/strata-1gpu-mtp.json …
+```
+
+The engine log of each run is copied to `runs/8-strata-1gpu/<run>.engine.log`.
+
+**Expected:** without drafting, near or above llama.cpp's one-GPU "best" (45.2 t/s decode); the drafters add little on prose and much on JSON.
+
+**Actual** (`runs/8-strata-1gpu/summary.md`):
+
+| Run | Kind | TTFT s | Prompt t/s | Decode t/s | Drafts accepted | Decode cache hits |
+|---|---|---|---|---|---|---|
+| no drafting | prose | 2.45 ± 0.02 | 1,778.7 ± 13.1 | 62.8 ± 0.1 | – | 90–92 % |
+| no drafting | structured | 2.50 ± 0.00 | 1,751.8 ± 2.3 | 62.9 ± 0.3 | – | |
+| lookup | prose | 2.45 ± 0.01 | 1,774.9 ± 10.5 | 62.7 ± 0.5 | 29 of 60 | 89–91 % |
+| lookup | structured | 2.50 ± 0.00 | 1,749.0 ± 2.7 | 77.4 ± 2.5 | 418 of 786 | |
+| MTP | prose | 2.51 ± 0.01 | 1,737.5 ± 4.2 | 77.8 ± 0.9 | 575 of 1,076 (53 %) | 86–89 % |
+| MTP | structured | 2.54 ± 0.00 | 1,722.5 ± 3.9 | 118.2 ± 4.4 | 889 of 1,047 (85 %) | |
+
+- Every request read its whole prompt ("0 reused + 4315 read", `timings.cache_n` 0), all ran to 256 tokens.
+- Peak VRAM 15,040–15,152 MiB on GPU 0; RSS of the server's process group 42.8–43.0 GiB; lowest MemAvailable about 17 GB.
+- The MTP draft layer takes 840 MiB of VRAM ("experts 675, dense 111") plus a 178 MiB draft head, so the expert cache shrinks from 5,978 to 5,349 slots and the hit rate drops by 2–3 points.
+- The answers start word for word as llama.cpp's (the same first 150 characters, prose and JSON), but unlike llama.cpp's five identical repetitions, Strata's 256-token texts differ between repetitions (different SHA-256 for most requests). Strata documents why: the adaptive expert cache, `ADAPT_FETCH` (on for 16 GiB cards) and the CPU prompt share change the last bits of the routed output. Step 11 checks whether that changes the answers' content.
+
+**Against llama.cpp on one GPU** (step 7, "best": 871.7 prompt / 45.2 and 42.4 decode):
+- Prompt: **2.0×** (1,779 against 872 t/s); TTFT 2.45 against 4.96 s.
+- Decode, exact (no drafting, nothing skipped): **+39 %** prose (62.8 against 45.2), **+48 %** JSON (62.9 against 42.4).
+- Decode with MTP: prose 77.8 (1.72× llama.cpp), JSON 118.2 (2.79×). The drafted tokens are verified, so the text is still the model's own; only `relaxed`-type options would change that, and none is on.
+
+**Verdict:** Strata is faster than llama.cpp's best configuration on every count, with the whole model and no drafting. Lookup drafting helps only output that repeats itself (JSON). The MTP drafter adds 24 % on prose and 88 % on JSON over no drafting; the video's point holds: structured-output headlines are far above prose.

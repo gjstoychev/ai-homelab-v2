@@ -447,3 +447,54 @@ Prompt +6 % without drafting (TTFT 2.32 against 2.45 s), +2 % with MTP. Peak VRA
 - With Strata's defaults the same request can end differently from one run to the next. Strata documents the causes (adaptive cache, PCIe share, CPU prompt share, `ADAPT_FETCH`), and its recipe removes them: the deterministic configs repeat exactly.
 - MTP drafting changes text here because it changes the expert cache size (5,349 against 5,978 slots: different experts computed on the GPU or the CPU, which round differently), not because drafted tokens are accepted unchecked.
 - The route tail skip changed one of ten answers late in a sentence. Ten prompts cannot measure the size of its quality cost (Strata's own figure: KL 0.0126); they show it is not free and not dramatic at this file's precision.
+
+## 12. Long context and the four-turn job (2026-11-25)
+
+**Why:** prompt speed at the lengths an agent sends, decode with a long context behind it, and a job timed in seconds rather than tokens per second.
+
+**Client:** `scripts/long-bench.py` (new, shared; started by `bench-run.sh` with `BENCH_CLIENT` and `LONG_MODE`). The document is Strata's own docs at v0.2.21 (`docs/*.md` in sorted order, 1,527,726 characters), cut to the target length, with one invented sentence in the middle: "The passphrase for the archive is obsidian-2824." Every long prompt ends with the question for it.
+
+**Configuration:** the fastest exact setup of steps 8–10, the helper cache on two GPUs without drafting, with `--max-context 131072 --kv-resident 32768` (KV streaming: setup turns it on from 64K when RAM allows; at 128K it needs 54.7 GB by setup's function). Two configs:
+- `strata-helper-nodraft-128k.json`: caches off, for the prompt timings.
+- `strata-helper-nodraft-128k-cache.json`: Strata's default prompt and conversation caches, for the job.
+
+### 12a. First attempt: a prompt too long for the context
+
+The token count was estimated from the first 16,000 characters of the corpus (3.69 characters per token). The "32K" prompt had 36,771 tokens: the later docs have more code and tables. Its three requests are valid (TTFT 16.9–17.2 s, about 2,170 t/s, needle found) and kept as `runs/12-long/attempt1-*`. The 128K prompt was over 131,072 tokens and Strata answered 400 (it rejects, never truncates). **Fix:** the client now calibrates on 16 slices spread evenly over the document prefix itself, twice, and aims 5 % below the target; a 400 is recorded instead of ending the run.
+
+### 12b. Long prompts
+
+**Command:** `LONG_MODE=ttft BENCH_CLIENT=scripts/long-bench.py scripts/bench-run.sh runs/12-long strata-helper-nodraft-128k 3 -- … --config configs/strata-helper-nodraft-128k.json …`
+
+**Actual** (3 requests each, the same prompt, nothing reused):
+
+| Prompt | TTFT s | Prompt t/s (server) | Decode t/s | Needle |
+|---|---|---|---|---|
+| 32,804 tokens (105,425 characters) | 15.37–15.60 | 2,110–2,137 | 65.8–71.2 | 3 of 3 |
+| 126,586 tokens (421,579 characters) | 61.47–61.53 | 2,059–2,064 | 68.4–72.2 | 3 of 3 |
+
+The log: "KV streaming: 32768 of 131072 cells per QSA layer in VRAM, the K/V in 1.55 GiB of pinned RAM"; at 126K about 67 % of the KV block reads hit VRAM. Peak VRAM 15,042 / 15,342 MiB, RSS 46.0 GiB, lowest MemAvailable 14.7 GB.
+
+### 12c. The four-turn job
+
+**Command:** `LONG_MODE=job BENCH_CLIENT=scripts/long-bench.py scripts/bench-run.sh runs/12-long strata-helper-nodraft-128k-cache 3 -- … --config configs/strata-helper-nodraft-128k-cache.json …`
+
+A 32,810-token document with the same needle, then four turns in one conversation: a five-bullet summary (up to 400 tokens), a list of `STRATA_` variables (400), a bash script (400), the passphrase (32). Each run starts with a random session tag, so it cannot reuse the previous run.
+
+**Actual:**
+
+| | Run 1 | Run 2 | Run 3 |
+|---|---|---|---|
+| Whole job | 33.4 s | 32.8 s | 33.1 s |
+| Turn 1 (summary): TTFT, tokens out | 15.70 s, 400 | 15.75 s, 400 | 15.70 s, 400 |
+| Turns 2–4: TTFT | 0.36–0.38 s | 0.38–0.42 s | 0.38–0.40 s |
+| Tokens reused in turns 2–4 | 33,209 / 33,650 / 33,942 | 33,211 / 33,623 / 33,914 | 33,211 / 33,650 / 33,941 |
+| Needle | found | found | found |
+
+Decode during the job: 62–73 t/s. The script turn wrote a plausible script, but for the Intel SYCL build (`ONEAPI_DEVICE_SELECTOR`, `build-sycl/strata`): the first matching example in the document, not this machine. That is the model's answer, not a speed issue.
+
+**Verdict:**
+- Prompt reading stays above 2,000 t/s up to 126K tokens; a 126K-token prompt takes 61.5 s before the first token (the vLLM video's 27B setup: 247 s for 249K).
+- Decode does not slow down with a long context behind it (68–72 t/s at 126K against 66.9 at 4K), thanks to KV streaming.
+- The needle came back in all nine long requests and all three jobs.
+- In the job, the first turn (reading the document) is half of the total; with the prompt cache the later turns start in 0.4 s. Of the 33 s, about 16 s are prompt reading and about 17 s are generating 1,064–1,092 tokens.

@@ -600,3 +600,32 @@ The prompts of concurrent requests are read one after another (the per-stream TT
 - The helper cache scales less: CUDA0 still runs every layer of every slot.
 - MTP helps a single stream (+44 % on the layer split) and nothing from two streams on: "the pipelined path does not run the slots' MTP drafts" (`docs/BATCHING.md`); `--batch-mtp` with `--batch-groups 1` would, and was not tried.
 - llama.cpp batches too (117 t/s with 4 streams), but Strata's layer split delivers 48 % more with 4 short requests and 66 % more with 4 long ones.
+
+**More runs for 13e** (same method, `runs/13e-concurrency-short/`):
+- Layer split, MTP, 4 slots with `--batch-mtp --batch-groups 1` (`strata-2gpu-mtp-par4-batchmtp.json`): "--batch-mtp: 4 slot drafters on CUDA1 (53 MiB … each)". Total 86–89 t/s with 1 stream, 105–108 with 2, 128–131 with 4: **slower** than the pipelined default (112.4 and 172.2). The docs report the same where the cards hold the experts ("80.2 -> 62.7 tok/s … it pays only when the experts do not all fit in VRAM").
+- llama.cpp with 8 slots (`-np 8 -c 65536`, MoE cache 20,480 MiB): 150.6–151.8 t/s total with 8 streams, against about 229 for Strata's layer split with 8 slots.
+
+**More runs for 13b:** llama.cpp's two-GPU "best" with `-ts 45,55` (more layers on GPU1, whose compute buffer is smaller). With 23,552 MiB of cache GPU1 ran out of memory: the cache is split like the layers (GPU1 got 12,937 MiB; files `oom-cache23552-*`). With 21,000 MiB (GPU1 11,537, GPU0 9,446): 53.4 / 52.2 decode, 828 / 817 prompt, against 53.1 / 52.9 and 838 / 842 with the default split, and 2.6 GB of GPU0 left unused. No gain.
+
+### 13f. The best two-GPU setup per use
+
+**The candidate for every use:** the layer split with MTP and 4 slots (`strata-2gpu-mtp-par4.json`). On the standard prompts, one stream (`runs/13f-recommended/summary.md`): prompt 1,793.5 t/s, decode 87.6 ± 2.1 prose and 133.7 ± 1.9 JSON, the same as the layer split with MTP and one slot (step 10: 86.2 / 132.4). The slots cost nothing when one request runs.
+
+| Use | Best two-GPU setup measured | Result | One GPU (best Strata) | Second card adds | llama.cpp, two GPUs |
+|---|---|---|---|---|---|
+| One chat, exact (no drafting) | helper cache | 66.9 t/s | 62.8 | +7 % | 53.1 |
+| One chat, prose, MTP | helper cache + MTP | 93.4 t/s | 77.8 | +20 % | – |
+| One chat, JSON, MTP | layer split + MTP + pipeline windows | 159.2 t/s | 118.2 | +35 % | – |
+| Long prompt, 126K tokens | layer split | TTFT 36.3 s | 61.8 s | 1.7× | 153.4 s |
+| Four-turn job over 32K | layer split | 29.0 s | – | – | 64.2 s |
+| 4 requests at once, short prompts | layer split, 4 slots | 173 t/s | 104.5 | 1.66× | 117.1 |
+| 8 requests at once, short prompts | layer split, 8 slots | ≈ 229 t/s | – | – | 151.2 |
+| 4 requests at once, 4.3K-token prompts | layer split, 4 slots | 61.7 t/s total | 52.4 | +18 % | 37.2 |
+| All-round (one config) | layer split + MTP + 4 slots | 87.6 / 133.7 t/s for one chat, 172 t/s for 4 | | | |
+
+**Verdict:**
+- The **layer split** is the best general way to run this model on both cards: fastest for long prompts, jobs and several requests, and within 3–8 % of the helper cache for one chat. With MTP and 4 slots it gives one chat 87.6 / 133.7 t/s and 4 requests 172 t/s together.
+- The **helper cache** is best only for one chat at a time (+3–8 % over the layer split); it reads prompts on one card.
+- For **one chat** the second card adds 7–35 %, depending on drafting and output; for **long prompts** and **several requests** it adds 1.66–1.7×.
+- What does not matter here: the split point, overlapped hand-off, `-ts` in llama.cpp, `--batch-mtp`, putting the draft layer on the first card.
+- llama.cpp's best on two GPUs is the layer split with the MoE cache; its row and tensor modes do not work with it on this model.

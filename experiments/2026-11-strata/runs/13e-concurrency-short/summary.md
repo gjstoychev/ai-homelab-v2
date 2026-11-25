@@ -19,3 +19,7 @@
 | 13e-concurrency-short/llamacpp-2gpu-best-np4-c1 | short | 1 | 3 | 19.2 | 0.69 ± 0.01 | 92.1 ± 0.7 | 52.1 ± 0.4 | – | 0/0 | – | – | 0 |
 | 13e-concurrency-short/llamacpp-2gpu-best-np4-c2 | short | 2 | 6 | 19.2 | 0.84 ± 0.00 | 75.5 ± 0.2 | 45.9 ± 0.2 | 85.5 ± 0.4 | 0/0 | – | – | 0 |
 | 13e-concurrency-short/llamacpp-2gpu-best-np4-c4 | short | 4 | 12 | 19.2 | 1.65 ± 0.09 | 54.7 ± 10.4 | 32.3 ± 0.2 | 117.1 ± 0.3 | 0/0 | – | – | 0 |
+| 13e-concurrency-short/strata-2gpu-mtp-par4-batchmtp-c1 | short | 1 | 3 | 19.3 | 0.38 ± 0.00 | 175.1 ± 0.3 | 92.9 ± 2.2 | – | 756/1323 (57 %) | – | – | 0 |
+| 13e-concurrency-short/strata-2gpu-mtp-par4-batchmtp-c2 | short | 2 | 6 | 19.3 | 0.77 ± 0.43 | 173.7 ± 1.0 | 58.4 ± 2.5 | 106.6 ± 1.3 | 1171/1892 (62 %) | – | – | 0 |
+| 13e-concurrency-short/strata-2gpu-mtp-par4-batchmtp-c4 | short | 4 | 12 | 19.3 | 1.28 ± 0.62 | 173.8 ± 1.2 | 35.7 ± 1.5 | 129.7 ± 1.2 | 2376/3753 (63 %) | – | – | 0 |
+| 13e-concurrency-short/llamacpp-2gpu-best-np8-c8 | short | 8 | 24 | 19.7 | 2.11 ± 0.13 | 42.1 ± 3.7 | 20.5 ± 0.1 | 151.4 ± 0.7 | 0/0 | – | – | 0 |

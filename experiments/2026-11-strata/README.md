@@ -116,7 +116,28 @@ The NVMe has 279 GB free before step 2 and about 280 GB after it (80 GB out, 82 
 
 ## Results
 
-Pending.
+Preliminary (steps 7–13; the write-up is step 15). Every number traces to `runs/` and the journal.
+
+**One GPU** (same weights, 4.3K-token prompt, 256 tokens out):
+
+| Engine | Prompt t/s | Decode t/s, prose | Decode t/s, JSON |
+|---|---|---|---|
+| llama.cpp v1.0.0, best (`-cmoe`, 9.25 GiB MoE cache, `-lm dio`, `-ub 4096`) | 872 | 45.2 | 42.4 |
+| Strata, exact (no drafting, nothing skipped) | 1,779 | 62.8 | 62.9 |
+| Strata, MTP | 1,738 | 77.8 | 118.2 |
+
+**Two GPUs, the best setup per use:**
+
+| Use | Best setup | Result | Second card adds | llama.cpp, two GPUs |
+|---|---|---|---|---|
+| One chat, exact | Strata helper cache | 66.9 t/s | +7 % | 53.1 t/s |
+| One chat, MTP, prose / JSON | Strata helper cache + MTP / layer split + MTP + pipeline windows | 93.4 / 159.2 t/s | +20 % / +35 % | – |
+| 126K-token prompt | Strata layer split | first token after 36.3 s | 1.7× | 153.4 s |
+| Four-turn job over a 32K document | Strata layer split | 29.0 s | – | 64.2 s |
+| 4 / 8 requests at once (short prompts) | Strata layer split + 4 / 8 slots | 173 / ≈ 229 t/s total | 1.66× (4) | 117 / 151 t/s |
+| All-round, one config | Strata layer split + MTP + 4 slots | 87.6 / 133.7 t/s one chat, 172 t/s for 4 | | |
+
+Quality (step 11): 100 of 100 answers correct on llama.cpp and every Strata setting; short factual answers identical, longer ones differ at near-ties.
 
 ## Findings
 

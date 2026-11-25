@@ -325,3 +325,36 @@ The engine log of each run is copied to `runs/8-strata-1gpu/<run>.engine.log`.
 Prompt speed and TTFT unchanged (the skip is a decode path). The decode cache hit rate rises from 90–91 % to 94–96 % (no drafting) and from 86–89 % to 92 % (MTP), because skipped misses are no longer looked up.
 
 **Verdict:** the skip leaves out about 5–6 % of all routed expert computations (about half of the misses) for 0–6 % more speed. On this machine a miss is cheap: 90 % of the routed experts are in the GPU cache, and the 13 CPU workers compute most misses while the GPU works, so leaving them out saves little time. The video's RTX 5080 had a 75 % hit rate, where misses cost more. The quality side (answers with and without the skip) is step 11. All further steps keep the skip off.
+
+## 10. Strata, two GPUs (2026-11-25)
+
+**Why:** what the second card adds with Strata's layer split, against llama.cpp's two-GPU "best" (837.6 prompt / 53.1 decode t/s).
+
+**Configs:** `strata-2gpu-nodraft.json` and `strata-2gpu-mtp.json`: the step 8 configs with `"gpu": [0, 1]` and `"layer_split": "auto"` instead of `"gpu": 0`.
+
+**Commands:** `scripts/bench-run.sh runs/10-strata-2gpu {nodraft,mtp} 5 -- env -C $S/src/terminal .venv/bin/python serve/server.py --engine strata --config configs/strata-2gpu-<run>.json --port 8080`
+
+**The split** (`runs/10-strata-2gpu/nodraft.engine.log`):
+- "layer split auto: K=26 - predicted 39.3 ms per decode window; the caches hold 14721 of 24576 profiled pairs (~98.5% of the routed mass), best of 46 placements".
+- CUDA0 runs layers 0–25 with an expert cache of 8,187 slots (11.91 GiB); CUDA1 runs layers 26–47 and the output head with 6,311 slots (11.58 GiB). Each card keeps only its own layers' dense weights (CUDA0 "1499 MiB freed").
+- PCIe probes: CUDA0 20.4 GB/s, CUDA1 19.4 GB/s ("miss cost x1.00" for both).
+- The expert arena stays once in RAM: RSS 44.3 GiB, lowest MemAvailable 15.4 GB.
+
+**Expected:** more decode than one GPU, since the caches hold 60 % of all experts instead of 24 %.
+
+**Actual** (`runs/10-strata-2gpu/summary.md`):
+
+| Run | Kind | Prompt t/s | Decode t/s | Against one GPU (step 8) | Decode cache hits |
+|---|---|---|---|---|---|
+| no drafting | prose | 1,878.3 ± 2.3 | 64.8 ± 0.2 | +3 % (62.8) | 96.8–97.4 % |
+| no drafting | structured | 1,877.4 ± 0.3 | 64.8 ± 0.1 | +3 % (62.9) | |
+| MTP | prose | 1,764.9 ± 1.2 | 86.2 ± 1.0 | +11 % (77.8) | 98.3–99.0 % |
+| MTP | structured | 1,764.2 ± 0.4 | 132.4 ± 3.6 | +12 % (118.2) | |
+
+Prompt +6 % without drafting (TTFT 2.32 against 2.45 s), +2 % with MTP. Peak VRAM 14,890–15,032 MiB per card.
+
+**Verdict:**
+- The hit rate went from about 90 to 97–99 %, but decode without drafting rose only 3 %. Decode is not limited by misses on this machine: a layer split runs the layers one card after the other, so a token still passes 48 layers in sequence, and the misses were already cheap (step 9). The second card mainly adds cache.
+- With MTP the gain is larger (+11–12 %): verify windows route more experts per step, so more of them miss on one card.
+- Against llama.cpp on two GPUs, exact against exact: decode +22 % (64.8 against 53.1), prompt 2.2× (1,878 against 838). With MTP: prose 1.62×, JSON 2.5×.
+- For a single user on this machine the second card is worth 3–12 %. The 2× RTX 5060 Ti row on Basalt's site (161 t/s) used Basalt's peer mode, a different way to use the second card; `2026-11-basalt` measures it.

@@ -1,6 +1,6 @@
 # llama.cpp v1.0.0: MoE models beyond VRAM, one setting at a time
 
-> Moved on 2026-11-25 from [`ai-homelab`](https://github.com/gjstoychev/ai-homelab) (`benchmarks/2026-11-llamacpp-flags/`, commit `dc0f3c3`), unchanged. "The labs" below are that repo's curriculum, and paths such as `~/benchmarks/` or `~/ai-homelab/scripts/` in the journal are where things were at the time.
+> Moved on 2026-11-25 from [`ai-homelab`](https://github.com/gjstoychev/ai-homelab) (`benchmarks/2026-11-llamacpp-flags/`, commit `dc0f3c3`); since then only the status line has changed. "The labs" below are that repo's curriculum, and paths such as `~/benchmarks/` or `~/ai-homelab/scripts/` in the journal are where things were at the time.
 
 A side measurement outside the labs, started in November 2026 on `formula` (2× RTX 5060 Ti 16 GB, 64 GB RAM; `docs/hardware.md`). llama.cpp v1.0.0, built from source, runs MoE models larger than VRAM. From a baseline, the settings below are switched on one at a time, each step keeping the previous ones, and every step is measured before the next. The full series runs on each model.
 
@@ -17,7 +17,7 @@ Order of the runs: the baselines of both models first (Qwen 0b, Qwen 0a, DeepSee
 
 Not compared: quality. DeepSeek at IQ1_M against Qwen at IQ3_XXS is a speed comparison only. DeepSeek's experts (about 74 GiB) do not fit into RAM even at IQ1_M: it runs the same steps with mmap as three tiers (MoE cache on the GPUs, page cache, NVMe), and step 3 (`-lm dio`, pinned memory) is not possible for it (journal, section 19). DeepSeek V4.1-Flash (552B) does not fit 32 GB of VRAM plus 64 GB of RAM even at 2 bits.
 
-Status: measurements complete for both models (2026-11-25); write-up pending. Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
+Status: complete (2026-11-25). Write-up: [llama.cpp: 80 GB MoE models on 32 GB of VRAM](https://gshell.dev/blog/llamacpp-moe-beyond-vram/). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
 
 ## Results
 

@@ -410,3 +410,40 @@ Prompt +6 % without drafting (TTFT 2.32 against 2.45 s), +2 % with MTP. Peak VRA
 | structured | 1,757.5 ± 0.8 | 156.5 ± 5.4 | 159.2 ± 4.1 |
 
 **Verdict:** slower: prose −14 % (back to the one-GPU MTP speed, 77.8), JSON −2 % (within the spread). On these two equal cards the default placement (draft layer on the last card) is the better one. The ranking of 10b stands.
+
+## 11. Quality check (2026-11-25)
+
+**Why:** speed is only comparable if the answers are the model's. The question is not how good IQ3_XXS is, but whether an engine or a setting changes the answers.
+
+**Client:** `scripts/quality-check.py` (new, shared): ten fixed prompts with a simple check each (17 × 23, the capital of Australia, the first ten primes, sorting five words, a train's journey time, the author of *Pride and Prejudice*, a German translation, a JSON object with fixed keys, a palindrome function, three sentences on why the sky is blue). Each prompt twice; non-streamed, temperature 0, seed 42, thinking off, no prompt reuse. `scripts/bench-run.sh` starts the server and runs it (`BENCH_CLIENT=scripts/quality-check.py`); `scripts/quality-compare.py` makes the table.
+
+**Configurations** (one GPU each):
+- `llamacpp-1gpu-best`: step 7's best one-GPU configuration, the reference.
+- `strata-nodraft`: step 8's speed config (Strata's defaults, drafting off).
+- `strata-det-nodraft`: Strata's recipe for byte-identical repeats (`docs/DETAILS.md`): `--adapt-swaps 0 --pcie-frac 0`, a fixed `--expert-cache 5978` (the count `auto` gave), `--prompt-cache 0`, `STRATA_IQ_MT_MIN=1`, `STRATA_PREFILL_CPU_SHARE=0`, and `STRATA_ADAPT_FETCH=0` (the sm_120 default that "does not give bit-for-bit the same text"). Config `strata-1gpu-det-nodraft.json`.
+- `strata-det-mtp`: the same with the MTP drafter (`--expert-cache 5349`, what `auto` gave with the draft layer).
+- `strata-det-skip7`: `strata-det-nodraft` with `STRATA_ROUTE_TAIL_SKIP=7`.
+
+**Expected:** every answer correct; the deterministic configs identical across repetitions; the skip changes some longer answers.
+
+**Actual** (`runs/11-quality/quality.md`; = same text as llama.cpp, ≠ different, ✓ check passed, ~ the two repetitions differ):
+
+| prompt | llama.cpp | Strata defaults | Strata deterministic | + MTP | + skip 7 |
+|---|---|---|---|---|---|
+| arith, capital, primes, sort, time, author, german | = ✓ | = ✓ | = ✓ | = ✓ | = ✓ |
+| json | = ✓ | ≠ ✓ ~ | ≠ ✓ | ≠ ✓ | ≠ ✓ |
+| code | = ✓ | ≠ ✓ ~ | ≠ ✓ | = ✓ | = ✓ |
+| explain | = ✓ | = ✓ | = ✓ | = ✓ | ≠ ✓ |
+
+- All 100 answers pass their check.
+- llama.cpp and the three deterministic Strata configs give the same text on both repetitions. Strata with its defaults does not: json and code each changed between the two repetitions (one of the two matched llama.cpp).
+- What differs, and where:
+  - json: the first tag `"archivist"` instead of `"archaeologist"` (Strata without drafting, with or without the skip); with MTP all three tags differ (`"astronomer", "novelist", "gardener"`). Still valid JSON with the required keys.
+  - code: `cleaned = ''.join(c.lower() for c in s if c.isalnum())` instead of a list comprehension; both correct.
+  - explain, with the skip only: from character 361 of 434, "some violet light is absorbed by the upper atmosphere, causing us to per…" instead of "some violet is absorbed by the upper atmosphere, resulting in the sky ap…".
+
+**Verdict:**
+- Strata gives the same answers as llama.cpp on short, factual prompts, and equally correct but not identical text on longer ones: the first different token comes where two continuations are nearly equally likely (an occupation in a list, a coding idiom).
+- With Strata's defaults the same request can end differently from one run to the next. Strata documents the causes (adaptive cache, PCIe share, CPU prompt share, `ADAPT_FETCH`), and its recipe removes them: the deterministic configs repeat exactly.
+- MTP drafting changes text here because it changes the expert cache size (5,349 against 5,978 slots: different experts computed on the GPU or the CPU, which round differently), not because drafted tokens are accepted unchecked.
+- The route tail skip changed one of ten answers late in a sentence. Ten prompts cannot measure the size of its quality cost (Strata's own figure: KL 0.0126); they show it is not free and not dramatic at this file's precision.

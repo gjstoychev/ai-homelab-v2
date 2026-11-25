@@ -3,6 +3,8 @@
 #
 #   scripts/bench-run.sh OUTDIR LABEL [REPS] -- <server command ...>
 #   (REPS 0: start, report the load, stop; no requests)
+#   BENCH_CLIENT=<script> runs another client with the same arguments (scripts/quality-check.py), writing
+#   OUTDIR/results.jsonl as well.
 #   e.g. scripts/bench-run.sh experiments/2026-11-strata/runs/7-llamacpp 1gpu-fit 5 -- \
 #          env CUDA_VISIBLE_DEVICES=0 ~/llama.cpp/v1.0.0/build/bin/llama-server -m <shard 1> --port 8080 ...
 #
@@ -107,7 +109,7 @@ if [ $ready != 1 ]; then
   exit 1
 fi
 echo "== ready in ${load_s} s"
-[ "$REPS" = 0 ] || python3 "$here/oai-bench.py" --url "$URL" --label "$LABEL" --out "$OUT/results.jsonl" --reps "$REPS" --load-s "$load_s"
+[ "$REPS" = 0 ] || python3 "${BENCH_CLIENT:-$here/oai-bench.py}" --url "$URL" --label "$LABEL" --out "$OUT/results.jsonl" --reps "$REPS" --load-s "$load_s"
 echo "== peak VRAM per GPU (MiB):"
 awk -F', ' 'NR > 1 { split($6, m, " "); if (m[1] > max[$2]) max[$2] = m[1] } END { for (g in max) print "  GPU" g ": " max[g] }' "$P.gpu.csv"
 echo "== peak server RSS / lowest MemAvailable (MiB): $(awk -F, 'NR > 1 { if ($4 > r) r = $4; if (a == "" || $2 < a) a = $2 } END { print r " / " a }' "$P.ram.csv")"

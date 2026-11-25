@@ -1,0 +1,11 @@
+.env
+*.vault
+secrets*
+.claude/settings.local.json
+
+# Disposable working files; must be recreatable from scripts
+work/
+
+# Model files belong in ~/models, never in the repo
+*.gguf
+*.safetensors

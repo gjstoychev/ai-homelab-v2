@@ -317,11 +317,11 @@ The engine log of each run is copied to `runs/8-strata-1gpu/<run>.engine.log`.
 
 | Run | Kind | Decode t/s, skip off | Decode t/s, skip 7 | Gain | Experts skipped per request | Routed per request |
 |---|---|---|---|---|---|---|
-| no drafting | prose | 62.8 ± 0.1 | 62.7 ± 0.3 | 0 % | about 5,900 (5,300–10,100) | about 116,000 |
-| no drafting | structured | 62.9 ± 0.3 | 63.7 ± 0.4 | +1 % | | |
-| MTP | prose | 77.8 ± 0.9 | 81.6 ± 1.9 | +5 % | about 8,000 (6,700–11,600) | about 145,000 |
-| MTP | structured | 118.2 ± 4.4 | 124.6 ± 3.6 | +5 % | | |
+| no drafting | prose | 62.8 ± 0.1 | 62.7 ± 0.4 | 0 % | about 5,900 (5,300–10,100) | about 116,000 |
+| no drafting | structured | 62.9 ± 0.3 | 63.8 ± 0.3 | +1 % | | |
+| MTP | prose | 77.8 ± 0.9 | 81.7 ± 2.2 | +5 % | about 8,000 (6,700–11,600) | about 145,000 |
+| MTP | structured | 118.2 ± 4.4 | 125.0 ± 3.7 | +6 % | | |
 
 Prompt speed and TTFT unchanged (the skip is a decode path). The decode cache hit rate rises from 90–91 % to 94–96 % (no drafting) and from 86–89 % to 92 % (MTP), because skipped misses are no longer looked up.
 
-**Verdict:** the skip leaves out about 5–6 % of all routed expert computations (about half of the misses) for 0–5 % more speed. On this machine a miss is cheap: 90 % of the routed experts are in the GPU cache, and the 13 CPU workers compute most misses while the GPU works, so leaving them out saves little time. The video's RTX 5080 had a 75 % hit rate, where misses cost more. The quality side (answers with and without the skip) is step 11. All further steps keep the skip off.
+**Verdict:** the skip leaves out about 5–6 % of all routed expert computations (about half of the misses) for 0–6 % more speed. On this machine a miss is cheap: 90 % of the routed experts are in the GPU cache, and the 13 CPU workers compute most misses while the GPU works, so leaving them out saves little time. The video's RTX 5080 had a 75 % hit rate, where misses cost more. The quality side (answers with and without the skip) is step 11. All further steps keep the skip off.

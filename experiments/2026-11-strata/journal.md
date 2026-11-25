@@ -546,3 +546,57 @@ Decode with 126K behind it stays at 66–70 t/s on the layer split (as on the he
 - **For long prompts the second card matters:** the layer split reads 1.5× (32K) to 1.7× (126K) faster than one GPU. In step 10, with 4K prompts, it added only 6 %: a long prompt is read in large chunks, and each card streams only its own layers' missing experts.
 - The helper cache reads prompts on CUDA0 alone (`docs/SECOND_GPU.md`: "Prompt prefill still uses CUDA0"), and its long-prompt times equal one GPU's.
 - Against llama.cpp on two GPUs: 4.2× faster to the first token at 126K, and the job in 45 % of the time.
+
+### 13d. Strata's layer split: split point and hand-off
+
+**Configs:** step 10's `strata-2gpu-nodraft.json` with `"layer_split": "20"` or `"32"` instead of `"auto"` (which chose 26), and with `"STRATA_SPLIT_OVERLAP": "1"` (overlapped hand-off between the cards).
+
+**Actual** (`runs/13d-strata-split/summary.md`; step 10 auto: 64.8 / 64.8 decode, 1,878 prompt):
+
+| Split | CUDA1 runs | CUDA1 cache | Decode t/s, prose / JSON | Prompt t/s |
+|---|---|---|---|---|
+| 20 | layers 20–47 | 6,227 slots (11.12 GiB) | 64.6 / 64.7 | 1,881 |
+| 32 | layers 32–47 | 6,476 slots (12.10 GiB) | 64.8 / 64.4 | 1,875 |
+| auto (26) + overlapped hand-off | layers 26–47 | 6,311 slots | 64.9 / 64.8 | 1,874 |
+
+**Verdict:** none of them changes anything beyond 0.5 %. The docs say the overlap "helps AMD; no gain on NVIDIA", which holds here. With 97 % cache hits on two cards, where the split falls does not matter for one stream.
+
+### 13e. Several requests at once
+
+**Why:** with `"parallel": N` Strata decodes N conversations in the same verify windows (`docs/BATCHING.md`), and on a layer split it pipelines groups of slots, so the two cards work on different conversations at the same time instead of waiting for each other. That is where a second card could pay most.
+
+**Client:** `oai-bench.py --concurrency 1,2,4` (`BENCH_CONCURRENCY`): N requests sent together per repetition, each prompt starting with its own tag (no shared prefix), 3 repetitions per level on one server start. "Total t/s" = all generated tokens / the group's wall time, from the first request sent to the last stream closed (so it includes prompt reading). Two workloads:
+- **long prompts:** the prose prompt (4,315 tokens), 256 tokens out each: what a few agents sending documents at once see.
+- **short:** a new prompt kind of about 50 tokens ("Write a long story, at least 1,500 words …"), 512 tokens out: decode alone.
+
+**Configs:** `"parallel": 4` added to the one-GPU, layer split and helper configs (`strata-*-par4.json`, no drafting, and MTP for the two two-GPU modes); `"parallel": 8` on the layer split (`strata-2gpu-nodraft-par8.json`). llama.cpp: the two-GPU "best" with `-np 4 -c 32768` (8,192 per slot); its MoE cache had to shrink to 22,016 MiB (23,552 projected 31,149 of 31,417 MiB and failed on the compute buffer, `runs/13e-concurrency-short/probe/`).
+
+**The engine's batch setup** (layer split, 4 slots): "--batch-groups auto: 2 groups of 2 slots", "4 slot sessions on CUDA0 (0.29 GiB each)", the same on CUDA1; with 8 slots "2 groups of 4 slots".
+
+**Actual, short prompts** (total t/s, 512 tokens per stream; `runs/13e-concurrency-short/summary.md`):
+
+| Configuration | 1 stream (decode t/s) | 2 at once | 4 at once | 8 at once |
+|---|---|---|---|---|
+| llama.cpp, 2 GPUs, `-np 4` | 52.1 | 85.5 | 117.1 | – |
+| Strata, 1 GPU | 56.6 | 73.8 | 104.5 | – |
+| Strata, helper cache | 67.6 | 90.0 | 132.8 | – |
+| Strata, helper cache + MTP | 95.5 | 88.9 | 130.7 | – |
+| **Strata, layer split** | 65.3 | **113.1** | **173.1** | **229.4 ± 14.7** |
+| Strata, layer split + MTP | 94.1 | 112.4 | 172.2 | – |
+
+**Actual, long prompts** (total t/s including prompt reading, 256 tokens per stream; `runs/13e-concurrency/summary.md`):
+
+| Configuration | 2 at once | 4 at once |
+|---|---|---|
+| llama.cpp, 2 GPUs, `-np 4` | 32.1 | 37.2 |
+| Strata, 1 GPU | 39.5 | 52.4 |
+| Strata, helper cache | 44.3 | 58.4 |
+| **Strata, layer split** | **46.8** | **61.7** |
+
+The prompts of concurrent requests are read one after another (the per-stream TTFTs of a group of four on the layer split: 2.3, 6.9, 9.3, 11.6 s), and a stream that already decodes slows while another prompt is read, so per-stream decode rates in this workload are not comparable; the totals are. With 4.3K-token prompts and 256-token answers, prompt reading is most of the wall time.
+
+**Verdict:**
+- **Several requests are where the second card pays most.** With 4 short requests at once the layer split delivers 173 t/s, 1.66× one GPU (104.5) and 1.30× the helper cache (132.8); with 8, about 230 t/s, 3.5× a single stream. The pipelined batch groups keep both cards busy.
+- The helper cache scales less: CUDA0 still runs every layer of every slot.
+- MTP helps a single stream (+44 % on the layer split) and nothing from two streams on: "the pipelined path does not run the slots' MTP drafts" (`docs/BATCHING.md`); `--batch-mtp` with `--batch-groups 1` would, and was not tried.
+- llama.cpp batches too (117 t/s with 4 streams), but Strata's layer split delivers 48 % more with 4 short requests and 66 % more with 4 long ones.

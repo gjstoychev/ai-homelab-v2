@@ -39,6 +39,9 @@ INSTRUCTIONS = {
     # prose: hard for a drafter to guess ahead
     "prose": "Continue this story in the same voice. Write at least 1,500 words: what happened to the notebooks, "
              "who read them first, and what they found in them. Plain prose, no headings, no lists.",
+    # short: no document, a few dozen prompt tokens, a long answer: decode alone (for --concurrency)
+    "short": "Write a long story, at least 1,500 words, about a lighthouse keeper who writes down the weather every "
+             "morning for forty years. Plain prose, no headings, no lists.",
     # structured: repetitive keys and syntax, easy to guess ahead
     "structured": "Turn the keeper's notebooks into data. Output only a JSON array of 60 objects, one per notebook, "
                   "each with the keys \"year\", \"wind_direction\", \"swell_m\", \"sky_colour\", \"ships_before_noon\" "
@@ -63,7 +66,7 @@ def stream(url, body, timeout):
 def one(url, kind, max_tokens, timeout, tag="", t_ref=None):
     body = {
         "model": "bench",
-        "messages": [{"role": "user", "content": tag + DOCUMENT + "\n\n" + INSTRUCTIONS[kind]}],
+        "messages": [{"role": "user", "content": tag + ("" if kind == "short" else DOCUMENT + "\n\n") + INSTRUCTIONS[kind]}],
         "max_tokens": max_tokens,
         "temperature": 0,
         "seed": 42,
@@ -124,8 +127,8 @@ def main():
     ap.add_argument("--label", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--reps", type=int, default=5)
-    ap.add_argument("--kinds", default="prose,structured")
-    ap.add_argument("--max-tokens", type=int, default=256)
+    ap.add_argument("--kinds", default=os.environ.get("BENCH_KINDS", "prose,structured"))
+    ap.add_argument("--max-tokens", type=int, default=int(os.environ.get("BENCH_MAX_TOKENS", "256")))
     ap.add_argument("--load-s", type=float, default=None)
     ap.add_argument("--timeout", type=float, default=1800)
     ap.add_argument("--concurrency", default=os.environ.get("BENCH_CONCURRENCY", "1"),

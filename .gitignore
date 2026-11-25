@@ -9,3 +9,6 @@ work/
 # Model files belong in ~/models, never in the repo
 *.gguf
 *.safetensors
+
+# Python bytecode
+__pycache__/

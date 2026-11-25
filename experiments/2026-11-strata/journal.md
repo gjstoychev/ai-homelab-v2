@@ -391,3 +391,22 @@ Prompt +6 % without drafting (TTFT 2.32 against 2.45 s), +2 % with MTP. Peak VRA
 - Exact (no drafting), the helper cache is the best way to use the second card here: 66.9 t/s, +7 % over one GPU and +3 % over the layer split, with one-GPU prompt speed.
 - With MTP, the best mode depends on the output: prose is fastest with the helper cache (93.4), JSON with the pipelined layer split (159.2), where accepted windows are long and the guessed next window usually holds.
 - The ranking of all two-card modes is within 3–20 % of each other; none doubles anything. The 161 t/s two-card row on Basalt's site is not comparable with any number here: Basalt's community decode figure averages chat, prose and structured output, on a different pack and version. `2026-11-basalt` measures Basalt with this client.
+
+### 10c. Pipeline windows with the draft layer on the first card (2026-11-25)
+
+**Why:** the 10b log said the draft layer stayed on the last card and named `STRATA_MTP_STAGE0=1` to move it; `docs/MULTI_GPU.md` says the first card is the intended place with the pipeline on ("its window has finished when the chain starts").
+
+**Config:** `strata-2gpu-mtp-pipe2-stage0.json`: `strata-2gpu-mtp-pipe2.json` with `"STRATA_MTP_STAGE0": "1"` in `env`.
+
+**Command:** `scripts/bench-run.sh runs/10b-strata-2gpu-modes 2gpu-mtp-pipe2-stage0 5 -- … --config configs/strata-2gpu-mtp-pipe2-stage0.json …`
+
+**Expected:** at least as fast as 10b's pipeline run (90.6 prose / 159.2 JSON), the docs' intended layout.
+
+**Actual:** the 10b note about the draft layer is gone; "two verifiers per stage, 2 stages overlap across windows (decode too …)"; split 0–22 / 23–47.
+
+| Kind | Prompt t/s | Decode t/s | Draft layer on the last card (10b) |
+|---|---|---|---|
+| prose | 1,758.8 ± 1.3 | 77.9 ± 1.1 | 90.6 ± 1.5 |
+| structured | 1,757.5 ± 0.8 | 156.5 ± 5.4 | 159.2 ± 4.1 |
+
+**Verdict:** slower: prose −14 % (back to the one-GPU MTP speed, 77.8), JSON −2 % (within the spread). On these two equal cards the default placement (draft layer on the last card) is the better one. The ranking of 10b stands.

@@ -200,3 +200,5 @@ curl -s http://127.0.0.1:8080/v1/chat/completions -H 'Content-Type: application/
 **Stop:** SIGTERM to the server: "[strata] stopping … stopped"; RAM and VRAM back to idle (2 GB used, 2 MiB per GPU).
 
 **Verdict:** works after the `--spec` fix. For the measurement configs: `--conversation-cache-mib 0`.
+
+**Configs after step 6:** all three get `--conversation-cache-mib 0` (no parked conversations) and `--prompt-cache 0` (`--help`: "keep N conversation checkpoints between requests (default 6 …); 0 = read every prompt from the start"), so every measured request reads its whole prompt. The four-turn job in step 12 runs with both at their defaults, as an agent would use the server.

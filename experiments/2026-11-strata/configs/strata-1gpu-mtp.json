@@ -24,7 +24,11 @@
   "--kv",
   "int8",
   "--pool-workers",
-  "13"
+  "13",
+  "--conversation-cache-mib",
+  "0",
+  "--prompt-cache",
+  "0"
  ],
  "cwd": "/home/llama/strata/v0.2.21/src/terminal",
  "tokenizer": "/home/llama/strata/v0.2.21/data/packs/iq3_xxs/tokenizer",

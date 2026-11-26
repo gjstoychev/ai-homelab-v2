@@ -1,0 +1,44 @@
+[server] legend   pp=prompt read  tg=generation  c=cached  acc=drafts accepted  dl=tokens per window  hit=expert cache  pcie=routed experts over PCIe
+[server] bench  ctx=32768 kv=int8 prompt-cache=0 spec=8 temp=1.0 top_p=0.95 top_k=20
+[server] engine log: /home/llama/.cache/basalt/ac6a02182dac5c62/engine.log
+[server] ready    http://127.0.0.1:8080/v1  openai+anthropic  stats http://127.0.0.1:8080/
+[server] warning: this CPU has no AVX-512: the expert kernels run on AVX-2 (multi-token for the i-quant gate/up rows)
+[server] planning weight allocation
+[server] auto     ram-experts=48.7GB pool-affinity=auto pool=19
+[server] placed   ram 38.1GiB 13.7s
+[server] placed   cuda0 13.6GiB 16.4s
+[server] loaded   51.7GiB 16.8s  cuda0=13.6GiB ram=38.1GiB
+[server] kv       0.6GiB cuda0 solo=32768 draft=0.0GiB
+[server] weights  loaded, ctx=32768 images=off
+[server] live | s1 tg=1/256 | total 0t/s
+[server] live | s1 tg=193/256 94.9t/s | total 95t/s
+[server] s1 done  pp=4315/0c 2.6s 1676t/s  tg=256 96.0t/s acc=67% dl=1.9  ttft=2.6s  end=length  hit=76.5%  pcie=0.0%
+[server] live | s1 tg=1/256 | total 0t/s
+[server] live | s1 tg=198/256 98.1t/s | total 98t/s
+[server] s1 done  pp=4315/0c 2.5s 1731t/s  tg=256 99.4t/s acc=70% dl=1.9  ttft=2.5s  end=length  hit=81.0%  pcie=0.0%
+[server] live | s1 tg=1/256 | total 0t/s
+[server] live | s1 tg=204/256 100.9t/s | total 101t/s
+[server] s1 done  pp=4315/0c 2.5s 1729t/s  tg=256 99.5t/s acc=69% dl=1.9  ttft=2.5s  end=length  hit=81.7%  pcie=0.0%
+[server] live | s1 tg=1/256 | total 0t/s
+[server] live | s1 tg=202/256 100.9t/s | total 101t/s
+[server] s1 done  pp=4315/0c 2.5s 1730t/s  tg=256 96.9t/s acc=72% dl=1.9  ttft=2.5s  end=length  hit=79.0%  pcie=0.0%
+[server] live | s1 tg=1/256 | total 0t/s
+[server] live | s1 tg=192/256 95.9t/s | total 96t/s
+[server] s1 done  pp=4315/0c 2.5s 1732t/s  tg=256 96.8t/s acc=69% dl=1.8  ttft=2.5s  end=length  hit=81.5%  pcie=0.0%
+[server] live | s1 tg=1/256 | total 0t/s
+[server] live | s1 tg=197/256 98.2t/s | total 98t/s
+[server] s1 done  pp=4315/0c 2.5s 1727t/s  tg=256 96.1t/s acc=66% dl=1.9  ttft=2.5s  end=length  hit=81.0%  pcie=0.0%
+[server] live | s1 tg=1/256 | total 0t/s
+[server] s1 done  pp=4335/0c 2.6s 1690t/s  tg=256 129.0t/s acc=89% dl=5.2  ttft=2.6s  end=length  hit=66.5%  pcie=0.0%
+[server] live | s1 tg=1/256 | total 0t/s
+[server] s1 done  pp=4335/0c 2.6s 1697t/s  tg=256 168.5t/s acc=91% dl=5.0  ttft=2.6s  end=length  hit=82.6%  pcie=0.0%
+[server] live | s1 tg=1/256 | total 0t/s
+[server] s1 done  pp=4335/0c 2.6s 1698t/s  tg=256 166.5t/s acc=88% dl=5.0  ttft=2.6s  end=length  hit=82.7%  pcie=0.0%
+[server] live | s1 tg=1/256 | total 0t/s
+[server] s1 done  pp=4335/0c 2.6s 1699t/s  tg=256 171.0t/s acc=91% dl=5.2  ttft=2.6s  end=length  hit=82.8%  pcie=0.0%
+[server] live | s1 tg=1/256 | total 0t/s
+[server] s1 done  pp=4335/0c 2.6s 1698t/s  tg=256 170.5t/s acc=90% dl=5.2  ttft=2.6s  end=length  hit=82.9%  pcie=0.0%
+[server] live | s1 tg=1/256 | total 0t/s
+[server] s1 done  pp=4335/0c 2.6s 1693t/s  tg=256 166.6t/s acc=91% dl=5.0  ttft=2.6s  end=length  hit=82.4%  pcie=0.0%
+[server] stopping (Ctrl+C again to force)
+[server] stopped

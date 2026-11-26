@@ -1,0 +1,361 @@
+basalt: system: Linux, CUDA driver 13.0 / runtime 13.0
+basalt: gpus: peer; RTX 5060 Ti (nvidia-smi 0) main, share 0.50; RTX 5060 Ti (nvidia-smi 1) peer, share 0.50 (bandwidth)
+basalt generate: experts IQ2_S/IQ4_NL, layers 0-7: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/Q2_0, layers 8-8: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/IQ4_NL, layers 9-9: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/Q2_0, layers 10-10: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/IQ4_NL, layers 11-12: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/Q2_0, layers 13-13: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ3_XXS/IQ4_NL, layers 14-14: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/IQ4_NL, layers 15-15: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ3_XXS/IQ4_NL, layers 16-18: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/IQ4_NL, layers 19-19: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ3_XXS/IQ4_NL, layers 20-20: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/IQ4_NL, layers 21-21: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ3_XXS/IQ4_NL, layers 22-22: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/IQ4_NL, layers 23-24: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ3_XXS/IQ4_NL, layers 25-25: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/IQ4_NL, layers 26-26: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ3_XXS/IQ4_NL, layers 27-31: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/IQ4_NL, layers 32-32: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ3_XXS/IQ4_NL, layers 33-33: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/IQ4_NL, layers 34-34: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ3_XXS/IQ4_NL, layers 35-35: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/IQ4_NL, layers 36-36: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ3_XXS/IQ4_NL, layers 37-38: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/IQ4_NL, layers 39-39: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ3_XXS/IQ4_NL, layers 40-42: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ2_S/IQ4_NL, layers 43-44: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ3_XXS/IQ4_NL, layers 45-46: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: experts IQ4_XS/IQ4_NL, layers 47-47: decode device-planned tail + grouped kernels, prefill MMQ, CPU tier dot
+basalt generate: PCIe probe: 20.2 GB/s host->device (best of 20.2 20.2 20.2 20.2) -> pcie_frac 0.55 (default 0.55)
+basalt generate: warning: this CPU has no AVX-512: the expert kernels run on AVX-2 (multi-token for the i-quant gate/up rows)
+basalt load: planning
+basalt generate: /home/llama/models/qwen3.8-flash-next-basalt-ud-iq3xxs/Qwen3.8-FN-UD-IQ3_XXS.basalt experts (largest blob 2.66 MB), token embedding Q6_K in mapped host memory (497 MiB, 0.1 s), its first 8192 rows in VRAM (16.4 MiB)
+basalt generate: profile /home/llama/basalt/v0.5.7/src/data/profiles/qwen4exp-48x512.prof: 24576 ranked pairs, built for 24576 slots
+basalt generate: 204 MiB of weights from /home/llama/models/qwen3.8-flash-next-basalt-ud-iq3xxs/Qwen3.8-FN-UD-IQ3_XXS.basalt laid out in 0.0 s (497 tensors skipped: served from the source tensors)
+basalt hc8: 194 hyper-connection matrices held only as 8-bit copies (659 MiB of copies) in 0.0 s
+basalt generate: 301 native projection matrices, 2331.54 MiB of weights, in 0.0 s
+basalt generate: the SSD is kept awake while rows are read: one page of the table after 40 ms without a read, until 60 s after the last request 
+basalt generate: PLE on, table 320001536 rows of /home/llama/models/qwen3.8-flash-next-basalt-ud-iq3xxs/Qwen3.8-FN-UD-IQ3_XXS.basalt
+basalt load: kv cuda0 601425152 32768 601425152
+basalt hc8: the draft layer's hyper-connection matrices as 8-bit copies only (37.5 MiB of bf16 left out)
+basalt load: kv draft cuda0 38833664 32768 38833664
+basalt mtp: draft layer loaded, 803 MiB of VRAM (experts 675, dense 73), files read in 0.00 s (588853 MiB/s)
+basalt generate: native head: Q6_K, 521472000 bytes, in 0.0 s
+basalt generate: GPU 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0
+basalt generate: experts via mmap (--mmap-experts)
+basalt hc8: 8-bit hyper-connection copies, 680 MiB of VRAM
+basalt verify: GDN mixer split by key head: saves -0.47 ms per 3.3-token window, costs 0.26 (1.00 GB of experts off the peer, read as decode misses) -> whole on CUDA0
+basalt generate: expert cache auto: 10.09 GiB free, 700 MiB reserved (+39 MiB for the draft head, +171 MiB for what loads after) -> 3710 slots
+basalt generate: expert cache 4802 slots, 9.20 GiB of VRAM; policy is
+basalt generate: the GPU computes the experts in the cache; it rounds differently from the CPU,
+                 so a reply can differ slightly from a run without the cache (same quality).
+                 PROFILE, ranked by routing frequency, no eviction.
+basalt generate: pre-filled 4802 of 4802 slots from the profile (9877 MB, read in the start's pass; slot 0 verified after it)
+basalt generate: R4 hit path ON - resident experts are computed on the GPU
+basalt generate: session is up (engine 0.5.7)
+basalt generate: token graph hit path: 4802 resident experts, decided on the device
+basalt generate: 19 expert-pool workers + the host thread
+basalt: FileExpertSource: allocating 45.22 GiB page-locked cache complement
+basalt: FileExpertSource: 384 free places for the adaptive swaps (4 blob sizes, 749 MiB)
+basalt generate: peer GPU 1: 7693 experts, 14.54 GiB (read in the start's pass)
+basalt generate: with the main card's 4802 experts that is 12495 of 24576 on the GPUs
+basalt generate: prompt split: off (a 32768-token context is too short for it)
+basalt load: total 55491712512
+basalt load: weights 0 55491712512
+basalt load: share cuda0 0 14554675712
+basalt load: share cuda1 0 0
+basalt load: share ram 0 40937036800
+basalt load: stages cuda0 ram
+basalt load: into cuda0
+basalt load: weights 556505216 55491712512
+basalt load: share cuda0 53188736 14554675712
+basalt load: weights 1120320000 55491712512
+basalt load: share cuda0 598848000 14554675712
+basalt load: weights 1681697280 55491712512
+basalt load: share cuda0 1160225280 14554675712
+basalt load: weights 2245434880 55491712512
+basalt load: share cuda0 1723962880 14554675712
+basalt load: weights 2801534464 55491712512
+basalt load: share cuda0 2280062464 14554675712
+basalt load: weights 3357915648 55491712512
+basalt load: share cuda0 2836443648 14554675712
+basalt load: weights 3914709504 55491712512
+basalt load: share cuda0 3393237504 14554675712
+basalt load: weights 4474369536 55491712512
+basalt load: share cuda0 3952897536 14554675712
+basalt load: weights 5031460352 55491712512
+basalt load: share cuda0 4509988352 14554675712
+basalt load: weights 5587466752 55491712512
+basalt load: share cuda0 5065994752 14554675712
+basalt load: weights 6144317952 55491712512
+basalt load: share cuda0 5622845952 14554675712
+basalt load: weights 6700989952 55491712512
+basalt load: share cuda0 6179517952 14554675712
+basalt load: weights 7257815552 55491712512
+basalt load: share cuda0 6736343552 14554675712
+basalt load: weights 7812874752 55491712512
+basalt load: share cuda0 7291402752 14554675712
+basalt load: weights 8368420352 55491712512
+basalt load: share cuda0 7846948352 14554675712
+basalt load: weights 8923991552 55491712512
+basalt load: share cuda0 8402519552 14554675712
+basalt load: weights 9480023552 55491712512
+basalt load: share cuda0 8958551552 14554675712
+basalt load: weights 10035466752 55491712512
+basalt load: share cuda0 9513994752 14554675712
+basalt load: weights 10592087552 55491712512
+basalt load: share cuda0 10070615552 14554675712
+basalt load: weights 11148580352 55491712512
+basalt load: share cuda0 10627108352 14554675712
+basalt load: weights 11704023552 55491712512
+basalt load: share cuda0 11182551552 14554675712
+basalt load: weights 12259287552 55491712512
+basalt load: share cuda0 11737815552 14554675712
+basalt load: weights 12815498752 55491712512
+basalt load: share cuda0 12294026752 14554675712
+basalt load: weights 13372375552 55491712512
+basalt load: share cuda0 12850903552 14554675712
+basalt load: weights 13927460352 55491712512
+basalt load: share cuda0 13405988352 14554675712
+basalt load: into ram
+basalt loader: the cards' share is read (12.89 GiB in 2.7 s); RAM next
+basalt load: weights 14494129664 55491712512
+basalt load: share ram 652326912 40937036800
+basalt load: weights 15062949640 55491712512
+basalt load: share ram 1221146888 40937036800
+basalt load: weights 15624702057 55491712512
+basalt load: share ram 1782899305 40937036800
+basalt load: weights 16188605952 55491712512
+basalt load: share ram 2346803200 40937036800
+basalt load: weights 16756732311 55491712512
+basalt load: share ram 2914929559 40937036800
+basalt load: weights 17313735391 55491712512
+basalt load: share ram 3471932639 40937036800
+basalt load: weights 17883740116 55491712512
+basalt load: share ram 4041937364 40937036800
+basalt load: weights 18451224286 55491712512
+basalt load: share ram 4609421534 40937036800
+basalt load: weights 19007177420 55491712512
+basalt load: share ram 5165374668 40937036800
+basalt load: weights 19562732836 55491712512
+basalt load: share ram 5720930084 40937036800
+basalt load: weights 20125466550 55491712512
+basalt load: share ram 6283663798 40937036800
+basalt load: weights 20683910193 55491712512
+basalt load: share ram 6842107441 40937036800
+basalt load: weights 21241209995 55491712512
+basalt load: share ram 7399407243 40937036800
+basalt load: weights 21810797689 55491712512
+basalt load: share ram 7968994937 40937036800
+basalt load: weights 22379619840 55491712512
+basalt load: share ram 8537817088 40937036800
+basalt load: weights 22938385804 55491712512
+basalt load: share ram 9096583052 40937036800
+basalt load: weights 23498785280 55491712512
+basalt load: share ram 9656982528 40937036800
+basalt load: weights 24059862191 55491712512
+basalt load: share ram 10218059439 40937036800
+basalt load: weights 24625290205 55491712512
+basalt load: share ram 10783487453 40937036800
+basalt load: weights 25186877952 55491712512
+basalt load: share ram 11345075200 40937036800
+basalt load: weights 25743194024 55491712512
+basalt load: share ram 11901391272 40937036800
+basalt load: weights 26307079286 55491712512
+basalt load: share ram 12465276534 40937036800
+basalt load: weights 26863575552 55491712512
+basalt load: share ram 13021772800 40937036800
+basalt load: weights 27429146266 55491712512
+basalt load: share ram 13587343514 40937036800
+basalt load: weights 27989519493 55491712512
+basalt load: share ram 14147716741 40937036800
+basalt load: weights 28547010458 55491712512
+basalt load: share ram 14705207706 40937036800
+basalt load: weights 29106117392 55491712512
+basalt load: share ram 15264314640 40937036800
+basalt load: weights 29675591168 55491712512
+basalt load: share ram 15833788416 40937036800
+basalt load: weights 30241520895 55491712512
+basalt load: share ram 16399718143 40937036800
+basalt load: weights 30796835745 55491712512
+basalt load: share ram 16955032993 40937036800
+basalt load: weights 31356335532 55491712512
+basalt load: share ram 17514532780 40937036800
+basalt load: weights 31916580352 55491712512
+basalt load: share ram 18074777600 40937036800
+basalt load: weights 32479610769 55491712512
+basalt load: share ram 18637808017 40937036800
+basalt load: weights 33043046502 55491712512
+basalt load: share ram 19201243750 40937036800
+basalt load: weights 33603415552 55491712512
+basalt load: share ram 19761612800 40937036800
+basalt load: weights 34167644672 55491712512
+basalt load: share ram 20325841920 40937036800
+basalt load: weights 34728970752 55491712512
+basalt load: share ram 20887168000 40937036800
+basalt load: weights 35297342819 55491712512
+basalt load: share ram 21455540067 40937036800
+basalt load: weights 35853978112 55491712512
+basalt load: share ram 22012175360 40937036800
+basalt load: weights 36409936172 55491712512
+basalt load: share ram 22568133420 40937036800
+basalt load: weights 36974496711 55491712512
+basalt load: share ram 23132693959 40937036800
+basalt load: weights 37543690752 55491712512
+basalt load: share ram 23701888000 40937036800
+basalt load: weights 38099634032 55491712512
+basalt load: share ram 24257831280 40937036800
+basalt load: weights 38657758422 55491712512
+basalt load: share ram 24815955670 40937036800
+basalt load: weights 39217034752 55491712512
+basalt load: share ram 25375232000 40937036800
+basalt load: weights 39782156518 55491712512
+basalt load: share ram 25940353766 40937036800
+basalt load: weights 40347941604 55491712512
+basalt load: share ram 26506138852 40937036800
+basalt load: weights 40911949581 55491712512
+basalt load: share ram 27070146829 40937036800
+basalt load: weights 41467837952 55491712512
+basalt load: share ram 27626035200 40937036800
+basalt load: weights 42025104914 55491712512
+basalt load: share ram 28183302162 40937036800
+basalt load: weights 42590570422 55491712512
+basalt load: share ram 28748767670 40937036800
+basalt load: weights 43152127847 55491712512
+basalt load: share ram 29310325095 40937036800
+basalt load: weights 43709412067 55491712512
+basalt load: share ram 29867609315 40937036800
+basalt load: weights 44269907543 55491712512
+basalt load: share ram 30428104791 40937036800
+basalt load: weights 44828012442 55491712512
+basalt load: share ram 30986209690 40937036800
+basalt load: weights 45385013386 55491712512
+basalt load: share ram 31543210634 40937036800
+basalt load: weights 45942873713 55491712512
+basalt load: share ram 32101070961 40937036800
+basalt load: weights 46507382476 55491712512
+basalt load: share ram 32665579724 40937036800
+basalt load: weights 47065993007 55491712512
+basalt load: share ram 33224190255 40937036800
+basalt load: weights 47622999552 55491712512
+basalt load: share ram 33781196800 40937036800
+basalt load: weights 48189933739 55491712512
+basalt load: share ram 34348130987 40937036800
+basalt load: weights 48750090752 55491712512
+basalt load: share ram 34908288000 40937036800
+basalt load: weights 49310552576 55491712512
+basalt load: share ram 35468749824 40937036800
+basalt load: weights 49865925137 55491712512
+basalt load: share ram 36024122385 40937036800
+basalt load: weights 50425857567 55491712512
+basalt load: share ram 36584054815 40937036800
+basalt load: weights 50985394688 55491712512
+basalt load: share ram 37143591936 40937036800
+basalt load: weights 51541228442 55491712512
+basalt load: share ram 37699425690 40937036800
+basalt load: weights 52103782761 55491712512
+basalt load: share ram 38261980009 40937036800
+basalt load: weights 52664561152 55491712512
+basalt load: share ram 38822758400 40937036800
+basalt load: weights 53223692390 55491712512
+basalt load: share ram 39381889638 40937036800
+basalt load: weights 53784695882 55491712512
+basalt load: share ram 39942893130 40937036800
+basalt load: weights 54348321866 55491712512
+basalt load: share ram 40506519114 40937036800
+basalt load: share ram 40937036800 40937036800
+basalt load: weights 54778839552 55491712512
+basalt load: weights 55335158272 55491712512
+basalt load: share cuda0 14554675712 14554675712
+basalt load: weights 55491712512 55491712512
+basalt: FileExpertSource: cache complement: allocation 0.0 s, registration 4.0 s, 47.77 GB read in the start's pass (unbuffered)
+basalt: FileExpertSource: mapped pinned cache complement ready: resident 45.22 GiB, pinned 45.22 GiB in 18 s; page-locked and mapped
+basalt: FileExpertSource: 3590 of the prompt path's 4064 lendable slots keep their experts in RAM too (the others are read from the file when lent: not enough RAM for them)
+basalt generate: resident RAM mode: 45.22 GiB of experts in RAM (page-locked), 4802 in the GPU cache; adaptive swaps exchange them with the GPU cache (no file reads)
+basalt generate: prompt path lends at most 90% of the cache (95% of the expert bytes pinned)
+basalt: gpus: RTX 5060 Ti dense, KV, 4802 experts (9.2 GiB); RTX 5060 Ti 7693 experts (14.5 GiB)
+basalt serve: prompt chunk auto: 32768 tokens, a 256-slot ring
+basalt serve: the prompt path borrows 4064 CUDA0 cache slots (7.77 GiB)
+basalt prefill: peer GPU 1 computes its experts' rows of each prompt chunk up to 2559 tokens, with compact group buffers; 580 MiB left free on it
+basalt hc: CUDA0: the hyper-connection read runs as staged (the norm per token and stream, the down projection's activations staged ahead by cp.async); checked bit for bit against the plain read on this card
+basalt verify: side branches at stream priority -5
+basalt verify: the MoE tail planned on the device, the peer card served by a persistent kernel (144 blocks)
+basalt verify: window up to 8 tokens, 86.2 MiB of device buffers
+basalt mtp: draft head over 106299 tokens (rows read from the main head)
+basalt mtp: draft head tiers: 40525 base rows, 65774 added rows read after an added token
+basalt serve: 666 MiB of VRAM free with everything loaded
+basalt serve: RAM: 6.31 GiB held for host buffers not made, given back
+basalt generate: experts live in VRAM 9.2 GiB (20%), peer GPU 14.5 GiB (31%), RAM 23.1 GiB (49%), file (SSD) 0.0 GiB (0%); 46.8 GiB in all
+basalt serve: RAM 11.59 GiB free, guard 2.00 GiB
+basalt verify: captured the 1-token window (upload no error, sync no error), 203 programmatic dependent launches
+basalt verify: captured the 2-token window (upload no error, sync no error), 203 programmatic dependent launches
+basalt verify: captured the 3-token window (upload no error, sync no error), 203 programmatic dependent launches
+basalt verify: captured the 4-token window (upload no error, sync no error), 203 programmatic dependent launches
+basalt verify: captured the 5-token window (upload no error, sync no error), 203 programmatic dependent launches
+basalt verify: captured the 6-token window (upload no error, sync no error), 203 programmatic dependent launches
+basalt verify: captured the 7-token window (upload no error, sync no error), 203 programmatic dependent launches
+basalt verify: captured the 8-token window (upload no error, sync no error), 203 programmatic dependent launches
+basalt load: weights 55491712512 55491712512
+basalt serve: prompt 4315 tokens = 0 reused + 4315 read in 2581 ms (1671.7 tok/s), 256 generated in 2246 ms (114.0 tok/s), drafts accepted 126 of 183, 0 checkpoints
+basalt serve: decode expert cache hit rate: 92.3% (93088 hits / 100815 lookups); 49905 more read by the GPU over PCIe or from another GPU (33.1% of all 150720 routed)
+basalt serve: adaptive swaps: 1771 into the VRAM tier this request, 0 deferred (no free RAM place)
+basalt serve: resident RAM: 45.22 GiB of experts in RAM, 423 exchanged with the VRAM tier, 1 blob reads from the file
+basalt serve: expert tiers: GPU 93088 hits this request; since the start RAM 34104 blobs, files 1 blobs 2.7 MB read
+basalt serve: prompt 4315 tokens = 0 reused + 4315 read in 2479 ms (1740.7 tok/s), 256 generated in 2273 ms (112.6 tok/s), drafts accepted 131 of 205, 0 checkpoints
+basalt serve: decode expert cache hit rate: 95.4% (113228 hits / 118734 lookups); 41106 more read by the GPU over PCIe or from another GPU (25.7% of all 159840 routed)
+basalt serve: adaptive swaps: 1026 into the VRAM tier this request, 0 deferred (no free RAM place)
+basalt serve: resident RAM: 45.22 GiB of experts in RAM, 636 exchanged with the VRAM tier, 1 blob reads from the file
+basalt serve: expert tiers: GPU 113228 hits this request; since the start RAM 57815 blobs, files 1 blobs 2.7 MB read
+basalt serve: prompt 4315 tokens = 0 reused + 4315 read in 2484 ms (1737.3 tok/s), 256 generated in 2249 ms (113.8 tok/s), drafts accepted 130 of 195, 0 checkpoints
+basalt serve: decode expert cache hit rate: 95.7% (114413 hits / 119593 lookups); 34967 more read by the GPU over PCIe or from another GPU (22.6% of all 154560 routed)
+basalt serve: adaptive swaps: 939 into the VRAM tier this request, 0 deferred (no free RAM place)
+basalt serve: resident RAM: 45.22 GiB of experts in RAM, 837 exchanged with the VRAM tier, 1 blob reads from the file
+basalt serve: expert tiers: GPU 114413 hits this request; since the start RAM 80963 blobs, files 1 blobs 2.7 MB read
+basalt serve: prompt 4315 tokens = 0 reused + 4315 read in 2488 ms (1734.2 tok/s), 256 generated in 2334 ms (109.7 tok/s), drafts accepted 122 of 189, 0 checkpoints
+basalt serve: decode expert cache hit rate: 96.1% (116087 hits / 120833 lookups); 34207 more read by the GPU over PCIe or from another GPU (22.1% of all 155040 routed)
+basalt serve: adaptive swaps: 741 into the VRAM tier this request, 0 deferred (no free RAM place)
+basalt serve: resident RAM: 45.22 GiB of experts in RAM, 992 exchanged with the VRAM tier, 1 blob reads from the file
+basalt serve: expert tiers: GPU 116087 hits this request; since the start RAM 103598 blobs, files 1 blobs 2.7 MB read
+basalt serve: prompt 4315 tokens = 0 reused + 4315 read in 2489 ms (1733.4 tok/s), 256 generated in 2303 ms (111.1 tok/s), drafts accepted 126 of 191, 0 checkpoints
+basalt serve: decode expert cache hit rate: 96.1% (117166 hits / 121874 lookups); 32686 more read by the GPU over PCIe or from another GPU (21.1% of all 154560 routed)
+basalt serve: adaptive swaps: 717 into the VRAM tier this request, 0 deferred (no free RAM place)
+basalt serve: resident RAM: 45.22 GiB of experts in RAM, 1140 exchanged with the VRAM tier, 1 blob reads from the file
+basalt serve: expert tiers: GPU 117166 hits this request; since the start RAM 126162 blobs, files 1 blobs 2.7 MB read
+basalt serve: prompt 4315 tokens = 0 reused + 4315 read in 2493 ms (1730.5 tok/s), 256 generated in 2262 ms (113.2 tok/s), drafts accepted 127 of 185, 0 checkpoints
+basalt serve: decode expert cache hit rate: 96.1% (114316 hits / 118941 lookups); 31779 more read by the GPU over PCIe or from another GPU (21.1% of all 150720 routed)
+basalt serve: adaptive swaps: 703 into the VRAM tier this request, 0 deferred (no free RAM place)
+basalt serve: resident RAM: 45.22 GiB of experts in RAM, 1277 exchanged with the VRAM tier, 1 blob reads from the file
+basalt serve: expert tiers: GPU 114316 hits this request; since the start RAM 148609 blobs, files 1 blobs 2.7 MB read
+basalt serve: prompt 4335 tokens = 0 reused + 4335 read in 2550 ms (1700.2 tok/s), 256 generated in 1438 ms (178.0 tok/s), drafts accepted 207 of 229, 0 checkpoints
+basalt serve: decode expert cache hit rate: 82.8% (78400 hits / 94668 lookups); 39732 more read by the GPU over PCIe or from another GPU (29.6% of all 134400 routed)
+basalt serve: adaptive swaps: 2374 into the VRAM tier this request, 0 deferred (no free RAM place)
+basalt serve: resident RAM: 45.22 GiB of experts in RAM, 1758 exchanged with the VRAM tier, 1 blob reads from the file
+basalt serve: expert tiers: GPU 78400 hits this request; since the start RAM 183144 blobs, files 1 blobs 2.7 MB read
+basalt serve: suffix drafts: 1 windows, 1 of 4 drafts accepted
+basalt serve: prompt 4335 tokens = 0 reused + 4335 read in 2537 ms (1708.9 tok/s), 256 generated in 1291 ms (198.4 tok/s), drafts accepted 208 of 247, 0 checkpoints
+basalt serve: decode expert cache hit rate: 95.3% (103327 hits / 108473 lookups); 34087 more read by the GPU over PCIe or from another GPU (23.9% of all 142560 routed)
+basalt serve: adaptive swaps: 799 into the VRAM tier this request, 0 deferred (no free RAM place)
+basalt serve: resident RAM: 45.22 GiB of experts in RAM, 1959 exchanged with the VRAM tier, 1 blob reads from the file
+basalt serve: expert tiers: GPU 103327 hits this request; since the start RAM 207240 blobs, files 1 blobs 2.7 MB read
+basalt serve: prompt 4335 tokens = 0 reused + 4335 read in 2540 ms (1706.7 tok/s), 256 generated in 1305 ms (196.2 tok/s), drafts accepted 212 of 244, 0 checkpoints
+basalt serve: decode expert cache hit rate: 96.5% (106473 hits / 110354 lookups); 31246 more read by the GPU over PCIe or from another GPU (22.1% of all 141600 routed)
+basalt serve: adaptive swaps: 393 into the VRAM tier this request, 0 deferred (no free RAM place)
+basalt serve: resident RAM: 45.22 GiB of experts in RAM, 2059 exchanged with the VRAM tier, 1 blob reads from the file
+basalt serve: expert tiers: GPU 106473 hits this request; since the start RAM 229703 blobs, files 1 blobs 2.7 MB read
+basalt serve: prompt 4335 tokens = 0 reused + 4335 read in 2543 ms (1704.4 tok/s), 256 generated in 1257 ms (203.7 tok/s), drafts accepted 209 of 244, 0 checkpoints
+basalt serve: decode expert cache hit rate: 96.1% (104258 hits / 108506 lookups); 31654 more read by the GPU over PCIe or from another GPU (22.6% of all 140160 routed)
+basalt serve: adaptive swaps: 540 into the VRAM tier this request, 0 deferred (no free RAM place)
+basalt serve: resident RAM: 45.22 GiB of experts in RAM, 2198 exchanged with the VRAM tier, 1 blob reads from the file
+basalt serve: expert tiers: GPU 104258 hits this request; since the start RAM 252727 blobs, files 1 blobs 2.7 MB read
+basalt serve: prompt 4335 tokens = 0 reused + 4335 read in 2541 ms (1706.3 tok/s), 256 generated in 1286 ms (199.0 tok/s), drafts accepted 207 of 242, 0 checkpoints
+basalt serve: decode expert cache hit rate: 96.6% (106076 hits / 109829 lookups); 30331 more read by the GPU over PCIe or from another GPU (21.6% of all 140160 routed)
+basalt serve: adaptive swaps: 440 into the VRAM tier this request, 0 deferred (no free RAM place)
+basalt serve: resident RAM: 45.22 GiB of experts in RAM, 2301 exchanged with the VRAM tier, 1 blob reads from the file
+basalt serve: expert tiers: GPU 106076 hits this request; since the start RAM 275062 blobs, files 1 blobs 2.7 MB read
+basalt serve: prompt 4335 tokens = 0 reused + 4335 read in 2541 ms (1705.7 tok/s), 256 generated in 1278 ms (200.3 tok/s), drafts accepted 208 of 243, 0 checkpoints
+basalt serve: decode expert cache hit rate: 97.1% (107118 hits / 110351 lookups); 29809 more read by the GPU over PCIe or from another GPU (21.3% of all 140160 routed)
+basalt serve: adaptive swaps: 350 into the VRAM tier this request, 0 deferred (no free RAM place)
+basalt serve: resident RAM: 45.22 GiB of experts in RAM, 2376 exchanged with the VRAM tier, 1 blob reads from the file
+basalt serve: expert tiers: GPU 107118 hits this request; since the start RAM 296849 blobs, files 1 blobs 2.7 MB read

@@ -178,3 +178,58 @@ Decode with 126K behind it: 75–79 t/s on one card and split, 87–88 in peer m
 | 8 requests (short) | peer + MTP, 8 slots, `vram-reserve-mib` 1500 | 200.5 t/s | ≈ 229 | 151 |
 
 The all-round Basalt setup is **peer + MTP** (`basalt-peer-mtp-par4.json`): the fastest single chat measured on this machine, the fastest long prompt and job, and level with Strata at four requests. Strata's layer split is still ahead from about four to eight simultaneous requests.
+
+## Control run (2026-11-26)
+
+Step 6's one-GPU run again with no download running (`runs/6-7-modes-control/`): 72.5 / 71.9 decode, 1,876 / 1,846 prompt, against 72.3 / 71.7 and 1,872 / 1,839 during the download. The download did not affect the numbers.
+
+## 8. Route tail skip on (2026-11-26)
+
+**Configs:** `basalt-1gpu-nodraft-skip7.json` and `basalt-peer-mtp-skip7.json`: `"route-tail-skip": 7` (Strata's rank). The start warns: "--route-tail-skip 7 drops low-ranked missed experts", and every request reports what it dropped.
+
+**Actual** (`runs/8-skip/summary.md`):
+
+| | Skip off | Skip 7 | Gain | Dropped |
+|---|---|---|---|---|
+| 1 GPU, no drafting, prose / JSON | 72.3 / 71.7 | 72.8 / 72.9 | +1 % / +2 % | "27200 of 49770 routed entries no GPU held dropped (54.7%); 1.5% of all 1761120 entries" |
+| peer + MTP, prose / JSON | 113.1 / 193.3 | 115.6 / 209.7 | +2 % / +8 % | "91786 of 195323 … (47.0%); 6.2% of all 1474560 entries" |
+
+**Verdict:** as in Strata: half of the misses are dropped, 1.5–6 % of all routed experts, for 1–8 % more speed. The skip stays off.
+
+## 9. The UD-IQ3_XXS pack (2026-11-26)
+
+**Configs:** `basalt-ud-*.json`, the step 6/7 configs with the UD-IQ3_XXS pack (Unsloth UD-IQ3_XXS experts, 46.8 GiB, Basalt's recommended pack for 16 GB cards; top-1 88.67 %, KL 0.1188 against GSQ-RCO IQ3_XXS's 84.03 %, 0.2404 by Basalt's card).
+
+**Placement:** one card: "experts live in VRAM 10.1 GiB (21%) … RAM 36.8 GiB (79%), file (SSD) 0.0 GiB"; peer: GPU 0 9.2 GiB, "peer GPU 1: 7693 experts, 14.54 GiB", RAM 23.1 GiB; split: layers 0–22 / 23–47, 21.1 GiB on the cards. Nothing on the SSD in any mode. Peer mode left the least RAM: RSS 55 GiB, lowest MemAvailable 5.1 GB.
+
+**Actual** (`runs/9-ud/summary.md`; GSQ-RCO pack from step 6/7 for comparison):
+
+| | GSQ-RCO IQ3_XXS | UD-IQ3_XXS | Change |
+|---|---|---|---|
+| 1 GPU, no drafting, prose / JSON | 72.3 / 71.7 | 68.2 / 68.2 | −6 % / −5 % |
+| 1 GPU, MTP | 104.8 / 170.5 | 98.1 / 169.9 | −6 % / 0 % |
+| peer, no drafting | 77.4 / 78.4 | 72.6 / 72.2 | −6 % / −8 % |
+| peer + MTP | 113.1 / 193.3 | 112.3 / 200.9 | −1 % / +4 % |
+| split + MTP | 107.4 / 184.5 | 105.3 / 182.0 | −2 % / −1 % |
+| Prompt t/s, 1 GPU | 1,872 | 1,756 | −6 % |
+
+**Verdict:** the better-quality pack costs 0–8 % speed (17 % more expert bytes per token) and still fits in RAM on 64 GB, in every mode. With peer + MTP it is as fast as the GSQ-RCO pack. For daily use on this machine UD-IQ3_XXS is the better choice; the cross-engine numbers stay on GSQ-RCO, the weights Strata ran.
+
+## 10. Quality check (2026-11-26)
+
+**Configs:** `1gpu-nodraft` (defaults), `1gpu-nodraft-det` (`"adapt-swaps": 0`, Basalt's advice for identity checks), `1gpu-nodraft-det-skip7`, `peer-mtp`, `peer-mtp-det` (`"adapt-swaps": 0, "peer-adapt-swaps": 0`). Same client and prompts as Strata's step 11 (`BENCH_CLIENT=scripts/quality-check.py`).
+
+**Actual** (`runs/10-quality/quality-vs-llamacpp.md`; llama.cpp's answers from `2026-11-strata` as the reference):
+
+| prompt | llama.cpp | Strata det. | Basalt defaults | Basalt det. | + skip 7 | peer + MTP | peer + MTP det. |
+|---|---|---|---|---|---|---|---|
+| 7 short ones | = ✓ | = ✓ | = ✓ | = ✓ | = ✓ | = ✓ | = ✓ |
+| json | = ✓ | ≠ ✓ | ≠ ✓ ~ | ≠ ✓ | ≠ ✓ | ≠ ✓ ~ | = ✓ |
+| code | = ✓ | ≠ ✓ | = ✓ | = ✓ | = ✓ | = ✓ | = ✓ |
+| explain | = ✓ | = ✓ | = ✓ | = ✓ | = ✓ | = ✓ | = ✓ |
+
+- 100 of 100 Basalt answers correct. Nine of ten prompts give llama.cpp's text in every Basalt setting, one more than Strata (code).
+- The JSON answer varies: the tags (`"astronomer", "novelist", "gardener"` / `"archivist" …` / `"archaeologist" …`) and once only the layout (pretty-printed instead of one line). With the defaults the two repetitions differed; with `adapt-swaps 0` they repeat, as Basalt documents.
+- The skip changed the JSON tags only.
+
+**Verdict:** Basalt's answers are as correct as llama.cpp's and Strata's, and closer to llama.cpp's than Strata's.

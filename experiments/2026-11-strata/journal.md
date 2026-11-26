@@ -629,3 +629,15 @@ The prompts of concurrent requests are read one after another (the per-stream TT
 - For **one chat** the second card adds 7–35 %, depending on drafting and output; for **long prompts** and **several requests** it adds 1.66–1.7×.
 - What does not matter here: the split point, overlapped hand-off, `-ts` in llama.cpp, `--batch-mtp`, putting the draft layer on the first card.
 - llama.cpp's best on two GPUs is the layer split with the MoE cache; its row and tensor modes do not work with it on this model.
+
+## 14. Unsloth UD-IQ3_XXS: skipped (2026-11-26)
+
+**Why it was in the plan:** a second like-for-like pair with Basalt's recommended 16 GB pack.
+
+**Found while reading `terminal/setup.py` (v0.2.21):** Strata has Unsloth's v3.1 UD-IQ3_XXS in its catalog: `"UD-IQ3_XXS": {"about": "3-bit i-quant (Unsloth Dynamic v3.1)", "download_gb": 83.6, "ram_gb": 48, "arena_gb": 50.3, … "budget": True, "shards": 4, … "revision": UNSLOTH_V31_REVISION}` (`d96201194f103c906994f283f504209dc8d2a10c`, 2026-11-04, the re-upload Basalt's UD packs are built from). So the engine supports it, and the format check of the plan is answered by the source. "budget": True means the RAM-budget mode: with 50.3 GB of experts, 64 GB of RAM leaves a 47 GiB budget and the rest is read from the SSD while it answers, so it is not a fully resident run like GSQ-RCO IQ3_XXS.
+
+**Why skipped now:** 83.6 GB more on the NVMe (279 GB free) would leave too little for Basalt's two packs (79.9 + 87.6 GB), and the archive has 59 GB free. It can be run in `2026-11-basalt` if Basalt's UD-IQ3_XXS pack is used and disk space is made then.
+
+## 15. Write-up (2026-11-26)
+
+README: status, the run conditions, the table of two-GPU modes, findings, the recommended two-GPU setup and what was not measured. `docs/stack.md`: the Strata build and the changelog. Repository README: status.

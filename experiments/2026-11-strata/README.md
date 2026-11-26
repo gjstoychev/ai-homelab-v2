@@ -1,6 +1,6 @@
 # Strata: Qwen3.8-Flash-Next on 2× RTX 5060 Ti, the full model
 
-Status: **planned** (2026-11-25). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
+Status: **done** (2026-11-25), steps 1–13 and 15; step 14 skipped (see the journal). Recommended setup: [below](#the-recommended-two-gpu-setup). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
 
 ## Question
 
@@ -116,7 +116,7 @@ The NVMe has 279 GB free before step 2 and about 280 GB after it (80 GB out, 82 
 
 ## Results
 
-Preliminary (steps 7–13; the write-up is step 15). Every number traces to `runs/` and the journal.
+Every number traces to a file in `runs/` and a step in the journal. All runs: kernel 7.0.0-43, driver 580.178.04, CUDA 13.0.88, Strata v0.2.21 (engine 0.1.67, built from source for sm_120), llama.cpp v1.0.0 (build 12359), the ISTA-DASLab GSQ-RCO IQ3_XXS GGUF at `ed59f92`, route tail skip off unless stated. Client: `scripts/oai-bench.py` and the other shared clients, temperature 0, thinking off, nothing reused unless stated. No page-cache drops and no CPU power (runs made without sudo).
 
 **One GPU** (same weights, 4.3K-token prompt, 256 tokens out):
 
@@ -139,6 +139,35 @@ Preliminary (steps 7–13; the write-up is step 15). Every number traces to `run
 
 Quality (step 11): 100 of 100 answers correct on llama.cpp and every Strata setting; short factual answers identical, longer ones differ at near-ties.
 
+**Two-GPU modes compared** (steps 10, 10b, 10c, 13b, 13d; decode t/s, 4.3K-token prompt):
+
+| Mode | Exact | MTP, prose | MTP, JSON | Prompt t/s |
+|---|---|---|---|---|
+| Strata, one GPU | 62.8 | 77.8 | 118.2 | 1,779 |
+| Strata layer split (auto, split at 26) | 64.8 | 86.2 | 132.4 | 1,878 |
+| … split at 20 / 32, or overlapped hand-off | 64.4–64.9 | – | – | 1,872–1,883 |
+| … + pipeline windows (`--pipeline-windows 2`) | – | 90.6 | 159.2 | 1,777 |
+| … + pipeline windows, draft layer on CUDA0 | – | 77.9 | 156.5 | 1,758 |
+| Strata helper cache (`--expert-cache-device1 auto --remote-expert-opt`) | 66.9 | 93.4 | 138.3 | 1,757 |
+| llama.cpp layer split + MoE cache | 53.1 | – | – | 838 |
+| llama.cpp `-sm tensor` (no MoE cache possible) | 20.6 | – | – | 94 |
+| llama.cpp `-sm row` | does not load | | | |
+
 ## Findings
 
-Pending.
+1. **Strata beats llama.cpp's best configuration on the same file, exact against exact:** prompt 2.0×, decode +39–48 % on one GPU; prompt 2.2×, decode +22 % on two. With drafting on, the gap grows (MTP: 1.7× prose, 2.8× JSON on one GPU).
+2. **On these cards the second GPU is worth 7–35 % for one chat, and 1.7× for long prompts and several requests.** One chat is limited by the GPU work per layer, not by missing experts (90 % of routed experts are already in one card's cache); long prompts and parallel requests are where both cards work at the same time.
+3. **The layer split is the best general two-GPU mode.** With MTP and `"parallel": 4` it serves one chat at 87.6 (prose) / 133.7 (JSON) t/s and four at 172 t/s, reads a 126K-token prompt in 36 s and runs the four-turn job in 29 s. The helper cache is 3–8 % faster for one chat only, and reads prompts on one card.
+4. **What did not matter:** the split point, overlapped hand-off, an uneven llama.cpp `-ts`, `--batch-mtp`, the draft layer on the first card. llama.cpp's row and tensor splits do not work with its MoE cache on this model.
+5. **The route tail skip buys little here** (0–6 % decode for 5–6 % of all routed experts left out), because misses are cheap with a 90 % hit rate and 13 CPU workers. It changed one of ten answers. It is off by default since 0.2.17 and stays off.
+6. **Speculative decoding numbers depend on the text:** MTP adds 24 % on prose and 88 % on JSON for one stream, and nothing once several requests run (the pipelined batch path does not draft). Prose and structured output are reported apart everywhere.
+7. **Quality:** 100 of 100 answers correct on every engine and setting. Strata's defaults are not repeatable run to run (adaptive cache, PCIe and CPU shares round differently); its documented recipe makes it repeat exactly.
+8. **Pitfalls found on the way:** a native pack needs `--spec` even without a drafter; llama-server reuses a prompt from its slot unless the request says `cache_prompt: false`; Strata's prompt and conversation caches have to be off for prompt timings; the MoE cache of llama.cpp must be resized for one GPU, for 131K context and for several slots.
+
+## The recommended two-GPU setup
+
+Strata v0.2.21, `"gpu": [0, 1]`, `"layer_split": "auto"`, `"parallel": 4`, the MTP draft layer (`--spec 4 --spec-min-p 0.5 --mtp …`), `--kv int8`, `--pool-workers 13`, `STRATA_ROUTE_TAIL_SKIP=0`, and Strata's prompt and conversation caches on (they are off in the speed configs only). The measured config is [`configs/strata-2gpu-mtp-par4.json`](configs/strata-2gpu-mtp-par4.json) (caches off); for long prompts add `--max-context 131072 --kv-resident 32768` as in [`configs/strata-2gpu-nodraft-128k-cache.json`](configs/strata-2gpu-nodraft-128k-cache.json). For a single user who only chats, the helper cache with MTP ([`configs/strata-helper-mtp.json`](configs/strata-helper-mtp.json)) is 7 % faster on prose.
+
+## Not measured
+
+Long mixed workloads (several agents reading and decoding over hours), sampled (non-greedy) decoding, more than 8 requests, context beyond 128K, other quantizations (step 14), CPU power and cold-cache load times.

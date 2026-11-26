@@ -17,6 +17,8 @@ Recorded 2026-11-25.
 | Docker | 29.8.0 (`docker-ce` 5:29.8.0-1~ubuntu.24.04~noble) | Docker apt repository |
 | NVIDIA Container Toolkit | 1.20.2-1 | NVIDIA apt repository |
 | llama.cpp | v1.0.0 (build 12359, commit `b1b770d9`), CUDA, `sm_120`, in `~/llama.cpp/v1.0.0`; `~/llama.cpp/current` points to it | built from source with `scripts/build-llamacpp.sh` |
+| Strata | v0.2.21 (commit `d46f5f2`, engine 0.1.67), CUDA, `sm_120`/`sm_120a`, in `~/strata/v0.2.21`; `~/strata/current` points to it; server venv `src/terminal/.venv` (pinned `requirements.txt`); MTP draft layer in `data/mtp/rt` | built from source with `scripts/build-strata.sh` (setup.py's CUDA flags; `setup.sh` not run) |
+| Hugging Face CLI | `huggingface_hub` 2.4.0, `hf-xet` 1.8.0, in `~/venvs/hf` | pip in a venv |
 | Ollama | 0.32.14, installed, disabled at boot; started by hand when needed | v1 (Lab 0b; disabled by its role `ollama` on 2026-11-24) |
 | Python | 3.12.3 | Ubuntu |
 
@@ -56,6 +58,7 @@ Not built yet.
 
 | Date | Node | Change |
 |---|---|---|
+| 2026-11-25 | formula | Strata v0.2.21 built from source (experiment `2026-11-strata`); Hugging Face CLI in `~/venvs/hf`; models: GSQ-RCO IQ3_XXS downloaded to `~/models`, batiai IQ3_XXS archived to `/mnt/models`. |
 | 2026-11-25 | formula | DeepSeek-V4-Flash-0731 UD-IQ1_M (81 GB) moved to `/mnt/models` with `scripts/move-model.sh`: copy 351 s (about 250 MB/s), direct-read verification 269 s, all three checksums OK. |
 | 2026-11-25 | formula | Model archive: Samsung 850 120 GB (old Linux install, unused) replaced by a Kingston A400 240 GB SATA SSD, ext4, at `/mnt/models`; Samsung 860 (Windows) moved from the ASMedia controller to an Intel SATA port. Unused Ollama models removed. |
 | 2026-11-25 | formula | Claude Code sandbox turned off (`/etc/claude-code/managed-settings.json`; previous version kept as `managed-settings.json.v1-sandbox`). This repo started. |

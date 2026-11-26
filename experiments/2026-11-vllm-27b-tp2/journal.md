@@ -584,3 +584,35 @@ Why: in `peer` the main card holds the whole model (the second card only reads t
 A mistake on the way: my first cleanup used `pkill -f "basalt serve"`, which matched my own shell command and killed it (exit 144); nothing was left running (checked: no Basalt process, cards at 2 MiB), and the second and third probes ran separately.
 
 Not done: building a no-drafter pack from QUASAR's checkpoint (about 20 GB download, converter with 16 processes) to see whether a 14 GiB main card holds it; with a context under 8,448 it would not change the answer for long prompts.
+
+## 14. The 252K needle at 150 W (2026-11-26)
+
+The one gap step 8b left: the needle, the heaviest load in the experiment, was not run capped. The user set the cap with `sudo nvidia-smi -pl 150` (both cards, from 180 W; confirmed with `nvidia-smi --query-gpu=index,power.limit`), driver 595.91.07, then two runs, 3 reps each, `NEEDLE_CHARS=835000`, the configs of step 6 and 7 unchanged (`runs/12-needle-cap150/`, with the `.gpu.csv` of each):
+
+```
+NEEDLE_CHARS=835000 BENCH_CLIENT=experiments/2026-11-vllm-27b-tp2/scripts/needle-client.py scripts/bench-run.sh \
+  experiments/2026-11-vllm-27b-tp2/runs/12-needle-cap150 fp8-mtp6-cap150 3 -- \
+  experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp6.args
+RECIPE_PASSES=needle BENCH_CLIENT=experiments/2026-11-vllm-27b-tp2/scripts/recipe-client.py scripts/bench-run.sh \
+  experiments/2026-11-vllm-27b-tp2/runs/12-needle-cap150 nvfp4-mtp4-cap150 3 -- \
+  experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/nvfp4-mtp4.args
+```
+
+**A mistake of mine first.** I started with the fp8 k=6 needle, saying it was the run that peaked at 183 W. It was not: the 183 W sample is the NVFP4 recipe's needle (step 7; 183.0 W on card 0 and 172 W on card 1 in `runs/7-recipe/nvfp4-mtp4-b.gpu.csv`). The fp8 needle never drew more than 126 W, so a 150 W cap could not touch it. Both were run.
+
+| | Uncapped (180 W) | Capped (150 W) |
+|---|---|---|
+| fp8, k=6: TTFT, 252,876 tokens | 271.95 s (930 t/s) | 272.97 s (926 t/s), **+0.4 %** |
+| fp8, k=6: peak power, card 0 / 1 | 125.7 / 117.1 W | 124.8 / 115.7 W (cap never reached) |
+| fp8, k=6: mean SM clock, card 0 (active) | 2,828 MHz | 2,818 MHz |
+| NVFP4 recipe: TTFT, 252,875 tokens | 279.09 s (906 t/s; step 7: 279.3 s) | 287.17 s (881 t/s), **+2.9 %** |
+| NVFP4: peak power, card 0 / 1 | 183.8 / 172.1 W (9c; 183.0 / 172.2 in step 7) | **153.2 / 154.0 W** (the cap, with sampling overshoot) |
+| NVFP4: samples above 150 W, card 0 | 2,037 of 3,405 (9c, whole run) | 677 of 1,965 (needle run) |
+| NVFP4: SM clock, card 0, minimum while active | 2,745 MHz (9c) | 2,617 MHz |
+| Needle found | 3/3 | 3/3 in both runs |
+
+The uncapped NVFP4 files hold the whole recipe run (baseline, depth and needle passes), the capped one only the needle, so the power means are not comparable between them; the peaks, the TTFT and the clock minimum are. 
+
+**Result: the cap is free for the fp8 needle (+0.4 %, it never draws 150 W) and costs 2.9 % on the NVFP4 needle,** the one step that draws more than 150 W (NVFP4's quantize and dequantize work adds to the load, 160 W average on card 0 against 119 W for fp8 at depth). Together with step 8b (decode within the spread, the 32K prompt 1.4 % slower), a 150 W limit costs 0–3 % in every run here, for 30 W less per card in the heaviest case. Not tested: the 150 W limit with several requests at once (the cards draw most with `max-num-seqs` 4).
+
+The cards stay at 150 W until the user resets them (`sudo nvidia-smi -pl 180`; it does not survive a reboot).

@@ -171,7 +171,7 @@ The new driver corrects vLLM's KV memory accounting (the pools now equal the sou
 ### What does not reproduce, and why
 
 - **Prompt reading is 18–33 % slower than the source's at 0.5–32K tokens (TTFT 1.31 against 0.99 s at 4K, 12.4 against 10.5 s at 32K) and 8 % in prompt rate at 252K** (930 against 1,011 t/s; 272 against 247 s). It is not the driver (9b, 9c), not the power limit (8b), not the KV type, not `NCCL_P2P_DISABLE`, not the NCCL version or its protocol (9d, 9g). What it is: about half of every prefill is the tensor-parallel all-reduce through host memory, 128 transfers of 40 MiB per chunk at 7.4 GB/s (9f, 9g); a faster host path would shrink the gap, and the source's gap would need that part to be about 40 % cheaper. The source's CPU (9800X3D) and memory differ from here (i7-14700, DDR5-6000 CL40), but no run on this machine changes either, so that part is a hypothesis, not a finding.
-- **The 150 W cap** the source used changes nothing measurable here (these runs draw 84–86 W on average, peaks of 130–139 W); the 250K needle was not run capped.
+- **The 150 W cap** the source used costs 0–3 % here: nothing measurable in decode (these runs draw 84–86 W on average, peaks of 130–139 W; step 8b), +0.4 % on the fp8 252K needle (it never draws 150 W), **+2.9 % on the NVFP4 recipe's needle** (287.2 s against 279.1 s; the one load that draws more, peaks of 183 W uncapped, 153 W capped; journal 14).
 
 ### The best two-GPU mode for a dense 27B model
 
@@ -187,5 +187,5 @@ It depends on what is read and what is written:
 
 ### Not measured
 
-Basalt with several requests, a no-drafter 27B pack (Basalt's `peer` mode, tried in step 13, refuses the published pack at every useful context: it needs 16.6 GiB on GPU 0 at the smallest context where a second card reads anything, 14.8 GiB are free), a matched checkpoint (vLLM and Basalt use different NVFP4 weights; the 252K comparison also differs in KV type), sequence-parallel or fp8 all-reduce in vLLM (nothing to switch on in these images), the profile with MTP or at 32K, the source's own KV-quality test (`kv-quality-test.md`), quality at distribution level (KL against BF16), and any run at 150 W with the 250K needle.
+Basalt with several requests, a no-drafter 27B pack (Basalt's `peer` mode, tried in step 13, refuses the published pack at every useful context: it needs 16.6 GiB on GPU 0 at the smallest context where a second card reads anything, 14.8 GiB are free), a matched checkpoint (vLLM and Basalt use different NVFP4 weights; the 252K comparison also differs in KV type), sequence-parallel or fp8 all-reduce in vLLM (nothing to switch on in these images), the profile with MTP or at 32K, the source's own KV-quality test (`kv-quality-test.md`), quality at distribution level (KL against BF16), and the 150 W cap with several requests at once.
 

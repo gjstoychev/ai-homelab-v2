@@ -1,0 +1,20 @@
+date: Thu Nov 26 09:23:07 PM UTC 2026
+label: nvfp4-mtp4-cap150, reps: 3
+kernel: 7.0.0-44-generic
+driver: 595.91.07
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 150.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 150.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/nvfp4-mtp4.args
+== ready in 105.0 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/long-bench.py --url http://127.0.0.1:8080 --label nvfp4-mtp4-cap150 --mode ttft --out experiments/2026-11-vllm-27b-tp2/runs/12-needle-cap150/needle.jsonl --targets 249450 --chars 835000 --reps 3 --unique-prefix --load-s 105.0
+nvfp4-mtp4-cap150: corpus 1527726 chars, needle obsidian-2824
+nvfp4-mtp4-cap150 249450: 835000 chars (fixed)
+nvfp4-mtp4-cap150 249450 rep 1: prompt 252875 tok, ttft 287.212 s (server - t/s), decode 140.6 t/s, needle found: 'obsidian-2824'
+nvfp4-mtp4-cap150 249450 rep 2: prompt 252876 tok, ttft 287.219 s (server - t/s), decode 161.69 t/s, needle found: 'obsidian-2824'
+nvfp4-mtp4-cap150 249450 rep 3: prompt 252876 tok, ttft 287.084 s (server - t/s), decode 159.68 t/s, needle found: 'obsidian-2824'
+== peak VRAM per GPU (MiB):
+  GPU0: 15842
+  GPU1: 15842
+== peak server RSS / lowest MemAvailable (MiB): 36 / 49323

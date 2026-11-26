@@ -3,7 +3,7 @@
 #   experiments/2026-11-vllm-27b-tp2/scripts/run-step8.sh [name ...]   (default: the four below)
 set -euo pipefail
 E=experiments/2026-11-vllm-27b-tp2
-OUT=$E/runs/8-parallel
+OUT=${STEP8_OUT:-$E/runs/8-parallel}
 names=("$@"); (( ${#names[@]} )) || names=(tp2-seqs2 tp2-seqs1 tp2-seqs4 pp2-seqs4)
 for n in "${names[@]}"; do
   case $n in

@@ -1,6 +1,6 @@
 # vLLM: Qwen3.8-27B on 2× RTX 5060 Ti with tensor parallelism, a reproduction
 
-Status: **in progress** (started 2026-11-26; phase A, steps 3–8 done except the 150 W cap). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
+Status: **in progress** (started 2026-11-26; phase A, steps 3–8 done). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
 
 ## Question
 
@@ -126,7 +126,7 @@ Steps/s is within 1–4 % of the source's at every k, and the step time follows 
 | TP=2, `max-num-seqs` 4 | 45.6 | 69.4 | 94.0 | 13.2 s |
 | PP=2, `max-num-seqs` 4, 65,536 context | 31.3 | 53.2 | 86.0 | **9.3 s** |
 
-Tensor parallelism is faster for one request (decode per stream 61 against 36 t/s) and holds the full 262K context; pipeline parallelism, which needed five starts (the last stage runs out of KV memory: its pool is 108K tokens against 463K), catches up with several requests (structured at 4: 129 against 120 t/s) and reads a 32K prompt 29 % faster. The 150 W cap is not measured yet.
+Tensor parallelism is faster for one request (decode per stream 61 against 36 t/s) and holds the full 262K context; pipeline parallelism, which needed five starts (the last stage runs out of KV memory: its pool is 108K tokens against 463K), catches up with several requests (structured at 4: 129 against 120 t/s) and reads a 32K prompt 29 % faster. The 150 W cap changes nothing measurable in these runs (the cards draw 84–86 W on average and peak at 130–139 W): decode and totals are within the run-to-run spread, the 32K prompt is 1.4 % slower (13.32 against 13.14 s); the 250K needle, which peaked at 183 W, was not run capped.
 
 More steps to come.
 

@@ -258,3 +258,19 @@ So with MTP and NVFP4 KV, pipeline parallelism holds a pool of 108K tokens (tens
 - Peak VRAM 15,842 / 15,606 MiB; peak power sample 183 W (limit 180 W).
 
 **Not done:** the 150 W cap (needs `sudo nvidia-smi -pl 150` and a reset to 180 W by the user, in their own shell); pipeline parallelism without MTP, which might hold a longer context; pipeline parallelism at long contexts.
+
+## 8b. The 150 W cap (2026-11-26)
+
+The user ran `sudo nvidia-smi -pl 150` (both cards: 180 → 150 W; the source runs its cards at 150 W). The recipe configuration (`tp2-seqs2`, `max-num-seqs` 2, thinking off) was measured again as in step 8: `STEP8_OUT=experiments/2026-11-vllm-27b-tp2/runs/8-cap150 experiments/2026-11-vllm-27b-tp2/scripts/run-step8.sh tp2-seqs2` (`run-step8.sh` got the `STEP8_OUT` override for this). The `.cmd` of the run records `power.limit 150.00 W`; same kernel 7.0.0-44, driver 580.178.04. Files: `runs/8-cap150/`.
+
+| | 180 W | 150 W |
+|---|--:|--:|
+| Decode per stream, 1 request, prose / structured | 58.1 / 110.7 | 60.8 / 106.6 |
+| Total t/s, 2 requests, prose / structured | 68.6 / 96.9 (one group short) | 70.0 / 95.6 |
+| Total t/s, 4 requests, prose / structured | 70.0 / 97.1 (one group short) | 69.3 / 96.8 |
+| TTFT at 32K | 13.14 s | 13.32 s (+1.4 %) |
+| Peak power per card in the run (sampled every 0.5 s) | 139 W | 130 W |
+
+**No measurable cost at 150 W:** the differences are inside the run-to-run spread (prose and structured swap signs), except the 32K prompt, which is 1.4 % slower. These runs use little power in the first place: mean 84–86 W per card, peaks of 130–139 W, so a 150 W limit is hardly reached; the cap did bind the clock at no sample (max 2,902 MHz in both). **Not tested:** the 250K needle, which peaked at 183 W in step 7 (a sample above the 180 W limit) and so is where a cap would bite; and the pipeline-parallel run.
+
+The cap stays at 150 W until the user resets it (`sudo nvidia-smi -pl 180`; it does not survive a reboot).

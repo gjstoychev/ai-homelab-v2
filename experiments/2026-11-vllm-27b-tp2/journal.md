@@ -616,3 +616,38 @@ The uncapped NVFP4 files hold the whole recipe run (baseline, depth and needle p
 **Result: the cap is free for the fp8 needle (+0.4 %, it never draws 150 W) and costs 2.9 % on the NVFP4 needle,** the one step that draws more than 150 W (NVFP4's quantize and dequantize work adds to the load, 160 W average on card 0 against 119 W for fp8 at depth). Together with step 8b (decode within the spread, the 32K prompt 1.4 % slower), a 150 W limit costs 0–3 % in every run here, for 30 W less per card in the heaviest case. Not tested: the 150 W limit with several requests at once (the cards draw most with `max-num-seqs` 4).
 
 The cards stay at 150 W until the user resets them (`sudo nvidia-smi -pl 180`; it does not survive a reboot).
+
+## 15. Basalt concurrency on the 27B (2026-11-26)
+
+The measurement step 10 left out: several requests at once on Basalt's `split` mode, with step 8's client unchanged (`scripts/step8-client.py`: `oai-bench.py --concurrency 1,2,4`, prose and structured, thinking off, 256 tokens, 3 reps after a warm-up, a random first line per request; then one 32K prompt, 2 reps), so the numbers sit next to vLLM's. Configs: `configs/basalt27-split-nodraft-par4.json` and `basalt27-split-par4-163k.json` (the step 10 configs with `"parallel": 4`; the second also `"max-context": 163840`). Files: `runs/13-basalt27b-concurrency/` (`results.jsonl`, `long.jsonl`, `summary.md`, one set of `.cmd/.out/.gpu.csv` per start; the refused start in `refused-262144-drafted/`).
+
+```
+BENCH_CLIENT=experiments/2026-11-vllm-27b-tp2/scripts/step8-client.py scripts/bench-run.sh \
+  experiments/2026-11-vllm-27b-tp2/runs/13-basalt27b-concurrency <label> 3 -- env -C ~/basalt-qwen35/v0.5.7/src \
+  bin/basalt serve --config experiments/2026-11-vllm-27b-tp2/configs/basalt27-<label>.json --python .venv/bin/python
+```
+
+**The drafted config with 4 slots does not start at the full context** (`refused-262144-drafted/`): "gpu-mode split: GPU 0 takes layers 0-26 at share 0.50 and needs 14.8 GiB, 14.7 GiB free; lower its gpu-share, max-context or parallel". The drafter's cells and the three extra slots' state (157 MiB each) tip the main card over by 0.1 GiB. I took the second lever, `max-context` 163,840 (Basalt shares the context between the slots: 40,960 positions each, enough for the 32K prompt), under a new config name; without the drafter 4 slots fit at 262,144 (65,536 each). So the two Basalt runs do not have the same context, and neither equals vLLM's pool (446,867 tokens shared dynamically by 4 slots).
+
+A slip of mine on the way: a pending wait command of mine would have moved the finished run's files and edited the configs the moment the first run ended; I noticed in time and stopped that task (`TaskStop`) before it fired. Nothing was lost; the refused start's files were then moved by hand to `refused-262144-drafted/`.
+
+Total t/s (generated tokens over the group's wall time, which for one request includes the prompt's 1 s), 1 / 2 / 4 requests at once, 3 groups each, 0 groups with an early-stopped stream:
+
+| | prose | structured | Mean TTFT at 4 requests (prose) | TTFT at 32K | Peak VRAM per card |
+|---|--:|--:|--:|--:|--:|
+| Basalt split, no drafter, 4 slots, 262,144 | 22.9 / 39.5 / 64.2 | 22.9 / 38.4 / 64.1 | 2.72 s (max 4.96) | 5.20 s | 14.0 / 13.6 GB |
+| Basalt split, DFlash 2, 4 slots, 163,840 | 39.6 / 57.5 / **84.1** | 89.6 / 90.3 / 103.3 | 2.87 s (max 5.28) | 5.62 s | 13.9 / 14.0 GB |
+| vLLM TP=2, `max-num-seqs` 4, MTP k=4, NVFP4 KV (step 8) | 45.6 / 69.4 / **94.0** | 67.6 / 97.2 / 120.2 (1 group) | 3.73 s (max 5.66) | 13.16 s | 15.8 GB |
+| vLLM PP=2, `max-num-seqs` 4, 65,536 (step 8) | 31.3 / 53.2 / 86.0 | 52.2 / 81.2 / 128.9 | 2.59 s (max 3.89) | 9.29 s | 15.8 / 15.6 GB |
+
+Decode per stream at 1 / 2 / 4 requests, Basalt drafted: prose 46.6 / 38.3 / 28.7 t/s, structured 137.9 / 79.3 / 42.4 (vLLM TP=2, 4 slots: prose 60.7 / 51.2 / 38.0, structured 108.1 / 88.3 / 62.5).
+
+What it shows:
+
+- **Basalt's slots share the weight pass, and the totals rise without a drafter: 22.9 → 39.5 → 64.2 t/s (2.8× at 4 requests)**, against vLLM TP's 1.5× from 1 to 4 requests at 4 slots for prose with MTP (45.6 → 94.0 is 2.1×; the totals there include drafting). Plain decode at 4 requests: Basalt 64 t/s, no vLLM number without MTP was measured at 4 slots.
+- **With drafting the picture depends on the output.** Prose: 39.6 → 84.1 (2.1×), 11 % below vLLM TP at 4 requests (94.0), 13–17 % below at 1–2. Structured: **one request is the best case, 89.6 t/s total (138 per stream), 33 % above vLLM (67.6)**, but two requests add nothing (90.3: each stream falls to 79 t/s) and four reach 103.3, 14 % below vLLM's 120.2 (a single complete group there). The guide says why: a window of drafted rows takes 8 of the 16 rows a pass can carry, so only two drafted slots share a pass; a drafter that is excellent for one stream has little left to batch.
+- **Prompt reading is unchanged by the slots:** 32K in 5.20 s without and 5.62 s with the drafter (step 10, one slot: 5.19 / 5.61 s). A prompt is read by one slot at a time on both engines; Basalt's is 2.3–2.5× faster than vLLM TP=2 (13.16 s) and 1.6× faster than vLLM PP=2 (9.29 s).
+- **No stream answered early in Basalt's 112 requests** (0 short groups, against 7 of 63 structured TP streams in vLLM at step 8): the same prompts and the same "request n.i of a batch test" line. Two separate things, not explained here: vLLM's early stops came with MTP and batched drafts, Basalt's output does not depend on the batch (its guide says rows are bitwise independent).
+- Peak VRAM falls to 13.9–14.0 GB per card at 4 slots (the lower context and the unchanged weights; the vLLM runs sit at 15.8 GB because their pool takes what is left).
+
+**Net for two cards and several clients:** vLLM TP=2 gives the best totals for prose from 1 to 4 requests (and holds 262K context with 463K pool), Basalt split the best single-stream JSON and by far the fastest prompts; at 4 requests both are within 11–14 % of each other, in the opposite direction for prose and JSON. Not tested: more than 4 slots (Basalt allows 8), the 4-slot start at 262,144 with the drafter (needs a different `gpu-share`), and a plain-decode vLLM at 4 slots for a like-for-like no-drafter comparison.

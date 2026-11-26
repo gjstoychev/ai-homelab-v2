@@ -1,0 +1,44 @@
+date: Thu Nov 26 09:47:11 PM UTC 2026
+label: split-par4-163k, reps: 3
+kernel: 7.0.0-44-generic
+driver: 595.91.07
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: env -C /home/llama/basalt-qwen35/v0.5.7/src bin/basalt serve --config /home/llama/ai-homelab-v2/experiments/2026-11-vllm-27b-tp2/configs/basalt27-split-par4-163k.json --python .venv/bin/python
+== ready in 8.8 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 8.8 --label split-par4-163k --out experiments/2026-11-vllm-27b-tp2/runs/13-basalt27b-concurrency/results.jsonl --reps 3 --kinds prose,structured --max-tokens 256 --concurrency 1,2,4
+split-par4-163k-c1 prose      rep 0 (warm-up) x1: 256 tokens in 6.50 s = 39.4 t/s total; per stream ttft [0.9966], decode [46.36]
+split-par4-163k-c1 prose      rep 1           x1: 256 tokens in 6.69 s = 38.3 t/s total; per stream ttft [0.996], decode [44.81]
+split-par4-163k-c1 prose      rep 2           x1: 256 tokens in 6.07 s = 42.2 t/s total; per stream ttft [0.9972], decode [50.25]
+split-par4-163k-c1 prose      rep 3           x1: 256 tokens in 6.70 s = 38.2 t/s total; per stream ttft [0.9978], decode [44.73]
+split-par4-163k-c1 structured rep 0 (warm-up) x1: 256 tokens in 2.87 s = 89.1 t/s total; per stream ttft [1.0053], decode [136.51]
+split-par4-163k-c1 structured rep 1           x1: 256 tokens in 2.92 s = 87.6 t/s total; per stream ttft [1.0057], decode [133.04]
+split-par4-163k-c1 structured rep 2           x1: 256 tokens in 2.78 s = 92.0 t/s total; per stream ttft [1.0053], decode [143.46]
+split-par4-163k-c1 structured rep 3           x1: 256 tokens in 2.86 s = 89.4 t/s total; per stream ttft [1.0066], decode [137.26]
+split-par4-163k-c2 prose      rep 0 (warm-up) x2: 512 tokens in 9.35 s = 54.8 t/s total; per stream ttft [1.0011, 3.1099], decode [32.51, 40.87]
+split-par4-163k-c2 prose      rep 1           x2: 512 tokens in 8.46 s = 60.6 t/s total; per stream ttft [2.0762, 1.0009], decode [46.49, 34.21]
+split-par4-163k-c2 prose      rep 2           x2: 512 tokens in 9.08 s = 56.4 t/s total; per stream ttft [0.999, 3.1076], decode [31.76, 42.72]
+split-par4-163k-c2 prose      rep 3           x2: 512 tokens in 9.23 s = 55.4 t/s total; per stream ttft [0.9989, 3.0577], decode [33.13, 41.29]
+split-par4-163k-c2 structured rep 0 (warm-up) x2: 512 tokens in 5.74 s = 89.3 t/s total; per stream ttft [1.0058, 3.1267], decode [57.71, 97.74]
+split-par4-163k-c2 structured rep 1           x2: 512 tokens in 5.74 s = 89.3 t/s total; per stream ttft [3.0871, 1.0075], decode [96.3, 57.88]
+split-par4-163k-c2 structured rep 2           x2: 512 tokens in 5.69 s = 90.1 t/s total; per stream ttft [1.0081, 3.1337], decode [54.52, 104.1]
+split-par4-163k-c2 structured rep 3           x2: 512 tokens in 5.58 s = 91.7 t/s total; per stream ttft [1.0066, 3.0927], decode [55.71, 107.03]
+split-par4-163k-c4 prose      rep 0 (warm-up) x4: 1024 tokens in 13.31 s = 76.9 t/s total; per stream ttft [1.0012, 3.0545, 4.1905, 5.2781], decode [22.2, 26.72, 31.21, 31.75]
+split-par4-163k-c4 prose      rep 1           x4: 1024 tokens in 13.27 s = 77.2 t/s total; per stream ttft [3.0637, 0.9988, 4.1243, 5.2792], decode [27.05, 22.08, 28.51, 31.91]
+split-par4-163k-c4 prose      rep 2           x4: 1024 tokens in 11.66 s = 87.8 t/s total; per stream ttft [4.2909, 3.1284, 2.0754, 1.0024], decode [37.19, 29.88, 27.17, 24.25]
+split-par4-163k-c4 prose      rep 3           x4: 1024 tokens in 11.72 s = 87.4 t/s total; per stream ttft [1.0013, 2.0676, 3.143, 4.2142], decode [24.65, 27.48, 29.74, 34.93]
+split-par4-163k-c4 structured rep 0 (warm-up) x4: 1024 tokens in 10.01 s = 102.2 t/s total; per stream ttft [3.0873, 1.009, 4.1549, 5.3179], decode [37.42, 29.7, 44.87, 54.3]
+split-par4-163k-c4 structured rep 1           x4: 1024 tokens in 10.00 s = 102.4 t/s total; per stream ttft [1.0085, 3.0773, 4.2273, 5.3213], decode [30.42, 37.41, 44.17, 55.09]
+split-par4-163k-c4 structured rep 2           x4: 1024 tokens in 9.83 s = 104.2 t/s total; per stream ttft [1.0093, 3.0788, 4.2251, 5.3209], decode [29.7, 38.45, 46.0, 56.59]
+split-par4-163k-c4 structured rep 3           x4: 1024 tokens in 9.91 s = 103.3 t/s total; per stream ttft [1.0083, 3.077, 5.3126, 4.2183], decode [30.69, 37.86, 57.33, 44.78]
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/long-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 8.8 --label split-par4-163k --mode ttft --out experiments/2026-11-vllm-27b-tp2/runs/13-basalt27b-concurrency/long.jsonl --targets 34700 --reps 2
+split-par4-163k: corpus 1527726 chars, needle obsidian-2824
+split-par4-163k 34700: 104124 chars at 3.18 chars/token
+split-par4-163k 34700 rep 1: prompt 32266 tok, ttft 5.614 s (server 5803.0 t/s), decode 62.91 t/s, needle found: 'obsidian-2824'
+split-par4-163k 34700 rep 2: prompt 32267 tok, ttft 5.616 s (server 5796.5 t/s), decode 62.92 t/s, needle found: 'obsidian-2824'
+== peak VRAM per GPU (MiB):
+  GPU0: 14036
+  GPU1: 13644
+== peak server RSS / lowest MemAvailable (MiB): 4651 / 56706

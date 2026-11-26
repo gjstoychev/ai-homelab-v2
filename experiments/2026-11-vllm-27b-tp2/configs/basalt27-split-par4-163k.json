@@ -1,0 +1,20 @@
+{
+ "version": 2,
+ "models": [
+  {
+   "model": "/home/llama/models/qwen3.8-27b-basalt-quasar-nvfp4/Qwen3.8-27B-QUASAR-NVFP4.basalt",
+   "gpu": "0,1",
+   "gpu-mode": "split",
+   "max-context": 163840,
+   "kv": "int8",
+   "prompt-cache": 0,
+   "alias": "bench",
+   "parallel": 4
+  }
+ ],
+ "server": {
+  "host": "127.0.0.1",
+  "port": 8080,
+  "totals-file": "none"
+ }
+}

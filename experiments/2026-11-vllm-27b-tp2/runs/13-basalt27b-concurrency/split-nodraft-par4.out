@@ -1,0 +1,227 @@
+[server] legend   pp=prompt read  tg=generation  c=cached  acc=drafts accepted  dl=tokens per window  hit=expert cache  pcie=routed experts over PCIe
+[server] bench  ctx=65536 (262144/4 slots) kv=int8 prompt-cache=0 batch=4 spec=0 temp=1.0 top_p=0.95 top_k=20
+[server] engine log: /home/llama/.cache/basalt/fbbdb0077e8dd328/engine.log
+[server] ready    http://127.0.0.1:8080/v1  openai+anthropic  stats http://127.0.0.1:8080/
+[server] planning weight allocation
+[server] placed   ram 2.4GiB 1.4s
+[server] placed   cuda0 7.4GiB 2.4s
+[server] placed   cuda1 6.6GiB 3.9s
+[server] loaded   16.4GiB 4.1s  cuda0=7.4GiB cuda1=6.6GiB ram=2.4GiB
+[server] slots    slots 4 × 65536 ctx (slot-full-context: 262144 each), others queue
+[server] weights  loaded, ctx=65536 images=off
+[server] live | s1 tg=3/256 | total 0t/s
+[server] live | s1 tg=53/256 25.4t/s | total 25t/s
+[server] live | s1 tg=103/256 25.2t/s | total 25t/s
+[server] live | s1 tg=153/256 25.1t/s | total 25t/s
+[server] live | s1 tg=203/256 25.1t/s | total 25t/s
+[server] live | s1 tg=253/256 25.1t/s | total 25t/s
+[server] s1 done  pp=4342/0c 0.9s 4810t/s  tg=256 25.0t/s  ttft=0.9s  end=length
+[server] live | s2 tg=28/256 25.9t/s | total 26t/s
+[server] live | s2 tg=78/256 25.3t/s | total 25t/s
+[server] live | s2 tg=128/256 25.1t/s | total 25t/s
+[server] live | s2 tg=178/256 25.1t/s | total 25t/s
+[server] live | s2 tg=228/256 25.1t/s | total 25t/s
+[server] s2 done  pp=4342/0c 0.9s 4796t/s  tg=256 25.0t/s  ttft=0.9s  end=length
+[server] live | s3 tg=3/256 | total 0t/s
+[server] live | s3 tg=53/256 25.4t/s | total 25t/s
+[server] live | s3 tg=103/256 25.2t/s | total 25t/s
+[server] live | s3 tg=153/256 25.1t/s | total 25t/s
+[server] live | s3 tg=203/256 25.1t/s | total 25t/s
+[server] live | s3 tg=253/256 25.1t/s | total 25t/s
+[server] s3 done  pp=4340/0c 0.9s 4781t/s  tg=256 24.9t/s  ttft=1.0s  end=length
+[server] live | s4 tg=28/256 25.9t/s | total 26t/s
+[server] live | s4 tg=78/256 25.3t/s | total 25t/s
+[server] live | s4 tg=128/256 25.1t/s | total 25t/s
+[server] live | s4 tg=178/256 25.1t/s | total 25t/s
+[server] live | s4 tg=228/256 25.1t/s | total 25t/s
+[server] s4 done  pp=4342/0c 0.9s 4782t/s  tg=256 24.9t/s  ttft=1.0s  end=length
+[server] live | s1 tg=3/256 | total 0t/s
+[server] live | s1 tg=53/256 25.4t/s | total 25t/s
+[server] live | s1 tg=103/256 25.2t/s | total 25t/s
+[server] live | s1 tg=153/256 25.1t/s | total 25t/s
+[server] live | s1 tg=203/256 25.1t/s | total 25t/s
+[server] live | s1 tg=253/256 25.1t/s | total 25t/s
+[server] s1 done  pp=4362/0c 0.9s 4762t/s  tg=256 25.0t/s  ttft=1.0s  end=length
+[server] live | s2 tg=28/256 25.9t/s | total 26t/s
+[server] live | s2 tg=78/256 25.3t/s | total 25t/s
+[server] live | s2 tg=128/256 25.1t/s | total 25t/s
+[server] live | s2 tg=178/256 25.1t/s | total 25t/s
+[server] live | s2 tg=228/256 25.1t/s | total 25t/s
+[server] s2 done  pp=4362/0c 0.9s 4753t/s  tg=256 25.0t/s  ttft=1.0s  end=length
+[server] live | s3 tg=3/256 | total 0t/s
+[server] live | s3 tg=53/256 25.4t/s | total 25t/s
+[server] live | s3 tg=103/256 25.2t/s | total 25t/s
+[server] live | s3 tg=153/256 25.1t/s | total 25t/s
+[server] live | s3 tg=203/256 25.1t/s | total 25t/s
+[server] live | s3 tg=253/256 25.0t/s | total 25t/s
+[server] s3 done  pp=4361/0c 0.9s 4755t/s  tg=256 24.9t/s  ttft=1.0s  end=length
+[server] live | s4 tg=28/256 25.9t/s | total 26t/s
+[server] live | s4 tg=78/256 25.3t/s | total 25t/s
+[server] live | s4 tg=128/256 25.1t/s | total 25t/s
+[server] live | s4 tg=178/256 25.1t/s | total 25t/s
+[server] live | s4 tg=228/256 25.1t/s | total 25t/s
+[server] s4 done  pp=4359/0c 0.9s 4748t/s  tg=256 25.0t/s  ttft=1.0s  end=length
+[server] live | s1 tg=3/256 | total 0t/s
+[server] live | s1 tg=30/256 14.1t/s | s2 tg=26/256 23.8t/s | total 38t/s
+[server] live | s1 tg=78/256 18.8t/s | s2 tg=75/256 24.1t/s | total 43t/s
+[server] live | s1 tg=126/256 20.5t/s | s2 tg=122/256 23.8t/s | total 44t/s
+[server] live | s1 tg=174/256 21.3t/s | s2 tg=170/256 23.8t/s | total 45t/s
+[server] live | s1 tg=222/256 21.8t/s | s2 tg=218/256 23.8t/s | total 46t/s
+[server] s1 done  pp=4341/0c 0.9s 4767t/s  tg=256 22.0t/s  ttft=1.0s  end=length
+[server] s2 done  pp=4341/0c 0.9s 4768t/s  tg=256 23.8t/s  ttft=2.0s  end=length
+[server] live | s3 tg=2/256 2.1t/s | total 2t/s
+[server] live | s3 tg=29/256 9.7t/s | s4 tg=24/256 23.8t/s | total 34t/s
+[server] live | s3 tg=76/256 15.2t/s | s4 tg=73/256 24.2t/s | total 39t/s
+[server] live | s3 tg=124/256 17.7t/s | s4 tg=121/256 24.0t/s | total 42t/s
+[server] live | s3 tg=173/256 19.1t/s | s4 tg=168/256 23.8t/s | total 43t/s
+[server] live | s3 tg=221/256 20.0t/s | s4 tg=216/256 23.8t/s | total 44t/s
+[server] s3 done  pp=4340/0c 1.8s 2385t/s  tg=256 22.0t/s  ttft=1.0s  end=length
+[server] s4 done  pp=4339/0c 0.9s 4766t/s  tg=256 23.8t/s  ttft=2.9s  end=length
+[server] live | s1 tg=3/256 | total 0t/s
+[server] live | s1 tg=30/256 14.1t/s | s2 tg=27/256 24.7t/s | total 39t/s
+[server] live | s1 tg=78/256 18.9t/s | s2 tg=74/256 23.8t/s | total 43t/s
+[server] live | s1 tg=126/256 20.5t/s | s2 tg=122/256 23.8t/s | total 44t/s
+[server] live | s1 tg=174/256 21.3t/s | s2 tg=170/256 23.8t/s | total 45t/s
+[server] live | s1 tg=222/256 21.8t/s | s2 tg=218/256 23.8t/s | total 46t/s
+[server] s1 done  pp=4342/0c 0.9s 4772t/s  tg=256 22.1t/s  ttft=1.0s  end=length
+[server] s2 done  pp=4340/0c 0.9s 4769t/s  tg=256 23.8t/s  ttft=2.0s  end=length
+[server] live | s3 tg=3/256 3.0t/s | total 3t/s
+[server] live | s3 tg=51/256 17.0t/s | s4 tg=48/256 23.8t/s | total 41t/s
+[server] live | s3 tg=99/256 19.7t/s | s4 tg=96/256 23.8t/s | total 44t/s
+[server] live | s3 tg=147/256 20.9t/s | s4 tg=144/256 23.8t/s | total 45t/s
+[server] live | s3 tg=194/256 21.4t/s | s4 tg=193/256 23.9t/s | total 45t/s
+[server] live | s3 tg=243/256 22.0t/s | s4 tg=240/256 23.8t/s | total 46t/s
+[server] s3 done  pp=4340/0c 0.9s 4777t/s  tg=256 22.0t/s  ttft=1.0s  end=length
+[server] s4 done  pp=4340/0c 0.9s 4777t/s  tg=256 23.8t/s  ttft=1.9s  end=length
+[server] live | s1 tg=2/256 2.1t/s | total 2t/s
+[server] live | s1 tg=30/256 9.9t/s | s2 tg=24/256 23.8t/s | total 34t/s
+[server] live | s1 tg=78/256 15.4t/s | s2 tg=72/256 23.8t/s | total 39t/s
+[server] live | s1 tg=125/256 17.7t/s | s2 tg=121/256 24.0t/s | total 42t/s
+[server] live | s1 tg=174/256 19.2t/s | s2 tg=168/256 23.8t/s | total 43t/s
+[server] live | s1 tg=222/256 20.0t/s | s2 tg=216/256 23.8t/s | total 44t/s
+[server] s1 done  pp=4360/0c 1.8s 2381t/s  tg=256 22.0t/s  ttft=1.0s  end=length
+[server] s2 done  pp=4362/0c 0.9s 4765t/s  tg=256 23.8t/s  ttft=3.0s  end=length
+[server] live | s3 tg=2/256 2.1t/s | total 2t/s
+[server] live | s3 tg=29/256 9.7t/s | s4 tg=24/256 23.8t/s | total 33t/s
+[server] live | s3 tg=77/256 15.4t/s | s4 tg=72/256 23.8t/s | total 39t/s
+[server] live | s3 tg=125/256 17.8t/s | s4 tg=120/256 23.8t/s | total 42t/s
+[server] live | s3 tg=173/256 19.1t/s | s4 tg=168/256 23.8t/s | total 43t/s
+[server] live | s3 tg=220/256 19.9t/s | s4 tg=217/256 23.9t/s | total 44t/s
+[server] s3 done  pp=4360/0c 1.8s 2382t/s  tg=256 21.9t/s  ttft=1.0s  end=length
+[server] s4 done  pp=4362/0c 0.9s 4765t/s  tg=256 23.8t/s  ttft=2.9s  end=length
+[server] live | s1 tg=3/256 | total 0t/s
+[server] live | s1 tg=30/256 14.1t/s | s2 tg=26/256 23.8t/s | total 38t/s
+[server] live | s1 tg=78/256 18.8t/s | s2 tg=74/256 23.8t/s | total 43t/s
+[server] live | s1 tg=126/256 20.5t/s | s2 tg=122/256 23.8t/s | total 44t/s
+[server] live | s1 tg=174/256 21.3t/s | s2 tg=170/256 23.8t/s | total 45t/s
+[server] live | s1 tg=222/256 21.8t/s | s2 tg=218/256 23.8t/s | total 46t/s
+[server] s1 done  pp=4361/0c 0.9s 4762t/s  tg=256 22.0t/s  ttft=1.0s  end=length
+[server] s2 done  pp=4361/0c 0.9s 4762t/s  tg=256 23.8t/s  ttft=2.0s  end=length
+[server] live | s3 tg=2/256 2.1t/s | total 2t/s
+[server] live | s3 tg=29/256 9.7t/s | s4 tg=24/256 23.8t/s | total 33t/s
+[server] live | s3 tg=77/256 15.4t/s | s4 tg=72/256 23.8t/s | total 39t/s
+[server] live | s3 tg=125/256 17.8t/s | s4 tg=120/256 23.8t/s | total 42t/s
+[server] live | s3 tg=172/256 19.0t/s | s4 tg=169/256 24.0t/s | total 43t/s
+[server] live | s3 tg=221/256 20.0t/s | s4 tg=216/256 23.8t/s | total 44t/s
+[server] s3 done  pp=4360/0c 1.8s 2381t/s  tg=256 21.9t/s  ttft=1.0s  end=length
+[server] s4 done  pp=4361/0c 0.9s 4761t/s  tg=256 23.8t/s  ttft=3.0s  end=length
+[server] live | s1 tg=2/256 2.1t/s | total 2t/s
+[server] live | s1 tg=8/256 2.7t/s | s2 tg=3/256 3.0t/s | s3 tg=1/256 | total 6t/s
+[server] live | s1 tg=31/256 6.2t/s | s2 tg=27/256 9.0t/s | s3 tg=24/256 12.0t/s | s4 tg=23/256 22.8t/s | total 50t/s
+[server] live | s1 tg=76/256 10.8t/s | s2 tg=70/256 13.9t/s | s3 tg=68/256 16.9t/s | s4 tg=67/256 22.2t/s | total 64t/s
+[server] live | s1 tg=119/256 13.1t/s | s2 tg=114/256 16.2t/s | s3 tg=112/256 18.5t/s | s4 tg=111/256 22.0t/s | total 70t/s
+[server] live | s1 tg=164/256 14.8t/s | s2 tg=159/256 17.6t/s | s3 tg=157/256 19.5t/s | s4 tg=155/256 22.0t/s | total 74t/s
+[server] live | s1 tg=208/256 15.9t/s | s2 tg=202/256 18.2t/s | s3 tg=200/256 19.9t/s | s4 tg=199/256 21.9t/s | total 76t/s
+[server] live | s1 tg=252/256 16.7t/s | s2 tg=247/256 18.9t/s | s3 tg=245/256 20.3t/s | s4 tg=243/256 21.9t/s | total 78t/s
+[server] s1 done  pp=4339/0c 1.8s 2388t/s  tg=256 17.8t/s  ttft=1.0s  end=length
+[server] s2 done  pp=4342/0c 0.9s 4781t/s  tg=256 18.9t/s  ttft=3.0s  end=length
+[server] s3 done  pp=4341/0c 0.9s 4777t/s  tg=256 20.3t/s  ttft=4.0s  end=length
+[server] s4 done  pp=4341/0c 0.9s 4781t/s  tg=256 21.9t/s  ttft=5.0s  end=length
+[server] live | s1 tg=2/256 2.1t/s | total 2t/s
+[server] live | s1 tg=8/256 2.7t/s | s2 tg=3/256 3.0t/s | s3 tg=1/256 | total 6t/s
+[server] live | s1 tg=32/256 6.4t/s | s2 tg=26/256 8.7t/s | s3 tg=25/256 12.5t/s | s4 tg=23/256 22.8t/s | total 50t/s
+[server] live | s1 tg=76/256 10.8t/s | s2 tg=71/256 14.2t/s | s3 tg=69/256 17.2t/s | s4 tg=67/256 22.2t/s | total 64t/s
+[server] live | s1 tg=120/256 13.3t/s | s2 tg=115/256 16.4t/s | s3 tg=113/256 18.7t/s | s4 tg=111/256 22.0t/s | total 70t/s
+[server] live | s1 tg=163/256 14.7t/s | s2 tg=158/256 17.5t/s | s3 tg=156/256 19.4t/s | s4 tg=155/256 22.0t/s | total 74t/s
+[server] live | s1 tg=207/256 15.8t/s | s2 tg=202/256 18.3t/s | s3 tg=200/256 19.9t/s | s4 tg=199/256 21.9t/s | total 76t/s
+[server] live | s1 tg=252/256 16.7t/s | s2 tg=246/256 18.8t/s | s3 tg=244/256 20.2t/s | s4 tg=243/256 21.9t/s | total 78t/s
+[server] s1 done  pp=4341/0c 1.8s 2391t/s  tg=256 17.8t/s  ttft=1.0s  end=length
+[server] s2 done  pp=4339/0c 0.9s 4779t/s  tg=256 18.9t/s  ttft=3.0s  end=length
+[server] s3 done  pp=4340/0c 0.9s 4777t/s  tg=256 20.3t/s  ttft=4.0s  end=length
+[server] s4 done  pp=4342/0c 0.9s 4781t/s  tg=256 21.9t/s  ttft=5.0s  end=length
+[server] live | s1 tg=3/256 2.9t/s | s2 tg=1/256 | total 3t/s
+[server] live | s1 tg=9/256 2.9t/s | s2 tg=5/256 2.5t/s | s3 tg=3/256 2.9t/s | s4 tg=1/256 | total 8t/s
+[server] live | s1 tg=53/256 10.4t/s | s2 tg=49/256 12.1t/s | s3 tg=47/256 15.4t/s | s4 tg=45/256 21.8t/s | total 60t/s
+[server] live | s1 tg=97/256 13.7t/s | s2 tg=93/256 15.3t/s | s3 tg=91/256 17.9t/s | s4 tg=89/256 21.8t/s | total 69t/s
+[server] live | s1 tg=140/256 15.4t/s | s2 tg=137/256 16.9t/s | s3 tg=136/256 19.2t/s | s4 tg=133/256 21.8t/s | total 73t/s
+[server] live | s1 tg=185/256 16.6t/s | s2 tg=181/256 17.9t/s | s3 tg=179/256 19.7t/s | s4 tg=177/256 21.8t/s | total 76t/s
+[server] live | s1 tg=229/256 17.4t/s | s2 tg=225/256 18.6t/s | s3 tg=223/256 20.0t/s | s4 tg=221/256 21.8t/s | total 78t/s
+[server] s1 done  pp=4341/0c 0.9s 4780t/s  tg=256 17.8t/s  ttft=1.0s  end=length
+[server] s2 done  pp=4340/0c 0.9s 4777t/s  tg=256 18.9t/s  ttft=2.0s  end=length
+[server] s3 done  pp=4340/0c 0.9s 4779t/s  tg=256 20.3t/s  ttft=3.0s  end=length
+[server] s4 done  pp=4339/0c 0.9s 4778t/s  tg=256 21.9t/s  ttft=4.0s  end=length
+[server] live | s1 tg=3/256 | total 0t/s
+[server] live | s1 tg=8/256 2.6t/s | s2 tg=5/256 2.5t/s | s3 tg=2/256 2.0t/s | s4 tg=1/256 | total 7t/s
+[server] live | s1 tg=52/256 10.3t/s | s2 tg=49/256 12.2t/s | s3 tg=47/256 15.6t/s | s4 tg=45/256 22.3t/s | total 60t/s
+[server] live | s1 tg=96/256 13.6t/s | s2 tg=92/256 15.3t/s | s3 tg=91/256 18.1t/s | s4 tg=89/256 22.1t/s | total 69t/s
+[server] live | s1 tg=140/256 15.4t/s | s2 tg=136/256 16.9t/s | s3 tg=134/256 19.0t/s | s4 tg=133/256 22.0t/s | total 73t/s
+[server] live | s1 tg=184/256 16.6t/s | s2 tg=181/256 18.0t/s | s3 tg=179/256 19.8t/s | s4 tg=177/256 21.9t/s | total 76t/s
+[server] live | s1 tg=228/256 17.4t/s | s2 tg=225/256 18.6t/s | s3 tg=222/256 20.0t/s | s4 tg=221/256 21.9t/s | total 78t/s
+[server] s1 done  pp=4340/0c 0.9s 4783t/s  tg=256 17.8t/s  ttft=1.0s  end=length
+[server] s2 done  pp=4339/0c 0.9s 4779t/s  tg=256 18.9t/s  ttft=2.0s  end=length
+[server] s3 done  pp=4341/0c 0.9s 4783t/s  tg=256 20.3t/s  ttft=3.0s  end=length
+[server] s4 done  pp=4341/0c 0.9s 4782t/s  tg=256 21.9t/s  ttft=4.0s  end=length
+[server] live | s1 tg=3/256 | total 0t/s
+[server] live | s1 tg=8/256 2.6t/s | s2 tg=4/256 2.0t/s | s3 tg=2/256 2.0t/s | total 7t/s
+[server] live | s1 tg=52/256 10.3t/s | s2 tg=48/256 11.9t/s | s3 tg=46/256 15.2t/s | s4 tg=44/256 21.8t/s | total 59t/s
+[server] live | s1 tg=96/256 13.6t/s | s2 tg=92/256 15.2t/s | s3 tg=90/256 17.9t/s | s4 tg=88/256 21.8t/s | total 69t/s
+[server] live | s1 tg=140/256 15.4t/s | s2 tg=136/256 16.9t/s | s3 tg=134/256 19.0t/s | s4 tg=132/256 21.8t/s | total 73t/s
+[server] live | s1 tg=184/256 16.6t/s | s2 tg=180/256 17.9t/s | s3 tg=178/256 19.6t/s | s4 tg=176/256 21.8t/s | total 76t/s
+[server] live | s1 tg=227/256 17.3t/s | s2 tg=224/256 18.5t/s | s3 tg=223/256 20.1t/s | s4 tg=220/256 21.8t/s | total 78t/s
+[server] s1 done  pp=4361/0c 0.9s 4767t/s  tg=256 17.8t/s  ttft=1.0s  end=length
+[server] s2 done  pp=4362/0c 0.9s 4765t/s  tg=256 18.9t/s  ttft=2.0s  end=length
+[server] s3 done  pp=4362/0c 0.9s 4764t/s  tg=256 20.3t/s  ttft=3.0s  end=length
+[server] s4 done  pp=4359/0c 0.9s 4764t/s  tg=256 21.9t/s  ttft=4.0s  end=length
+[server] live | s1 tg=2/256 2.1t/s | total 2t/s
+[server] live | s1 tg=8/256 2.6t/s | s2 tg=2/256 2.0t/s | total 5t/s
+[server] live | s1 tg=32/256 6.3t/s | s2 tg=26/256 8.6t/s | s3 tg=24/256 11.9t/s | s4 tg=22/256 21.8t/s | total 49t/s
+[server] live | s1 tg=75/256 10.6t/s | s2 tg=71/256 14.1t/s | s3 tg=68/256 16.9t/s | s4 tg=66/256 21.8t/s | total 63t/s
+[server] live | s1 tg=119/256 13.1t/s | s2 tg=115/256 16.3t/s | s3 tg=112/256 18.5t/s | s4 tg=110/256 21.8t/s | total 70t/s
+[server] live | s1 tg=164/256 14.8t/s | s2 tg=158/256 17.4t/s | s3 tg=156/256 19.4t/s | s4 tg=154/256 21.8t/s | total 73t/s
+[server] live | s1 tg=208/256 15.9t/s | s2 tg=202/256 18.2t/s | s3 tg=200/256 19.8t/s | s4 tg=198/256 21.8t/s | total 76t/s
+[server] live | s1 tg=252/256 16.7t/s | s2 tg=246/256 18.8t/s | s3 tg=244/256 20.2t/s | s4 tg=242/256 21.8t/s | total 77t/s
+[server] s1 done  pp=4360/0c 1.8s 2383t/s  tg=256 17.7t/s  ttft=1.0s  end=length
+[server] s2 done  pp=4362/0c 0.9s 4770t/s  tg=256 18.9t/s  ttft=3.0s  end=length
+[server] s3 done  pp=4361/0c 0.9s 4765t/s  tg=256 20.3t/s  ttft=4.0s  end=length
+[server] s4 done  pp=4360/0c 0.9s 4769t/s  tg=256 21.9t/s  ttft=5.0s  end=length
+[server] live | s1 tg=3/256 2.9t/s | s2 tg=1/256 | total 3t/s
+[server] live | s1 tg=8/256 2.6t/s | s2 tg=4/256 2.0t/s | s3 tg=2/256 2.0t/s | total 7t/s
+[server] live | s1 tg=52/256 10.3t/s | s2 tg=48/256 11.9t/s | s3 tg=46/256 15.2t/s | s4 tg=44/256 21.8t/s | total 59t/s
+[server] live | s1 tg=96/256 13.6t/s | s2 tg=92/256 15.2t/s | s3 tg=90/256 17.9t/s | s4 tg=88/256 21.8t/s | total 69t/s
+[server] live | s1 tg=140/256 15.4t/s | s2 tg=136/256 16.9t/s | s3 tg=134/256 19.0t/s | s4 tg=132/256 21.8t/s | total 73t/s
+[server] live | s1 tg=184/256 16.6t/s | s2 tg=180/256 17.9t/s | s3 tg=178/256 19.6t/s | s4 tg=176/256 21.8t/s | total 76t/s
+[server] live | s1 tg=228/256 17.4t/s | s2 tg=224/256 18.5t/s | s3 tg=222/256 20.0t/s | s4 tg=220/256 21.8t/s | total 78t/s
+[server] s1 done  pp=4361/0c 0.9s 4769t/s  tg=256 17.8t/s  ttft=1.0s  end=length
+[server] s2 done  pp=4359/0c 0.9s 4759t/s  tg=256 18.9t/s  ttft=2.0s  end=length
+[server] s3 done  pp=4359/0c 0.9s 4767t/s  tg=256 20.3t/s  ttft=3.0s  end=length
+[server] s4 done  pp=4361/0c 0.9s 4767t/s  tg=256 21.9t/s  ttft=4.0s  end=length
+[server] live | s1 tg=3/256 | total 0t/s
+[server] live | s1 tg=8/256 2.6t/s | s2 tg=4/256 2.0t/s | s3 tg=2/256 2.0t/s | total 7t/s
+[server] live | s1 tg=51/256 10.1t/s | s2 tg=49/256 12.2t/s | s3 tg=46/256 15.2t/s | s4 tg=44/256 21.8t/s | total 59t/s
+[server] live | s1 tg=95/256 13.4t/s | s2 tg=93/256 15.4t/s | s3 tg=90/256 17.9t/s | s4 tg=88/256 21.8t/s | total 69t/s
+[server] live | s1 tg=140/256 15.4t/s | s2 tg=136/256 16.9t/s | s3 tg=134/256 19.0t/s | s4 tg=132/256 21.8t/s | total 73t/s
+[server] live | s1 tg=184/256 16.6t/s | s2 tg=180/256 17.9t/s | s3 tg=178/256 19.6t/s | s4 tg=176/256 21.8t/s | total 76t/s
+[server] live | s1 tg=228/256 17.4t/s | s2 tg=224/256 18.5t/s | s3 tg=222/256 20.0t/s | s4 tg=220/256 21.8t/s | total 78t/s
+[server] s1 done  pp=4360/0c 0.9s 4766t/s  tg=256 17.8t/s  ttft=1.0s  end=length
+[server] s2 done  pp=4360/0c 0.9s 4762t/s  tg=256 18.9t/s  ttft=2.0s  end=length
+[server] s3 done  pp=4362/0c 0.9s 4769t/s  tg=256 20.3t/s  ttft=3.0s  end=length
+[server] s4 done  pp=4361/0c 0.9s 4765t/s  tg=256 21.9t/s  ttft=4.0s  end=length
+[server] s1 done  pp=4631/0c 0.9s 4907t/s  tg=1 24.9t/s  ttft=1.0s  end=length
+[server] live | s2 tg=1/1 | total 0t/s
+[server] s2 done  pp=5061/0c 1.0s 5126t/s  tg=1 24.9t/s  ttft=1.0s  end=length
+[server] s3 read  pp=28672/32266 5575t/s 5s
+[server] s3 done  pp=32266/0c 5.1s 6273t/s  tg=8 23.4t/s  ttft=5.2s  end=stop
+[server] s4 read  pp=28672/32268 5568t/s 5s
+[server] s4 done  pp=32268/0c 5.1s 6266t/s  tg=8 23.4t/s  ttft=5.2s  end=stop
+[server] stopping (Ctrl+C again to force)
+[server] stopped

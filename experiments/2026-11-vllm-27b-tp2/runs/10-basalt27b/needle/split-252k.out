@@ -1,0 +1,72 @@
+[server] legend   pp=prompt read  tg=generation  c=cached  acc=drafts accepted  dl=tokens per window  hit=expert cache  pcie=routed experts over PCIe
+[server] bench  ctx=262144 kv=int8 prompt-cache=0 spec=16 temp=1.0 top_p=0.95 top_k=20
+[server] engine log: /home/llama/.cache/basalt/fbbdb0077e8dd328/engine.log
+[server] ready    http://127.0.0.1:8080/v1  openai+anthropic  stats http://127.0.0.1:8080/
+[server] planning weight allocation
+[server] placed   ram 2.4GiB 1.4s
+[server] placed   cuda0 8.6GiB 2.7s
+[server] placed   cuda1 7.4GiB 4.3s
+[server] loaded   18.4GiB 4.6s  cuda0=8.6GiB cuda1=7.4GiB ram=2.4GiB
+[server] weights  loaded, ctx=262144 images=off
+[server] s1 read  pp=32768/252887 5841t/s 6s
+[server] s1 read  pp=57344/252887 5051t/s 11s
+[server] s1 read  pp=77824/252887 4492t/s 17s
+[server] s1 read  pp=94208/252887 4112t/s 23s
+[server] s1 read  pp=110592/252887 3788t/s 29s
+[server] s1 read  pp=122880/252887 3573t/s 34s
+[server] s1 read  pp=135168/252887 3380t/s 40s
+[server] s1 read  pp=147456/252887 3204t/s 46s
+[server] s1 read  pp=159744/252887 3051t/s 52s
+[server] s1 read  pp=172032/252887 2909t/s 59s
+[server] s1 read  pp=184320/252887 2778t/s 66s
+[server] s1 read  pp=192512/252887 2696t/s 71s
+[server] s1 read  pp=200704/252887 2618t/s 77s
+[server] s1 read  pp=208896/252887 2546t/s 82s
+[server] s1 read  pp=217088/252887 2478t/s 88s
+[server] s1 read  pp=225280/252887 2412t/s 93s
+[server] s1 read  pp=233472/252887 2351t/s 99s
+[server] s1 read  pp=241664/252887 2292t/s 105s
+[server] s1 read  pp=249856/252887 2187t/s 114s
+[server] s1 done  pp=252887/0c 114.2s 2214t/s  tg=8 22.2t/s acc=44% dl=2.0  ttft=114.4s  end=stop
+[server] s1 read  pp=32768/252887 5803t/s 6s
+[server] s1 read  pp=57344/252887 5026t/s 11s
+[server] s1 read  pp=77824/252887 4473t/s 17s
+[server] s1 read  pp=94208/252887 4097t/s 23s
+[server] s1 read  pp=110592/252887 3776t/s 29s
+[server] s1 read  pp=122880/252887 3563t/s 35s
+[server] s1 read  pp=135168/252887 3371t/s 40s
+[server] s1 read  pp=147456/252887 3197t/s 46s
+[server] s1 read  pp=159744/252887 3044t/s 52s
+[server] s1 read  pp=172032/252887 2903t/s 59s
+[server] s1 read  pp=184320/252887 2772t/s 66s
+[server] s1 read  pp=192512/252887 2691t/s 72s
+[server] s1 read  pp=200704/252887 2613t/s 77s
+[server] s1 read  pp=208896/252887 2542t/s 82s
+[server] s1 read  pp=217088/252887 2474t/s 88s
+[server] s1 read  pp=225280/252887 2409t/s 94s
+[server] s1 read  pp=233472/252887 2347t/s 99s
+[server] s1 read  pp=241664/252887 2289t/s 106s
+[server] s1 read  pp=249856/252887 2184t/s 114s
+[server] s1 done  pp=252887/0c 114.4s 2210t/s  tg=8 21.2t/s acc=33% dl=2.0  ttft=114.5s  end=stop
+[server] s1 read  pp=32768/252888 5804t/s 6s
+[server] s1 read  pp=57344/252888 5026t/s 11s
+[server] s1 read  pp=77824/252888 4474t/s 17s
+[server] s1 read  pp=94208/252888 4098t/s 23s
+[server] s1 read  pp=110592/252888 3776t/s 29s
+[server] s1 read  pp=122880/252888 3563t/s 34s
+[server] s1 read  pp=135168/252888 3372t/s 40s
+[server] s1 read  pp=147456/252888 3198t/s 46s
+[server] s1 read  pp=159744/252888 3044t/s 52s
+[server] s1 read  pp=172032/252888 2903t/s 59s
+[server] s1 read  pp=184320/252888 2773t/s 66s
+[server] s1 read  pp=192512/252888 2692t/s 72s
+[server] s1 read  pp=200704/252888 2614t/s 77s
+[server] s1 read  pp=208896/252888 2542t/s 82s
+[server] s1 read  pp=217088/252888 2474t/s 88s
+[server] s1 read  pp=225280/252888 2409t/s 94s
+[server] s1 read  pp=233472/252888 2348t/s 99s
+[server] s1 read  pp=241664/252888 2289t/s 106s
+[server] s1 read  pp=249856/252888 2184t/s 114s
+[server] s1 done  pp=252888/0c 114.4s 2211t/s  tg=8 22.8t/s acc=40% dl=2.0  ttft=114.5s  end=stop
+[server] stopping (Ctrl+C again to force)
+[server] stopped

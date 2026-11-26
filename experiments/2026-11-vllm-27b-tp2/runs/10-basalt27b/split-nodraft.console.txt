@@ -1,0 +1,54 @@
+date: Thu Nov 26 08:35:45 PM UTC 2026
+label: split-nodraft, reps: 5
+kernel: 7.0.0-44-generic
+driver: 595.91.07
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: env -C /home/llama/basalt-qwen35/v0.5.7/src bin/basalt serve --config /home/llama/ai-homelab-v2/experiments/2026-11-vllm-27b-tp2/configs/basalt27-split-nodraft.json --python .venv/bin/python
+== ready in 7.7 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 7.7 --label split-nodraft --out experiments/2026-11-vllm-27b-tp2/runs/10-basalt27b/results.jsonl --reps 5 --kinds prose,structured --max-tokens 256
+split-nodraft prose      rep 0 (warm-up) prompt 4327 tok, ttft 0.9527 s, 256 tok at 24.95 t/s | server: prompt 4777.0 t/s, decode 24.9 t/s, drafts 0/0
+split-nodraft prose      rep 1           prompt 4329 tok, ttft 0.9466 s, 256 tok at 24.95 t/s | server: prompt 4787.7 t/s, decode 25.0 t/s, drafts 0/0
+split-nodraft prose      rep 2           prompt 4330 tok, ttft 0.9468 s, 256 tok at 24.95 t/s | server: prompt 4787.2 t/s, decode 24.9 t/s, drafts 0/0
+split-nodraft prose      rep 3           prompt 4330 tok, ttft 0.9468 s, 256 tok at 24.95 t/s | server: prompt 4788.2 t/s, decode 24.9 t/s, drafts 0/0
+split-nodraft prose      rep 4           prompt 4331 tok, ttft 0.9467 s, 256 tok at 24.95 t/s | server: prompt 4787.8 t/s, decode 24.9 t/s, drafts 0/0
+split-nodraft prose      rep 5           prompt 4331 tok, ttft 0.9471 s, 256 tok at 24.95 t/s | server: prompt 4786.2 t/s, decode 24.9 t/s, drafts 0/0
+split-nodraft structured rep 0 (warm-up) prompt 4348 tok, ttft 0.9473 s, 256 tok at 24.95 t/s | server: prompt 4803.9 t/s, decode 24.9 t/s, drafts 0/0
+split-nodraft structured rep 1           prompt 4350 tok, ttft 0.9475 s, 256 tok at 24.95 t/s | server: prompt 4804.0 t/s, decode 24.9 t/s, drafts 0/0
+split-nodraft structured rep 2           prompt 4349 tok, ttft 0.9475 s, 256 tok at 24.95 t/s | server: prompt 4804.5 t/s, decode 24.9 t/s, drafts 0/0
+split-nodraft structured rep 3           prompt 4350 tok, ttft 0.9472 s, 256 tok at 24.95 t/s | server: prompt 4807.2 t/s, decode 24.9 t/s, drafts 0/0
+split-nodraft structured rep 4           prompt 4349 tok, ttft 0.948 s, 256 tok at 24.95 t/s | server: prompt 4800.8 t/s, decode 24.9 t/s, drafts 0/0
+split-nodraft structured rep 5           prompt 4350 tok, ttft 0.9474 s, 256 tok at 24.95 t/s | server: prompt 4806.6 t/s, decode 25.0 t/s, drafts 0/0
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 7.7 --label split-nodraft-repro --out experiments/2026-11-vllm-27b-tp2/runs/10-basalt27b/results.jsonl --reps 3 --kinds prose,structured,mixed --max-tokens 800 --thinking
+split-nodraft-repro prose      rep 0 (warm-up) prompt 4370 tok, ttft 0.9559 s, 800 tok at 24.28 t/s | server: prompt 4783.3 t/s, decode 24.9 t/s, drafts 0/0 | reasoning None tok
+split-nodraft-repro prose      rep 1           prompt 4371 tok, ttft 0.9556 s, 800 tok at 24.28 t/s | server: prompt 4784.9 t/s, decode 24.9 t/s, drafts 0/0 | reasoning None tok
+split-nodraft-repro prose      rep 2           prompt 4370 tok, ttft 0.9548 s, 800 tok at 24.28 t/s | server: prompt 4788.5 t/s, decode 24.9 t/s, drafts 0/0 | reasoning None tok
+split-nodraft-repro prose      rep 3           prompt 4370 tok, ttft 0.9545 s, 800 tok at 24.28 t/s | server: prompt 4788.5 t/s, decode 24.9 t/s, drafts 0/0 | reasoning None tok
+split-nodraft-repro structured rep 0 (warm-up) prompt 4387 tok, ttft 0.9566 s, 800 tok at 24.28 t/s | server: prompt 4797.7 t/s, decode 24.9 t/s, drafts 0/0 | reasoning None tok
+split-nodraft-repro structured rep 1           prompt 4389 tok, ttft 0.9564 s, 800 tok at 24.28 t/s | server: prompt 4802.0 t/s, decode 24.9 t/s, drafts 0/0 | reasoning None tok
+split-nodraft-repro structured rep 2           prompt 4389 tok, ttft 0.9571 s, 800 tok at 24.28 t/s | server: prompt 4798.3 t/s, decode 24.9 t/s, drafts 0/0 | reasoning None tok
+split-nodraft-repro structured rep 3           prompt 4391 tok, ttft 0.9563 s, 800 tok at 24.28 t/s | server: prompt 4804.7 t/s, decode 24.9 t/s, drafts 0/0 | reasoning None tok
+split-nodraft-repro mixed      rep 0 (warm-up) prompt 4396 tok, ttft 0.957 s, 800 tok at 24.28 t/s | server: prompt 4805.9 t/s, decode 24.9 t/s, drafts 0/0 | reasoning None tok
+split-nodraft-repro mixed      rep 1           prompt 4395 tok, ttft 0.956 s, 800 tok at 24.28 t/s | server: prompt 4809.1 t/s, decode 24.9 t/s, drafts 0/0 | reasoning None tok
+split-nodraft-repro mixed      rep 2           prompt 4398 tok, ttft 0.9564 s, 800 tok at 24.28 t/s | server: prompt 4810.2 t/s, decode 24.9 t/s, drafts 0/0 | reasoning None tok
+split-nodraft-repro mixed      rep 3           prompt 4394 tok, ttft 0.9568 s, 800 tok at 24.28 t/s | server: prompt 4805.3 t/s, decode 24.9 t/s, drafts 0/0 | reasoning None tok
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/long-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 7.7 --label split-nodraft --mode ttft --out experiments/2026-11-vllm-27b-tp2/runs/10-basalt27b/long.jsonl --targets 700,4500,34700 --reps 3
+split-nodraft: corpus 1527726 chars, needle obsidian-2824
+split-nodraft 700: 2130 chars at 4.48 chars/token
+split-nodraft 700 rep 1: prompt 579 tok, ttft 0.179 s (server 4214.0 t/s), decode 29.45 t/s, needle found: 'obsidian-2824'
+split-nodraft 700 rep 2: prompt 579 tok, ttft 0.179 s (server 4214.0 t/s), decode 29.44 t/s, needle found: 'obsidian-2824'
+split-nodraft 700 rep 3: prompt 577 tok, ttft 0.178 s (server 4239.5 t/s), decode 29.46 t/s, needle found: 'obsidian-2824'
+split-nodraft 4500: 15387 chars at 3.77 chars/token
+split-nodraft 4500 rep 1: prompt 4210 tok, ttft 0.94 s (server 4692.9 t/s), decode 29.11 t/s, needle found: 'obsidian-2824'
+split-nodraft 4500 rep 2: prompt 4212 tok, ttft 0.941 s (server 4687.8 t/s), decode 29.1 t/s, needle found: 'obsidian-2824'
+split-nodraft 4500 rep 3: prompt 4211 tok, ttft 0.94 s (server 4691.4 t/s), decode 29.1 t/s, needle found: 'obsidian-2824'
+split-nodraft 34700: 104124 chars at 3.18 chars/token
+split-nodraft 34700 rep 1: prompt 32267 tok, ttft 5.187 s (server 6280.9 t/s), decode 27.34 t/s, needle found: 'obsidian-2824'
+split-nodraft 34700 rep 2: prompt 32267 tok, ttft 5.195 s (server 6270.3 t/s), decode 27.33 t/s, needle found: 'obsidian-2824'
+split-nodraft 34700 rep 3: prompt 32268 tok, ttft 5.198 s (server 6265.9 t/s), decode 27.35 t/s, needle found: 'obsidian-2824'
+== peak VRAM per GPU (MiB):
+  GPU0: 13160
+  GPU1: 13388
+== peak server RSS / lowest MemAvailable (MiB): 3384 / 57860

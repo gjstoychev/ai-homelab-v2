@@ -7,7 +7,9 @@
 # the programs in <tag>/src/bin (Basalt's own layout: `bin/basalt serve` runs the Python server from the folder above
 # bin/), the server's Python environment in <tag>/src/.venv (requirements.txt, pinned), what was built in
 # <tag>/build-info.txt, and ~/basalt/current -> <tag> after a successful build.
-# docs/building.md: "The build fetches nothing." BASALT_MODELS=qwen4exp leaves the other models out of the build.
+# docs/building.md: "The build fetches nothing." BASALT_MODELS (default qwen4exp, Flash-Next only) is the list of models
+# built, a semicolon list of architecture ids (the 27B is qwen35); BASALT_ROOT (default ~/basalt) the install root, so a
+# build with another model list can sit beside the pinned one: BASALT_ROOT=~/basalt-qwen35 BASALT_MODELS='qwen4exp;qwen35'.
 set -euo pipefail
 
 tag=${1:-v0.5.7}
@@ -38,7 +40,7 @@ python3 -m venv "$src/.venv"
 # it. CUDAToolkit_ROOT: cudart and cuBLAS from this toolkit. Half the cores: nvcc needs the RAM.
 cmake -G Ninja -S "$src" -B "$src/build" \
   -DCMAKE_BUILD_TYPE=Release \
-  -DBASALT_MODELS=qwen4exp \
+  "-DBASALT_MODELS=${BASALT_MODELS:-qwen4exp}" \
   -DCMAKE_CUDA_ARCHITECTURES=120 \
   -DCMAKE_CUDA_COMPILER="$cuda/bin/nvcc" \
   -DCUDAToolkit_ROOT="$cuda"
@@ -54,7 +56,7 @@ set +e
   echo "== source";    git -C "$src" describe --tags; git -C "$src" rev-parse HEAD
   echo "== build";     echo "${build_s} s with -j $(( $(nproc) / 2 ))"
   echo "== toolchain"; "$cuda/bin/nvcc" --version | tail -n2; cmake --version | head -n1; ninja --version; gcc --version | head -n1
-  echo "== packages";  dpkg-query -W -f '${Package} ${Version}\n' cuda-nvcc-13-0 libcublas-dev-13-0 nvidia-driver-580-server-open
+  echo "== packages";  dpkg-query -W -f '${Package} ${Version}\n' cuda-nvcc-13-0 libcublas-dev-13-0 'nvidia-driver-*-server-open'
   echo "== cmake";     grep -E '^(CMAKE_BUILD_TYPE|CMAKE_CUDA_ARCHITECTURES|CMAKE_CUDA_COMPILER|CUDAToolkit_ROOT|BASALT_[A-Z0-9_]*|PEER_ADA|BUILD_TESTING|WERROR):' \
                          "$src/build/CMakeCache.txt"
   echo "== files";     ls -l "$src/bin"

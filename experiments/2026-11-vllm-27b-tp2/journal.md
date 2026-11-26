@@ -506,3 +506,42 @@ Caveats: (1) nccl-tests used the host's NCCL 2.28.9; vLLM's images carry NCCL 2.
 **What this leaves:** about 0.7 s of every 4K prompt, and 5.8 s of every 32K prompt, is moving 40 MiB twice per layer through host memory at 7.4 GB/s. The source's faster TTFT would need that to be about 40 % cheaper; that is a property of the host's memory path (copy in, copy out through DDR5), not of the driver, the NCCL flags or the protocol. Options that would change it are outside this machine's current setup: P2P-capable cards or board (no), a smaller message (sequence parallelism or fp8 all-reduce: not in vLLM's TP path here), or pipeline parallelism, which step 8 already measured (32K in 9.3 s against 13.2 s with TP, at a 40 % cost on one stream).
 
 **Next:** step 10 (Basalt on the 27B).
+
+## 10. Basalt on the 27B (2026-11-26)
+
+Basalt v0.5.7 runs Qwen3.8-27B (dense, `qwen35`), but the build of the Flash-Next experiment left it out (`BASALT_MODELS=qwen4exp`). `scripts/build-basalt.sh` now takes `BASALT_MODELS` and `BASALT_ROOT` from the environment (the driver package list in `build-info.txt` no longer names 580 only); a second build went to `~/basalt-qwen35/v0.5.7` (`BASALT_MODELS='qwen4exp;qwen35'`, the pinned Flash-Next build is untouched). Pack: `jesdga/Qwen3.8-27B-Basalt` revision `10c9a90e0bf9e0809c37ae439c735647b835b74e`, `Qwen3.8-27B-QUASAR-NVFP4.basalt`, 21,149,505,930 bytes, fetched and checked with `scripts/hf-fetch.sh` into `~/models/qwen3.8-27b-basalt-quasar-nvfp4`. `docs/stack.md` updated.
+
+**What is not the same as vLLM's run:** the weights are QUASAR's quantization-aware NVFP4 checkpoint (vLLM runs `qwen3.8-27b-nvfp4-0cc2795`), the drafter is DFlash 2 (a block drafter, `spec` up to 16) instead of MTP, the KV cache is int8 (vLLM fp8), and the two cards run in `gpu-mode split` (the main card holds the first layers, the head, the drafter and the encoder, the second card the later layers; a pipeline, not tensor parallelism). `split` because the pack with its drafter takes 16 GiB, more than one card; `peer` needs the model to fit the main card. Context 262,144 with int8 KV, `parallel` 1, `prompt-cache` 0. Configs `configs/basalt27-split.json` (drafting on, the default) and `configs/basalt27-split-nodraft.json` (`"spec": 0`).
+
+```
+BENCH_CLIENT=experiments/2026-11-vllm-27b-tp2/scripts/baseline-client.py scripts/bench-run.sh \
+  experiments/2026-11-vllm-27b-tp2/runs/10-basalt27b <label> 5 -- env -C ~/basalt-qwen35/v0.5.7/src \
+  bin/basalt serve --config experiments/2026-11-vllm-27b-tp2/configs/basalt27-<label>.json --python .venv/bin/python
+NEEDLE_CHARS=835000 BENCH_CLIENT=experiments/2026-11-vllm-27b-tp2/scripts/needle-client.py scripts/bench-run.sh \
+  experiments/2026-11-vllm-27b-tp2/runs/10-basalt27b/needle split-252k 3 -- <the same server command, split.json>
+```
+
+The same clients as step 4 and 6 (step 4's three passes, then the 252K needle). Files: `runs/10-basalt27b/` (`split*`, `needle/`, `long.jsonl`, `results.jsonl`). The first start went through without a problem; the needle was found in every request (12/12 with the three TTFT lengths and the 252K reps).
+
+| | vLLM TP=2, fp8 KV (driver 595, steps 9b/9c) | Basalt split, int8 KV | Source (vLLM, 595) |
+|---|---|---|---|
+| Decode, no drafting, all kinds | 42.3 t/s | **24.95 t/s** (24.3 with thinking on) | 41.99 |
+| Decode drafted, shared prose / JSON (thinking off, 256) | 64.76 / 116.44 (MTP k=4) | 46.57 ± 1.91 / **127.99 ± 5.04** | |
+| Decode drafted, repro prose / structured / mixed (thinking on, 800) | 67.82 / 85.76 / 78.25 | 51.40 / 80.03 / 57.58 | 78.31 / 124.89 / 81.61 |
+| TTFT ~0.5K (MTP / drafter on; off) | 0.197; 0.184 s | 0.186; 0.179 s | 0.141 s |
+| TTFT ~4K | 1.347; 1.310 s | **0.986; 0.940 s** | 0.987 s |
+| TTFT ~32K | 13.112; 12.404 s | **5.613; 5.193 s** | 10.521 s |
+| Prompt rate at 32K | 2,461 t/s | **5,749 t/s** (6,213 without drafter) | |
+| Needle, 252,887 tokens (3 reps) | 272.0 s (fp8 k=6); 279.1 s (NVFP4 recipe) | **114.5 s** (2,210 t/s), found 3/3 | 246.7 s (249,450 tokens); 274.8 s (NVFP4) |
+| Peak VRAM per card | 15.7–15.8 GB | 14.4 / 14.8 GB | |
+| Ready | 62–78 s | 8.2 s (page cache warm) | |
+
+What it shows:
+
+- **Prompt reading is where Basalt wins, by a lot:** 1.4× at 4K, 2.2–2.4× at 32K, 2.4× at 252K (114.5 s against 272 s; and 2.2× faster than the source's own vLLM number). It is a pipeline over the cards, so no all-reduce goes through host memory (compare 9f/9g: that is about half of vLLM's prompt read), and the split hands a chunk's rows over once per chunk, not twice per layer. The prompt rate rises with length (3,113 → 4,272 → 5,749 t/s) as the pipeline fills; at 252K it is 2,210 t/s, in line with attention's cost growth.
+- **Plain decode is where vLLM wins:** 24.95 against 42.3 t/s. A pipeline split runs the cards one after the other for every token, and each card's layers wait for the other's; the Basalt guide prices it at 0.37 ms per layer the second card runs. Tensor parallelism (vLLM) runs both at once at the cost of the all-reduces, and at decode those are small (9f).
+- **Drafted decode: the drafter decides, and it depends on the prompt.** Basalt's DFlash 2 drafts structured output very well (128 t/s, 5.1× its plain decode; vLLM's MTP k=4: 116, 2.75×) and prose poorly (46.6 t/s, 1.9×; vLLM 64.8, 1.5× of a higher base). Net: JSON +10 % over vLLM, prose −28 %, repro mixed −26 %. That pattern (drafter strong where output repeats the prompt's shape) is the same one the vLLM runs showed with acceptance length.
+- Drafting costs prompt reading 6–8 % (TTFT 4K 0.986 against 0.940 s; the drafter reads the prompt too), as MTP does in vLLM (3–6 %).
+- Not compared here: output quality (the weights differ, QUASAR's QAT against vLLM's checkpoint; step 11), several requests at once, and `peer` mode on one card with a smaller context.
+
+**Next:** step 11, the quality check with the ten prompts.

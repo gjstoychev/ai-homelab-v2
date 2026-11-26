@@ -274,3 +274,30 @@ The user ran `sudo nvidia-smi -pl 150` (both cards: 180 → 150 W; the source ru
 **No measurable cost at 150 W:** the differences are inside the run-to-run spread (prose and structured swap signs), except the 32K prompt, which is 1.4 % slower. These runs use little power in the first place: mean 84–86 W per card, peaks of 130–139 W, so a 150 W limit is hardly reached; the cap did bind the clock at no sample (max 2,902 MHz in both). **Not tested:** the 250K needle, which peaked at 183 W in step 7 (a sample above the 180 W limit) and so is where a cap would bite; and the pipeline-parallel run.
 
 The cap stays at 150 W until the user resets it (`sudo nvidia-smi -pl 180`; it does not survive a reboot).
+
+## 9. Phase B: driver 595.91.07 (2026-11-26)
+
+The user installed `nvidia-driver-595-server-open` 595.91.07 by hand (580 packages removed, DKMS built for 7.0.0-44), put it on `apt-mark hold`, and rebooted. Checked after the reboot: both cards at 595.91.07 and 180 W, both visible inside `local/vllm-openai:v0.32.0`, `nvidia-persistenced` active, `nvidia-smi` reports CUDA 13.2. A mistake in the check command: `docker run … local/vllm-openai:v0.32.0 nvidia-smi -L` hands `-L` to the image's entrypoint (`vllm`) and fails with "unrecognized arguments: -L"; it needs `--entrypoint nvidia-smi`. Not a driver problem. `docs/stack.md` updated (commit cd0459c).
+
+### 9a. Smoke test, driver 595 (same config as step 3)
+
+```
+scripts/bench-run.sh experiments/2026-11-vllm-27b-tp2/runs/9-driver595/smoke fp8-mtp4 1 -- \
+  experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp4.args
+```
+
+Files: `runs/9-driver595/smoke/fp8-mtp4.*`, requests in `results.jsonl`. Image v0.30.0 (config unchanged), kernel 7.0.0-44.
+
+| | Driver 580 (step 3) | Driver 595 |
+|---|---|---|
+| KV pool, fp8, MTP k=4, util 0.95 | 273,333 | **278,927** (the source's figure exactly) |
+| Available KV memory per card | 4.7 GiB | 4.81 GiB |
+| Ready | 119.1 s | 98.3 s (engine init 40.5 s) |
+| Peak VRAM per card | 15,790 MiB | 15,792 MiB |
+| Prose TTFT / decode | 0.302 s / 62.95 t/s | 0.327 s / 67.42 t/s |
+| Structured TTFT / decode | 0.340 s / 114.41 t/s | 0.333 s / 117.96 t/s |
+| MTP acceptance length (prose / JSON) | 2.27 / 4.02 | 2.39 / 4.18 |
+
+One rep each, so the decode differences (+7 % prose, +3 % JSON) are indications, not results; the acceptance lengths differ too, so part of it may be the prompt/sampling noise rather than the driver. The KV pool difference is a memory-accounting effect (the driver's reserved memory, or the way vLLM's profiler sees it) and is not noise. The ready time is not comparable: page cache state differed. Container stopped cleanly (no `vllm-bench` left).
+
+**Next:** step 4 again (baseline-client on fp8-mtp4 and fp8-nomtp), the key question being TTFT at 4K and 32K.

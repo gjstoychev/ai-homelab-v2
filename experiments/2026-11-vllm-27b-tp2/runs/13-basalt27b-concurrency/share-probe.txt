@@ -1,0 +1,14 @@
+Basalt v0.5.7 (~/basalt-qwen35), pack Qwen3.8-27B-QUASAR-NVFP4.basalt (10c9a90e), driver 595.91.07, cards idle (2 MiB).
+Config: configs/basalt27-split-par4.json (split, DFlash 2 drafter on, kv int8, max-context 262144, parallel 4) with "gpu-share" set
+as below (a temporary copy per share). Command per probe:
+  timeout 45 env -C ~/basalt-qwen35/v0.5.7/src bin/basalt serve --config <copy>.json --python .venv/bin/python
+Every probe stopped at "planning weight allocation"; nothing was loaded; both cards at 2 MiB after each.
+
+no gpu-share (default 0.50, by free VRAM; refused-262144-drafted/):
+  error: gpu-mode split: GPU 0 (RTX 5060 Ti) takes layers 0-26 at share 0.50 and needs 14.8 GiB, 14.7 GiB free
+"49,51" (0.49): error: gpu-mode split: GPU 0 (RTX 5060 Ti) takes layers 0-26 at share 0.49 and needs 14.8 GiB, 14.7 GiB free
+"24,26" (0.48): error: gpu-mode split: GPU 1 (RTX 5060 Ti) takes layers 26-63 at share 0.52 and needs 15.6 GiB, 14.7 GiB free
+"9,11"  (0.45): error: gpu-mode split: GPU 1 (RTX 5060 Ti) takes layers 23-63 at share 0.55 and needs 16.8 GiB, 14.7 GiB free
+"21,29" (0.42): error: gpu-mode split: GPU 1 (RTX 5060 Ti) takes layers 20-63 at share 0.58 and needs 17.4 GiB, 14.7 GiB free
+"2,3"   (0.40): error: gpu-mode split: GPU 1 (RTX 5060 Ti) takes layers 19-63 at share 0.60 and needs 18.2 GiB, 14.7 GiB free
+"19,31" (0.38): error: gpu-mode split: GPU 1 (RTX 5060 Ti) takes layers 17-63 at share 0.62 and needs 18.6 GiB, 14.7 GiB free

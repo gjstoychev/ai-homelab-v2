@@ -651,3 +651,15 @@ What it shows:
 - Peak VRAM falls to 13.9–14.0 GB per card at 4 slots (the lower context and the unchanged weights; the vLLM runs sit at 15.8 GB because their pool takes what is left).
 
 **Net for two cards and several clients:** vLLM TP=2 gives the best totals for prose from 1 to 4 requests (and holds 262K context with 463K pool), Basalt split the best single-stream JSON and by far the fastest prompts; at 4 requests both are within 11–14 % of each other, in the opposite direction for prose and JSON. Not tested: more than 4 slots (Basalt allows 8), the 4-slot start at 262,144 with the drafter (needs a different `gpu-share`), and a plain-decode vLLM at 4 slots for a like-for-like no-drafter comparison.
+
+### 15b. The drafted 4-slot config at 262,144 with another `gpu-share` (2026-11-26)
+
+Asked for after step 15: does a different `gpu-share` let the drafted 4-slot config start at the full context? **No.** Seven probes (`runs/13-basalt27b-concurrency/share-probe.txt`; each a temporary copy of `configs/basalt27-split-par4.json` with `"gpu-share"`, stopped at planning, nothing loaded):
+
+| `gpu-share` (GPU 0) | Cut | Refused on | Needs | Free |
+|---|---|---|---|---|
+| default 0.50, 0.49 | layers 0–26 on GPU 0 | GPU 0 | 14.8 GiB | 14.7 GiB |
+| 0.48 | layers 26–63 on GPU 1 | GPU 1 | 15.6 GiB | 14.7 GiB |
+| 0.45 / 0.42 / 0.40 / 0.38 | GPU 1 from layer 23 / 20 / 19 / 17 | GPU 1 | 16.8 / 17.4 / 18.2 / 18.6 GiB | 14.7 GiB |
+
+The cut moves a whole layer at a time, and the two cuts on either side of the boundary each leave one card short: 0.1 GiB on GPU 0 with 27 layers there, 0.9 GiB on GPU 1 with 38 layers there. A layer moved to GPU 1 costs it about 0.8 GiB at this context and slot count (its weights, plus the KV of the attention layers and the recurrent state for four slots), so no share fits both. The levers left are the ones the refusal names besides the share (`max-context`, `parallel`; step 15 used 163,840) and one it does not name: `vram-reserve-mib` (default 700 MiB kept free on the main card for graphs and scratch, at least 128 on Linux), which could close GPU 0's 0.1 GiB gap. Not tried: lowering the reserve risks an out-of-memory error during a run rather than at the start.

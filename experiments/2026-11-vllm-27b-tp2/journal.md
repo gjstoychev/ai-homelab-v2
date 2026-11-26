@@ -334,3 +334,44 @@ What it shows:
 - **The KV pools now equal the source's to the token** (351,618 and 278,927), 0.9 % and 2.0 % higher than on 580: the new driver leaves vLLM's profiler the same free memory the source saw.
 
 **Next:** step 6 (the 252K needle) and step 7 (the v0.32.0 NVFP4 recipe) on 595, then the NCCL P2P question as a separate test.
+
+### 9c. Steps 6 and 7 again on driver 595 (2026-11-26)
+
+```
+NEEDLE_CHARS=835000 BENCH_CLIENT=experiments/2026-11-vllm-27b-tp2/scripts/needle-client.py scripts/bench-run.sh \
+  experiments/2026-11-vllm-27b-tp2/runs/9-driver595/needle fp8-mtp6-252k 3 -- \
+  experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp6.args
+BENCH_CLIENT=experiments/2026-11-vllm-27b-tp2/scripts/recipe-client.py scripts/bench-run.sh \
+  experiments/2026-11-vllm-27b-tp2/runs/9-driver595/recipe nvfp4-mtp4 5 -- \
+  experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/nvfp4-mtp4.args
+```
+
+Both ran back to back without a hitch (the step 7 path mistake is fixed, so one start did all passes). Files: `runs/9-driver595/needle/`, `runs/9-driver595/recipe/` (`summary.md`, `depth.jsonl`, `long.jsonl`, `needle.jsonl`). A note on my own bookkeeping: the first "finished" notification came from the launcher shell, not from the runs; I checked that `vllm-bench` was still up and waited for the real marker.
+
+| | Source | Driver 580 | Driver 595 |
+|---|---|---|---|
+| fp8 k=6 KV pool (util 0.95) | 272,533 | 266,140 | **272,533** |
+| fp8 needle, prompt tokens | 249,450 | 252,872 | 252,876 (3 reps) |
+| fp8 needle TTFT / rate | 246.7 s / 1,011 t/s | 272.2 s / 929 t/s | **271.95 s / 930 t/s** |
+| fp8 needle found | | 3/3 | 3/3 |
+| NVFP4 KV pool (v0.32.0, util 0.94) | 474,032 | 463,166 | **474,032** |
+| NVFP4 needle TTFT / rate | 274.8 s (250.8K) / 912.7 t/s | 279.3 s / 905 t/s | **279.09 s / 906 t/s** |
+| NVFP4 needle found (all 12 requests of the run) | | 3/3 | 12/12 |
+| NVFP4 TTFT ~0.5K / 4K / 32K | | 0.214 / 1.379 / 13.169 s | 0.210 / 1.369 / 13.133 s |
+| NVFP4 TTFT 127K | | 89.3 s | 89.15 s |
+| NVFP4 decode shared prose / JSON | | 58.50 / 108.25 | 61.75 / 113.79 |
+| NVFP4 decode repro prose / structured / mixed | | 62.55 / 92.17 / 71.95 | 66.04 / 82.91 / 68.76 |
+| NVFP4 decode at 1K / 32K / 127K, prose (2 reps) | | 67.88 / 68.17 / 61.58 | 70.3 / 68.3 / 66.4 |
+| NVFP4 decode at 1K / 32K / 127K, structured | | 108.44 / 110.42 / 95.09 | 113.0 / 112.3 / 98.8 |
+| Peak VRAM per card (fp8 k=6 / NVFP4) | | 15.8 GB / 15,836 MiB | 15,842 / 15,842 MiB |
+
+What it shows:
+
+- **Both KV pools equal the source's to the token** (fp8 k=6 272,533; NVFP4 474,032), as the fp8 pools in step 9b did: the 2 % memory gap of phase A came from the driver, not from the engine or the cards.
+- **Prompt reading at 253K is unchanged by the driver** (271.95 against 272.2 s; 279.1 against 279.3 s), and so is TTFT at every length (127K: 89.15 against 89.3 s). The remaining gaps to the source are 10 % at 253K for fp8 (930 against 1,011 t/s), and the NVFP4 needle is within 1 % of the source's rate (906 against 912.7; prompts differ by 0.8 %).
+- **Decode moves up by 3 to 8 % in most rows** (prose 1K 67.9 → 70.3, 127K 61.6 → 66.4, JSON 127K 95.1 → 98.8; shared prose 58.5 → 61.8), but the reproduction rows go both ways (structured 92.2 → 82.9, whose spread is 80–104 t/s) and the depth pass has two reps per cell. The tendency is up; it is not established by this data. It would need the k sweep or more reps to separate from prompt noise.
+- No Xid, no restart, no container left.
+
+**Phase B so far:** the driver (595.91.07, the source's) fixes the KV memory gap and changes nothing in prompt reading or decode beyond noise. The prompt-reading gap (18–33 % at 0.5–32K, 8–10 % at 253K) is therefore something else: the NCCL path, the host, or how the source measured.
+
+**Next:** the NCCL P2P test (is `NCCL_P2P_DISABLE=1` needed here, and does enabling P2P change prompt reading?), then Strata/Basalt checks on 595.

@@ -1,0 +1,19 @@
+date: Thu Nov 26 08:16:51 PM UTC 2026
+label: fp8-nomtp-profile, reps: 1
+kernel: 7.0.0-44-generic
+driver: 595.91.07
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-nomtp-profile.args
+== ready in 67.5 s
+warm-up 0: prompt 4223 tok, ttft 1.304 s
+warm-up 1: prompt 4222 tok, ttft 1.296 s
+start_profile 200
+profiled: prompt 4220 tok, ttft 1.317 s
+stop_profile 200
+== peak VRAM per GPU (MiB):
+  GPU0: 15704
+  GPU1: 15704
+== peak server RSS / lowest MemAvailable (MiB): 36 / 51320

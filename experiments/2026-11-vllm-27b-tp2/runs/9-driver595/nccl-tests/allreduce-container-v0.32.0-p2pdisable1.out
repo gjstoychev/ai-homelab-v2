@@ -1,0 +1,482 @@
+### -b 8K -e 128M -f 2
+# nccl-tests version 2.22.0 (826b3e6) nccl-headers=22809 nccl-library=23007
+# Collective test starting: all_reduce_perf
+# nThread 1 nGpus 2 minBytes 8192 maxBytes 134217728 step: 2(factor) warmup iters: 20 iters: 100 agg iters: 1 validation: 1 graph: 0 unalign: 0
+#
+# Using devices
+#  Rank  0 Group  0 Pid      1 on e7171b0c6ddc device  0 [0000:01:00] NVIDIA GeForce RTX 5060 Ti
+#  Rank  1 Group  0 Pid      1 on e7171b0c6ddc device  1 [0000:02:00] NVIDIA GeForce RTX 5060 Ti
+e7171b0c6ddc:1:1 [0] NCCL INFO ncclOsDlopen(libnccl-env.so) failed: libnccl-env.so: cannot open shared object file: No such file or directory
+e7171b0c6ddc:1:1 [0] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+e7171b0c6ddc:1:1 [0] NCCL INFO cudaDriverVersion 13020
+e7171b0c6ddc:1:1 [0] NCCL INFO NCCL version 2.30.7+cuda13.3
+e7171b0c6ddc:1:1 [0] NCCL INFO NCCL git version HEAD a5187fa2e
+e7171b0c6ddc:1:71 [1] NCCL INFO ncclOsDlopen(libnccl-net.so) failed: libnccl-net.so: cannot open shared object file: No such file or directory
+e7171b0c6ddc:1:71 [1] NCCL INFO NET/Plugin: Could not find: libnccl-net.so
+e7171b0c6ddc:1:71 [1] NCCL INFO NET/IB : No device found.
+e7171b0c6ddc:1:71 [1] NCCL INFO NET/IB : Using [RO]; OOB eth0:172.17.0.2<0>
+e7171b0c6ddc:1:71 [1] NCCL INFO Failed to initialize NET plugin IB
+e7171b0c6ddc:1:71 [1] NCCL INFO NET/Socket : Using [0]eth0:172.17.0.2<0>
+e7171b0c6ddc:1:71 [1] NCCL INFO Initialized NET plugin Socket
+e7171b0c6ddc:1:71 [1] NCCL INFO Assigned NET plugin Socket to comm
+e7171b0c6ddc:1:70 [0] NCCL INFO Initialized NET plugin Socket
+e7171b0c6ddc:1:70 [0] NCCL INFO Assigned NET plugin Socket to comm
+e7171b0c6ddc:1:71 [1] NCCL INFO ncclOsDlopen(libnccl-rma.so) failed: libnccl-rma.so: cannot open shared object file: No such file or directory
+e7171b0c6ddc:1:71 [1] NCCL INFO RMA/Plugin: Could not find: libnccl-rma.so
+e7171b0c6ddc:1:71 [1] NCCL INFO RMA/Plugin: Failed to load external plugin libnccl-rma.so, dlHandle: (nil), ncclRma: (nil)
+e7171b0c6ddc:1:71 [1] NCCL INFO RMA/Plugin: Failed to initialize any plugin
+e7171b0c6ddc:1:70 [0] NCCL INFO RMA/Plugin: Failed to initialize any plugin
+e7171b0c6ddc:1:71 [1] NCCL INFO ncclOsDlopen(libnccl-gin.so) failed: libnccl-gin.so: cannot open shared object file: No such file or directory
+e7171b0c6ddc:1:71 [1] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+e7171b0c6ddc:1:71 [1] NCCL INFO GIN/Plugin: Failed to load external plugin libnccl-gin.so, dlHandle: (nil), ncclGin: (nil)
+e7171b0c6ddc:1:71 [1] NCCL INFO GIN/Plugin: Failed to initialize any GIN plugin
+e7171b0c6ddc:1:71 [1] NCCL INFO Using network Socket
+e7171b0c6ddc:1:70 [0] NCCL INFO GIN/Plugin: Failed to initialize any GIN plugin
+e7171b0c6ddc:1:70 [0] NCCL INFO Using network Socket
+e7171b0c6ddc:1:70 [0] NCCL INFO Loaded NVML from libnvidia-ml.so.1
+e7171b0c6ddc:1:70 [0] NCCL INFO [Rank 0] ncclCommInitRankConfig comm 0x5bd5cb390890 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0x7b86c92e007c6b18 - Init START
+e7171b0c6ddc:1:71 [1] NCCL INFO [Rank 1] ncclCommInitRankConfig comm 0x5bd5cb4b76b0 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0x7b86c92e007c6b18 - Init START
+e7171b0c6ddc:1:71 [1] NCCL INFO RAS client listening socket at ::1<28028>
+e7171b0c6ddc:1:71 [1] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+e7171b0c6ddc:1:70 [0] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+e7171b0c6ddc:1:71 [1] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 1 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+e7171b0c6ddc:1:71 [1] NCCL INFO NVLS multicast support is not available on dev 1
+e7171b0c6ddc:1:70 [0] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 0 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+e7171b0c6ddc:1:70 [0] NCCL INFO NVLS multicast support is not available on dev 0
+e7171b0c6ddc:1:71 [1] NCCL INFO Rank 1: 1 Net devices
+e7171b0c6ddc:1:70 [0] NCCL INFO Rank 0: 1 Net devices
+e7171b0c6ddc:1:70 [0] NCCL INFO Rank 0: 0 CollNet devices
+e7171b0c6ddc:1:71 [1] NCCL INFO Rank 1: 0 CollNet devices
+e7171b0c6ddc:1:71 [1] NCCL INFO comm 0x5bd5cb4b76b0 rank 1 nRanks 2 nNodes 1 localRanks 2 localRank 1 MNNVL 0
+e7171b0c6ddc:1:70 [0] NCCL INFO Local Net device counts across ranks: min 1 max 1
+e7171b0c6ddc:1:70 [0] NCCL INFO Local CollNet device counts across ranks: min 0 max 0
+e7171b0c6ddc:1:70 [0] NCCL INFO comm 0x5bd5cb390890 rank 0 nRanks 2 nNodes 1 localRanks 2 localRank 0 MNNVL 0
+e7171b0c6ddc:1:71 [1] NCCL INFO Trees [0] -1/-1/-1->1->0 [1] -1/-1/-1->1->0
+e7171b0c6ddc:1:71 [1] NCCL INFO P2P Chunksize set to 131072
+e7171b0c6ddc:1:70 [0] NCCL INFO Channel 00/02 : 0 1
+e7171b0c6ddc:1:70 [0] NCCL INFO Channel 01/02 : 0 1
+e7171b0c6ddc:1:70 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1
+e7171b0c6ddc:1:70 [0] NCCL INFO P2P Chunksize set to 131072
+e7171b0c6ddc:1:71 [1] NCCL INFO ncclOsDlopen(libnccl-profiler.so) failed: libnccl-profiler.so: cannot open shared object file: No such file or directory
+e7171b0c6ddc:1:71 [1] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+e7171b0c6ddc:1:71 [1] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+e7171b0c6ddc:1:70 [0] NCCL INFO ncclOsDlopen(libnccl-profiler.so) failed: libnccl-profiler.so: cannot open shared object file: No such file or directory
+e7171b0c6ddc:1:70 [0] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+e7171b0c6ddc:1:70 [0] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+e7171b0c6ddc:1:74 [0] NCCL INFO [Proxy Service] Device 0 CPU core 27
+e7171b0c6ddc:1:76 [0] NCCL INFO [Proxy Service UDS] Device 0 CPU core 23
+e7171b0c6ddc:1:73 [0] NCCL INFO [Proxy Service] Device 1 CPU core 20
+e7171b0c6ddc:1:73 [1] NCCL INFO proxy listening socket at 172.17.0.2<37359>
+e7171b0c6ddc:1:75 [0] NCCL INFO [Proxy Service UDS] Device 1 CPU core 17
+e7171b0c6ddc:1:74 [0] NCCL INFO proxy listening socket at 172.17.0.2<34031>
+e7171b0c6ddc:1:71 [1] NCCL INFO ncclOsDlopen(libnccl-tuner.so) failed: libnccl-tuner.so: cannot open shared object file: No such file or directory
+e7171b0c6ddc:1:71 [1] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+e7171b0c6ddc:1:71 [1] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+e7171b0c6ddc:1:71 [1] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+e7171b0c6ddc:1:71 [1] NCCL INFO Symmetric memory is not supported. cuMemEnable 1, globalGinSupport 0, cuMemGdrSupport 0
+e7171b0c6ddc:1:70 [0] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+e7171b0c6ddc:1:70 [0] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+e7171b0c6ddc:1:70 [0] NCCL INFO Symmetric memory is not supported. cuMemEnable 1, globalGinSupport 0, cuMemGdrSupport 0
+e7171b0c6ddc:1:70 [0] NCCL INFO CC Off, workFifoBytes 1048576
+e7171b0c6ddc:1:71 [1] NCCL INFO ncclCommInitRankConfig comm 0x5bd5cb4b76b0 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0x7b86c92e007c6b18 - Init COMPLETE
+e7171b0c6ddc:1:71 [1] NCCL INFO Init timings - ncclCommInitRankConfig: rank 1 nranks 2 total 0.28 (kernels 0.23, alloc 0.03, bootstrap 0.00, allgathers 0.00, topo 0.01, graphs 0.00, connections 0.00, rest 0.00)
+e7171b0c6ddc:1:70 [0] NCCL INFO ncclCommInitRankConfig comm 0x5bd5cb390890 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0x7b86c92e007c6b18 - Init COMPLETE
+e7171b0c6ddc:1:70 [0] NCCL INFO Init timings - ncclCommInitRankConfig: rank 0 nranks 2 total 0.28 (kernels 0.23, alloc 0.03, bootstrap 0.00, allgathers 0.00, topo 0.01, graphs 0.00, connections 0.00, rest 0.00)
+#
+#                                                              out-of-place                       in-place
+#       size         count      type   redop    root     time   algbw   busbw  #wrong     time   algbw   busbw  #wrong
+#        (B)    (elements)                               (us)  (GB/s)  (GB/s)             (us)  (GB/s)  (GB/s)        
+        8192          4096  bfloat16     sum      -1e7171b0c6ddc:1:73 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-PJmIkN size 9637888 ptr 0x7247296ce000
+e7171b0c6ddc:1:74 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-fBUR3E size 9637888 ptr 0x724728d9c000
+e7171b0c6ddc:1:73 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-BePgmj size 9637888 ptr 0x72472846a000
+e7171b0c6ddc:1:73 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-DzyAgY size 4096 ptr 0x7249771f1000
+e7171b0c6ddc:1:77 [1] NCCL INFO Channel 00 : 1[1] -> 0[0] via SHM/direct
+e7171b0c6ddc:1:74 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-2YDoeZ size 9637888 ptr 0x724714f75000
+e7171b0c6ddc:1:73 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-bp4BCu size 4096 ptr 0x7249771ef000
+e7171b0c6ddc:1:77 [1] NCCL INFO Channel 01 : 1[1] -> 0[0] via SHM/direct
+e7171b0c6ddc:1:74 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-FQUblr size 4096 ptr 0x7249770b8000
+e7171b0c6ddc:1:78 [0] NCCL INFO Channel 00 : 0[0] -> 1[1] via SHM/direct
+e7171b0c6ddc:1:74 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-lsM1ip size 4096 ptr 0x7249770b6000
+e7171b0c6ddc:1:78 [0] NCCL INFO Channel 01 : 0[0] -> 1[1] via SHM/direct
+e7171b0c6ddc:1:77 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-fBUR3E size 9637888 ptr 0x724714643000
+e7171b0c6ddc:1:78 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-PJmIkN size 9637888 ptr 0x7247116ce000
+e7171b0c6ddc:1:77 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-FQUblr size 4096 ptr 0x7249770b4000
+e7171b0c6ddc:1:78 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-DzyAgY size 4096 ptr 0x7249770b2000
+e7171b0c6ddc:1:77 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-2YDoeZ size 9637888 ptr 0x724710d9c000
+e7171b0c6ddc:1:78 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-BePgmj size 9637888 ptr 0x72471046a000
+e7171b0c6ddc:1:77 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-lsM1ip size 4096 ptr 0x7249770b0000
+e7171b0c6ddc:1:78 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-bp4BCu size 4096 ptr 0x7249770ae000
+e7171b0c6ddc:1:77 [1] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+e7171b0c6ddc:1:78 [0] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+    12.52    0.65    0.65       0    16.18    0.51    0.51       0
+       16384          8192  bfloat16     sum      -1    11.05    1.48    1.48       0    10.84    1.51    1.51       0
+       32768         16384  bfloat16     sum      -1    15.59    2.10    2.10       0    15.36    2.13    2.13       0
+       65536         32768  bfloat16     sum      -1    24.92    2.63    2.63       0    25.05    2.62    2.62       0
+      131072         65536  bfloat16     sum      -1    45.24    2.90    2.90       0    45.46    2.88    2.88       0
+      262144        131072  bfloat16     sum      -1    47.36    5.53    5.53       0    47.32    5.54    5.54       0
+      524288        262144  bfloat16     sum      -1    79.61    6.59    6.59       0    79.75    6.57    6.57       0
+     1048576        524288  bfloat16     sum      -1   148.05    7.08    7.08       0   148.06    7.08    7.08       0
+     2097152       1048576  bfloat16     sum      -1   294.77    7.11    7.11       0   293.34    7.15    7.15       0
+     4194304       2097152  bfloat16     sum      -1   569.53    7.36    7.36       0   569.60    7.36    7.36       0
+     8388608       4194304  bfloat16     sum      -1  1122.59    7.47    7.47       0  1125.45    7.45    7.45       0
+    16777216       8388608  bfloat16     sum      -1  2240.77    7.49    7.49       0  2246.14    7.47    7.47       0
+    33554432      16777216  bfloat16     sum      -1  4474.95    7.50    7.50       0  4480.23    7.49    7.49       0
+    67108864      33554432  bfloat16     sum      -1  8935.02    7.51    7.51       0  8939.87    7.51    7.51       0
+   134217728      67108864  bfloat16     sum      -1  17861.2    7.51    7.51       0  17861.1    7.51    7.51       0
+# Out of bounds values : 0 OK
+# Avg bus bandwidth    : 5.39088 
+#
+# Collective test concluded: all_reduce_perf
+#
+
+### -b 10K -e 10K
+# nccl-tests version 2.22.0 (826b3e6) nccl-headers=22809 nccl-library=23007
+# Collective test starting: all_reduce_perf
+# nThread 1 nGpus 2 minBytes 10240 maxBytes 10240 step: 1048576(bytes) warmup iters: 20 iters: 100 agg iters: 1 validation: 1 graph: 0 unalign: 0
+#
+# Using devices
+#  Rank  0 Group  0 Pid      1 on a0b787ba616c device  0 [0000:01:00] NVIDIA GeForce RTX 5060 Ti
+#  Rank  1 Group  0 Pid      1 on a0b787ba616c device  1 [0000:02:00] NVIDIA GeForce RTX 5060 Ti
+a0b787ba616c:1:1 [0] NCCL INFO ncclOsDlopen(libnccl-env.so) failed: libnccl-env.so: cannot open shared object file: No such file or directory
+a0b787ba616c:1:1 [0] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+a0b787ba616c:1:1 [0] NCCL INFO cudaDriverVersion 13020
+a0b787ba616c:1:1 [0] NCCL INFO NCCL version 2.30.7+cuda13.3
+a0b787ba616c:1:1 [0] NCCL INFO NCCL git version HEAD a5187fa2e
+a0b787ba616c:1:70 [0] NCCL INFO ncclOsDlopen(libnccl-net.so) failed: libnccl-net.so: cannot open shared object file: No such file or directory
+a0b787ba616c:1:70 [0] NCCL INFO NET/Plugin: Could not find: libnccl-net.so
+a0b787ba616c:1:70 [0] NCCL INFO NET/IB : No device found.
+a0b787ba616c:1:70 [0] NCCL INFO NET/IB : Using [RO]; OOB eth0:172.17.0.2<0>
+a0b787ba616c:1:70 [0] NCCL INFO Failed to initialize NET plugin IB
+a0b787ba616c:1:70 [0] NCCL INFO NET/Socket : Using [0]eth0:172.17.0.2<0>
+a0b787ba616c:1:70 [0] NCCL INFO Initialized NET plugin Socket
+a0b787ba616c:1:70 [0] NCCL INFO Assigned NET plugin Socket to comm
+a0b787ba616c:1:71 [1] NCCL INFO Initialized NET plugin Socket
+a0b787ba616c:1:71 [1] NCCL INFO Assigned NET plugin Socket to comm
+a0b787ba616c:1:70 [0] NCCL INFO ncclOsDlopen(libnccl-rma.so) failed: libnccl-rma.so: cannot open shared object file: No such file or directory
+a0b787ba616c:1:70 [0] NCCL INFO RMA/Plugin: Could not find: libnccl-rma.so
+a0b787ba616c:1:70 [0] NCCL INFO RMA/Plugin: Failed to load external plugin libnccl-rma.so, dlHandle: (nil), ncclRma: (nil)
+a0b787ba616c:1:70 [0] NCCL INFO RMA/Plugin: Failed to initialize any plugin
+a0b787ba616c:1:71 [1] NCCL INFO RMA/Plugin: Failed to initialize any plugin
+a0b787ba616c:1:70 [0] NCCL INFO ncclOsDlopen(libnccl-gin.so) failed: libnccl-gin.so: cannot open shared object file: No such file or directory
+a0b787ba616c:1:70 [0] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+a0b787ba616c:1:70 [0] NCCL INFO GIN/Plugin: Failed to load external plugin libnccl-gin.so, dlHandle: (nil), ncclGin: (nil)
+a0b787ba616c:1:70 [0] NCCL INFO GIN/Plugin: Failed to initialize any GIN plugin
+a0b787ba616c:1:70 [0] NCCL INFO Using network Socket
+a0b787ba616c:1:71 [1] NCCL INFO GIN/Plugin: Failed to initialize any GIN plugin
+a0b787ba616c:1:71 [1] NCCL INFO Using network Socket
+a0b787ba616c:1:70 [0] NCCL INFO Loaded NVML from libnvidia-ml.so.1
+a0b787ba616c:1:70 [0] NCCL INFO [Rank 0] ncclCommInitRankConfig comm 0x5bf02b0af300 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0x7d62d918d9a0bb73 - Init START
+a0b787ba616c:1:71 [1] NCCL INFO [Rank 1] ncclCommInitRankConfig comm 0x5bf02b1d6120 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0x7d62d918d9a0bb73 - Init START
+a0b787ba616c:1:71 [1] NCCL INFO RAS client listening socket at ::1<28028>
+a0b787ba616c:1:71 [1] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+a0b787ba616c:1:70 [0] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+a0b787ba616c:1:71 [1] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 1 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+a0b787ba616c:1:71 [1] NCCL INFO NVLS multicast support is not available on dev 1
+a0b787ba616c:1:70 [0] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 0 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+a0b787ba616c:1:70 [0] NCCL INFO NVLS multicast support is not available on dev 0
+a0b787ba616c:1:71 [1] NCCL INFO Rank 1: 1 Net devices
+a0b787ba616c:1:71 [1] NCCL INFO Rank 1: 0 CollNet devices
+a0b787ba616c:1:70 [0] NCCL INFO Rank 0: 1 Net devices
+a0b787ba616c:1:70 [0] NCCL INFO Rank 0: 0 CollNet devices
+a0b787ba616c:1:71 [1] NCCL INFO comm 0x5bf02b1d6120 rank 1 nRanks 2 nNodes 1 localRanks 2 localRank 1 MNNVL 0
+a0b787ba616c:1:70 [0] NCCL INFO Local Net device counts across ranks: min 1 max 1
+a0b787ba616c:1:70 [0] NCCL INFO Local CollNet device counts across ranks: min 0 max 0
+a0b787ba616c:1:70 [0] NCCL INFO comm 0x5bf02b0af300 rank 0 nRanks 2 nNodes 1 localRanks 2 localRank 0 MNNVL 0
+a0b787ba616c:1:71 [1] NCCL INFO Trees [0] -1/-1/-1->1->0 [1] -1/-1/-1->1->0
+a0b787ba616c:1:70 [0] NCCL INFO Channel 00/02 : 0 1
+a0b787ba616c:1:70 [0] NCCL INFO Channel 01/02 : 0 1
+a0b787ba616c:1:70 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1
+a0b787ba616c:1:71 [1] NCCL INFO P2P Chunksize set to 131072
+a0b787ba616c:1:70 [0] NCCL INFO P2P Chunksize set to 131072
+a0b787ba616c:1:71 [1] NCCL INFO ncclOsDlopen(libnccl-profiler.so) failed: libnccl-profiler.so: cannot open shared object file: No such file or directory
+a0b787ba616c:1:71 [1] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+a0b787ba616c:1:71 [1] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+a0b787ba616c:1:70 [0] NCCL INFO ncclOsDlopen(libnccl-profiler.so) failed: libnccl-profiler.so: cannot open shared object file: No such file or directory
+a0b787ba616c:1:70 [0] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+a0b787ba616c:1:70 [0] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+a0b787ba616c:1:74 [0] NCCL INFO [Proxy Service] Device 0 CPU core 16
+a0b787ba616c:1:76 [0] NCCL INFO [Proxy Service UDS] Device 0 CPU core 25
+a0b787ba616c:1:74 [0] NCCL INFO proxy listening socket at 172.17.0.2<34243>
+a0b787ba616c:1:73 [0] NCCL INFO [Proxy Service] Device 1 CPU core 27
+a0b787ba616c:1:73 [1] NCCL INFO proxy listening socket at 172.17.0.2<58857>
+a0b787ba616c:1:75 [0] NCCL INFO [Proxy Service UDS] Device 1 CPU core 21
+a0b787ba616c:1:71 [1] NCCL INFO ncclOsDlopen(libnccl-tuner.so) failed: libnccl-tuner.so: cannot open shared object file: No such file or directory
+a0b787ba616c:1:71 [1] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+a0b787ba616c:1:71 [1] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+a0b787ba616c:1:71 [1] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+a0b787ba616c:1:71 [1] NCCL INFO Symmetric memory is not supported. cuMemEnable 1, globalGinSupport 0, cuMemGdrSupport 0
+a0b787ba616c:1:70 [0] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+a0b787ba616c:1:70 [0] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+a0b787ba616c:1:70 [0] NCCL INFO Symmetric memory is not supported. cuMemEnable 1, globalGinSupport 0, cuMemGdrSupport 0
+a0b787ba616c:1:70 [0] NCCL INFO CC Off, workFifoBytes 1048576
+a0b787ba616c:1:71 [1] NCCL INFO ncclCommInitRankConfig comm 0x5bf02b1d6120 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0x7d62d918d9a0bb73 - Init COMPLETE
+a0b787ba616c:1:71 [1] NCCL INFO Init timings - ncclCommInitRankConfig: rank 1 nranks 2 total 0.24 (kernels 0.19, alloc 0.03, bootstrap 0.00, allgathers 0.00, topo 0.01, graphs 0.00, connections 0.00, rest 0.00)
+a0b787ba616c:1:70 [0] NCCL INFO ncclCommInitRankConfig comm 0x5bf02b0af300 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0x7d62d918d9a0bb73 - Init COMPLETE
+a0b787ba616c:1:70 [0] NCCL INFO Init timings - ncclCommInitRankConfig: rank 0 nranks 2 total 0.24 (kernels 0.19, alloc 0.03, bootstrap 0.00, allgathers 0.00, topo 0.01, graphs 0.00, connections 0.00, rest 0.00)
+#
+#                                                              out-of-place                       in-place
+#       size         count      type   redop    root     time   algbw   busbw  #wrong     time   algbw   busbw  #wrong
+#        (B)    (elements)                               (us)  (GB/s)  (GB/s)             (us)  (GB/s)  (GB/s)        
+       10240          5120  bfloat16     sum      -1a0b787ba616c:1:73 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-1Wl7Dx size 9637888 ptr 0x770c74d9c000
+a0b787ba616c:1:74 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-dRXKbV size 9637888 ptr 0x770c756ce000
+a0b787ba616c:1:73 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-eJ8COd size 9637888 ptr 0x770c7446a000
+a0b787ba616c:1:73 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-weNjMh size 4096 ptr 0x770ec349f000
+a0b787ba616c:1:77 [1] NCCL INFO Channel 00 : 1[1] -> 0[0] via SHM/direct
+a0b787ba616c:1:74 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-HirFxg size 9637888 ptr 0x770c60f75000
+a0b787ba616c:1:73 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-4nXScf size 4096 ptr 0x770ec349d000
+a0b787ba616c:1:77 [1] NCCL INFO Channel 01 : 1[1] -> 0[0] via SHM/direct
+a0b787ba616c:1:74 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-w65mGO size 4096 ptr 0x770ec32c3000
+a0b787ba616c:1:78 [0] NCCL INFO Channel 00 : 0[0] -> 1[1] via SHM/direct
+a0b787ba616c:1:74 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-Ow7BJK size 4096 ptr 0x770ec32c1000
+a0b787ba616c:1:78 [0] NCCL INFO Channel 01 : 0[0] -> 1[1] via SHM/direct
+a0b787ba616c:1:77 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-dRXKbV size 9637888 ptr 0x770c60643000
+a0b787ba616c:1:78 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-1Wl7Dx size 9637888 ptr 0x770c5d6ce000
+a0b787ba616c:1:77 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-w65mGO size 4096 ptr 0x770ec32bf000
+a0b787ba616c:1:78 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-weNjMh size 4096 ptr 0x770ec32bd000
+a0b787ba616c:1:77 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-HirFxg size 9637888 ptr 0x770c5cd9c000
+a0b787ba616c:1:78 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-eJ8COd size 9637888 ptr 0x770c5c46a000
+a0b787ba616c:1:77 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-Ow7BJK size 4096 ptr 0x770ec32bb000
+a0b787ba616c:1:78 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-4nXScf size 4096 ptr 0x770ec32b9000
+a0b787ba616c:1:77 [1] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+a0b787ba616c:1:78 [0] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+    10.33    0.99    0.99       0    10.28    1.00    1.00       0
+# Out of bounds values : 0 OK
+# Avg bus bandwidth    : 0.993522 
+#
+# Collective test concluded: all_reduce_perf
+#
+
+### -b 50K -e 50K
+# nccl-tests version 2.22.0 (826b3e6) nccl-headers=22809 nccl-library=23007
+# Collective test starting: all_reduce_perf
+# nThread 1 nGpus 2 minBytes 51200 maxBytes 51200 step: 1048576(bytes) warmup iters: 20 iters: 100 agg iters: 1 validation: 1 graph: 0 unalign: 0
+#
+# Using devices
+#  Rank  0 Group  0 Pid      1 on dc379a9ca399 device  0 [0000:01:00] NVIDIA GeForce RTX 5060 Ti
+#  Rank  1 Group  0 Pid      1 on dc379a9ca399 device  1 [0000:02:00] NVIDIA GeForce RTX 5060 Ti
+dc379a9ca399:1:1 [0] NCCL INFO ncclOsDlopen(libnccl-env.so) failed: libnccl-env.so: cannot open shared object file: No such file or directory
+dc379a9ca399:1:1 [0] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+dc379a9ca399:1:1 [0] NCCL INFO cudaDriverVersion 13020
+dc379a9ca399:1:1 [0] NCCL INFO NCCL version 2.30.7+cuda13.3
+dc379a9ca399:1:1 [0] NCCL INFO NCCL git version HEAD a5187fa2e
+dc379a9ca399:1:71 [0] NCCL INFO ncclOsDlopen(libnccl-net.so) failed: libnccl-net.so: cannot open shared object file: No such file or directory
+dc379a9ca399:1:71 [0] NCCL INFO NET/Plugin: Could not find: libnccl-net.so
+dc379a9ca399:1:71 [0] NCCL INFO NET/IB : No device found.
+dc379a9ca399:1:71 [0] NCCL INFO NET/IB : Using [RO]; OOB eth0:172.17.0.2<0>
+dc379a9ca399:1:71 [0] NCCL INFO Failed to initialize NET plugin IB
+dc379a9ca399:1:71 [0] NCCL INFO NET/Socket : Using [0]eth0:172.17.0.2<0>
+dc379a9ca399:1:71 [0] NCCL INFO Initialized NET plugin Socket
+dc379a9ca399:1:71 [0] NCCL INFO Assigned NET plugin Socket to comm
+dc379a9ca399:1:72 [1] NCCL INFO Initialized NET plugin Socket
+dc379a9ca399:1:72 [1] NCCL INFO Assigned NET plugin Socket to comm
+dc379a9ca399:1:71 [0] NCCL INFO ncclOsDlopen(libnccl-rma.so) failed: libnccl-rma.so: cannot open shared object file: No such file or directory
+dc379a9ca399:1:71 [0] NCCL INFO RMA/Plugin: Could not find: libnccl-rma.so
+dc379a9ca399:1:71 [0] NCCL INFO RMA/Plugin: Failed to load external plugin libnccl-rma.so, dlHandle: (nil), ncclRma: (nil)
+dc379a9ca399:1:71 [0] NCCL INFO RMA/Plugin: Failed to initialize any plugin
+dc379a9ca399:1:72 [1] NCCL INFO RMA/Plugin: Failed to initialize any plugin
+dc379a9ca399:1:71 [0] NCCL INFO ncclOsDlopen(libnccl-gin.so) failed: libnccl-gin.so: cannot open shared object file: No such file or directory
+dc379a9ca399:1:71 [0] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+dc379a9ca399:1:71 [0] NCCL INFO GIN/Plugin: Failed to load external plugin libnccl-gin.so, dlHandle: (nil), ncclGin: (nil)
+dc379a9ca399:1:71 [0] NCCL INFO GIN/Plugin: Failed to initialize any GIN plugin
+dc379a9ca399:1:71 [0] NCCL INFO Using network Socket
+dc379a9ca399:1:72 [1] NCCL INFO GIN/Plugin: Failed to initialize any GIN plugin
+dc379a9ca399:1:72 [1] NCCL INFO Using network Socket
+dc379a9ca399:1:71 [0] NCCL INFO Loaded NVML from libnvidia-ml.so.1
+dc379a9ca399:1:71 [0] NCCL INFO [Rank 0] ncclCommInitRankConfig comm 0x5f425048f9f0 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0x3f0ef9ac7b19b6c5 - Init START
+dc379a9ca399:1:72 [1] NCCL INFO [Rank 1] ncclCommInitRankConfig comm 0x5f42505b6810 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0x3f0ef9ac7b19b6c5 - Init START
+dc379a9ca399:1:72 [1] NCCL INFO RAS client listening socket at ::1<28028>
+dc379a9ca399:1:71 [0] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+dc379a9ca399:1:72 [1] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+dc379a9ca399:1:71 [0] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 0 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+dc379a9ca399:1:71 [0] NCCL INFO NVLS multicast support is not available on dev 0
+dc379a9ca399:1:72 [1] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 1 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+dc379a9ca399:1:72 [1] NCCL INFO NVLS multicast support is not available on dev 1
+dc379a9ca399:1:72 [1] NCCL INFO Rank 1: 1 Net devices
+dc379a9ca399:1:72 [1] NCCL INFO Rank 1: 0 CollNet devices
+dc379a9ca399:1:71 [0] NCCL INFO Rank 0: 1 Net devices
+dc379a9ca399:1:71 [0] NCCL INFO Rank 0: 0 CollNet devices
+dc379a9ca399:1:71 [0] NCCL INFO Local Net device counts across ranks: min 1 max 1
+dc379a9ca399:1:71 [0] NCCL INFO Local CollNet device counts across ranks: min 0 max 0
+dc379a9ca399:1:71 [0] NCCL INFO comm 0x5f425048f9f0 rank 0 nRanks 2 nNodes 1 localRanks 2 localRank 0 MNNVL 0
+dc379a9ca399:1:72 [1] NCCL INFO comm 0x5f42505b6810 rank 1 nRanks 2 nNodes 1 localRanks 2 localRank 1 MNNVL 0
+dc379a9ca399:1:71 [0] NCCL INFO Channel 00/02 : 0 1
+dc379a9ca399:1:71 [0] NCCL INFO Channel 01/02 : 0 1
+dc379a9ca399:1:72 [1] NCCL INFO Trees [0] -1/-1/-1->1->0 [1] -1/-1/-1->1->0
+dc379a9ca399:1:72 [1] NCCL INFO P2P Chunksize set to 131072
+dc379a9ca399:1:71 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1
+dc379a9ca399:1:71 [0] NCCL INFO P2P Chunksize set to 131072
+dc379a9ca399:1:72 [1] NCCL INFO ncclOsDlopen(libnccl-profiler.so) failed: libnccl-profiler.so: cannot open shared object file: No such file or directory
+dc379a9ca399:1:72 [1] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+dc379a9ca399:1:72 [1] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+dc379a9ca399:1:71 [0] NCCL INFO ncclOsDlopen(libnccl-profiler.so) failed: libnccl-profiler.so: cannot open shared object file: No such file or directory
+dc379a9ca399:1:71 [0] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+dc379a9ca399:1:71 [0] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+dc379a9ca399:1:74 [0] NCCL INFO [Proxy Service] Device 1 CPU core 25
+dc379a9ca399:1:75 [0] NCCL INFO [Proxy Service] Device 0 CPU core 20
+dc379a9ca399:1:75 [0] NCCL INFO proxy listening socket at 172.17.0.2<53825>
+dc379a9ca399:1:76 [0] NCCL INFO [Proxy Service UDS] Device 1 CPU core 22
+dc379a9ca399:1:74 [1] NCCL INFO proxy listening socket at 172.17.0.2<52305>
+dc379a9ca399:1:77 [0] NCCL INFO [Proxy Service UDS] Device 0 CPU core 26
+dc379a9ca399:1:72 [1] NCCL INFO ncclOsDlopen(libnccl-tuner.so) failed: libnccl-tuner.so: cannot open shared object file: No such file or directory
+dc379a9ca399:1:72 [1] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+dc379a9ca399:1:72 [1] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+dc379a9ca399:1:72 [1] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+dc379a9ca399:1:72 [1] NCCL INFO Symmetric memory is not supported. cuMemEnable 1, globalGinSupport 0, cuMemGdrSupport 0
+dc379a9ca399:1:71 [0] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+dc379a9ca399:1:71 [0] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+dc379a9ca399:1:71 [0] NCCL INFO Symmetric memory is not supported. cuMemEnable 1, globalGinSupport 0, cuMemGdrSupport 0
+dc379a9ca399:1:71 [0] NCCL INFO CC Off, workFifoBytes 1048576
+dc379a9ca399:1:72 [1] NCCL INFO ncclCommInitRankConfig comm 0x5f42505b6810 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0x3f0ef9ac7b19b6c5 - Init COMPLETE
+dc379a9ca399:1:72 [1] NCCL INFO Init timings - ncclCommInitRankConfig: rank 1 nranks 2 total 0.22 (kernels 0.19, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.01, graphs 0.00, connections 0.00, rest 0.00)
+dc379a9ca399:1:71 [0] NCCL INFO ncclCommInitRankConfig comm 0x5f425048f9f0 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0x3f0ef9ac7b19b6c5 - Init COMPLETE
+dc379a9ca399:1:71 [0] NCCL INFO Init timings - ncclCommInitRankConfig: rank 0 nranks 2 total 0.22 (kernels 0.19, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.01, graphs 0.00, connections 0.00, rest 0.00)
+#
+#                                                              out-of-place                       in-place
+#       size         count      type   redop    root     time   algbw   busbw  #wrong     time   algbw   busbw  #wrong
+#        (B)    (elements)                               (us)  (GB/s)  (GB/s)             (us)  (GB/s)  (GB/s)        
+       51200         25600  bfloat16     sum      -1dc379a9ca399:1:74 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-qne3px size 9637888 ptr 0x739d10ecd000
+dc379a9ca399:1:75 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-oOZYWL size 9637888 ptr 0x739d1059b000
+dc379a9ca399:1:74 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-9csQdV size 9637888 ptr 0x739cfcf75000
+dc379a9ca399:1:74 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-WAGdoI size 4096 ptr 0x739f5ea7a000
+dc379a9ca399:1:78 [1] NCCL INFO Channel 00 : 1[1] -> 0[0] via SHM/direct
+dc379a9ca399:1:75 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-EV6nrA size 9637888 ptr 0x739cfc643000
+dc379a9ca399:1:74 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-PIG6rW size 4096 ptr 0x739f5ea78000
+dc379a9ca399:1:78 [1] NCCL INFO Channel 01 : 1[1] -> 0[0] via SHM/direct
+dc379a9ca399:1:75 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-dVpTWB size 4096 ptr 0x739f5e8c0000
+dc379a9ca399:1:79 [0] NCCL INFO Channel 00 : 0[0] -> 1[1] via SHM/direct
+dc379a9ca399:1:75 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-nko9dc size 4096 ptr 0x739f5e8be000
+dc379a9ca399:1:79 [0] NCCL INFO Channel 01 : 0[0] -> 1[1] via SHM/direct
+dc379a9ca399:1:79 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-qne3px size 9637888 ptr 0x739cf8d9c000
+dc379a9ca399:1:78 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-oOZYWL size 9637888 ptr 0x739cf96ce000
+dc379a9ca399:1:78 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-dVpTWB size 4096 ptr 0x739f5e8ba000
+dc379a9ca399:1:79 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-WAGdoI size 4096 ptr 0x739f5e8bc000
+dc379a9ca399:1:78 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-EV6nrA size 9637888 ptr 0x739cf846a000
+dc379a9ca399:1:79 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-9csQdV size 9637888 ptr 0x739ce96ce000
+dc379a9ca399:1:78 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-nko9dc size 4096 ptr 0x739f5e8b8000
+dc379a9ca399:1:79 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-PIG6rW size 4096 ptr 0x739f5e8b6000
+dc379a9ca399:1:78 [1] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+dc379a9ca399:1:79 [0] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+    21.92    2.34    2.34       0    22.00    2.33    2.33       0
+# Out of bounds values : 0 OK
+# Avg bus bandwidth    : 2.33108 
+#
+# Collective test concluded: all_reduce_perf
+#
+
+### -b 40M -e 40M
+# nccl-tests version 2.22.0 (826b3e6) nccl-headers=22809 nccl-library=23007
+# Collective test starting: all_reduce_perf
+# nThread 1 nGpus 2 minBytes 41943040 maxBytes 41943040 step: 1048576(bytes) warmup iters: 20 iters: 100 agg iters: 1 validation: 1 graph: 0 unalign: 0
+#
+# Using devices
+#  Rank  0 Group  0 Pid      1 on 4c023a0dc640 device  0 [0000:01:00] NVIDIA GeForce RTX 5060 Ti
+#  Rank  1 Group  0 Pid      1 on 4c023a0dc640 device  1 [0000:02:00] NVIDIA GeForce RTX 5060 Ti
+4c023a0dc640:1:1 [0] NCCL INFO ncclOsDlopen(libnccl-env.so) failed: libnccl-env.so: cannot open shared object file: No such file or directory
+4c023a0dc640:1:1 [0] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+4c023a0dc640:1:1 [0] NCCL INFO cudaDriverVersion 13020
+4c023a0dc640:1:1 [0] NCCL INFO NCCL version 2.30.7+cuda13.3
+4c023a0dc640:1:1 [0] NCCL INFO NCCL git version HEAD a5187fa2e
+4c023a0dc640:1:72 [1] NCCL INFO ncclOsDlopen(libnccl-net.so) failed: libnccl-net.so: cannot open shared object file: No such file or directory
+4c023a0dc640:1:72 [1] NCCL INFO NET/Plugin: Could not find: libnccl-net.so
+4c023a0dc640:1:72 [1] NCCL INFO NET/IB : No device found.
+4c023a0dc640:1:72 [1] NCCL INFO NET/IB : Using [RO]; OOB eth0:172.17.0.2<0>
+4c023a0dc640:1:72 [1] NCCL INFO Failed to initialize NET plugin IB
+4c023a0dc640:1:72 [1] NCCL INFO NET/Socket : Using [0]eth0:172.17.0.2<0>
+4c023a0dc640:1:72 [1] NCCL INFO Initialized NET plugin Socket
+4c023a0dc640:1:72 [1] NCCL INFO Assigned NET plugin Socket to comm
+4c023a0dc640:1:71 [0] NCCL INFO Initialized NET plugin Socket
+4c023a0dc640:1:71 [0] NCCL INFO Assigned NET plugin Socket to comm
+4c023a0dc640:1:72 [1] NCCL INFO ncclOsDlopen(libnccl-rma.so) failed: libnccl-rma.so: cannot open shared object file: No such file or directory
+4c023a0dc640:1:72 [1] NCCL INFO RMA/Plugin: Could not find: libnccl-rma.so
+4c023a0dc640:1:72 [1] NCCL INFO RMA/Plugin: Failed to load external plugin libnccl-rma.so, dlHandle: (nil), ncclRma: (nil)
+4c023a0dc640:1:72 [1] NCCL INFO RMA/Plugin: Failed to initialize any plugin
+4c023a0dc640:1:71 [0] NCCL INFO RMA/Plugin: Failed to initialize any plugin
+4c023a0dc640:1:72 [1] NCCL INFO ncclOsDlopen(libnccl-gin.so) failed: libnccl-gin.so: cannot open shared object file: No such file or directory
+4c023a0dc640:1:72 [1] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+4c023a0dc640:1:72 [1] NCCL INFO GIN/Plugin: Failed to load external plugin libnccl-gin.so, dlHandle: (nil), ncclGin: (nil)
+4c023a0dc640:1:72 [1] NCCL INFO GIN/Plugin: Failed to initialize any GIN plugin
+4c023a0dc640:1:72 [1] NCCL INFO Using network Socket
+4c023a0dc640:1:71 [0] NCCL INFO GIN/Plugin: Failed to initialize any GIN plugin
+4c023a0dc640:1:71 [0] NCCL INFO Using network Socket
+4c023a0dc640:1:72 [1] NCCL INFO Loaded NVML from libnvidia-ml.so.1
+4c023a0dc640:1:72 [1] NCCL INFO [Rank 1] ncclCommInitRankConfig comm 0x5c5d267a2610 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0x2c050338c84f46e4 - Init START
+4c023a0dc640:1:71 [0] NCCL INFO [Rank 0] ncclCommInitRankConfig comm 0x5c5d2667b7f0 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0x2c050338c84f46e4 - Init START
+4c023a0dc640:1:71 [0] NCCL INFO RAS client listening socket at ::1<28028>
+4c023a0dc640:1:72 [1] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+4c023a0dc640:1:71 [0] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+4c023a0dc640:1:72 [1] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 1 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+4c023a0dc640:1:72 [1] NCCL INFO NVLS multicast support is not available on dev 1
+4c023a0dc640:1:71 [0] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 0 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+4c023a0dc640:1:71 [0] NCCL INFO NVLS multicast support is not available on dev 0
+4c023a0dc640:1:72 [1] NCCL INFO Rank 1: 1 Net devices
+4c023a0dc640:1:72 [1] NCCL INFO Rank 1: 0 CollNet devices
+4c023a0dc640:1:71 [0] NCCL INFO Rank 0: 1 Net devices
+4c023a0dc640:1:71 [0] NCCL INFO Rank 0: 0 CollNet devices
+4c023a0dc640:1:72 [1] NCCL INFO comm 0x5c5d267a2610 rank 1 nRanks 2 nNodes 1 localRanks 2 localRank 1 MNNVL 0
+4c023a0dc640:1:71 [0] NCCL INFO Local Net device counts across ranks: min 1 max 1
+4c023a0dc640:1:71 [0] NCCL INFO Local CollNet device counts across ranks: min 0 max 0
+4c023a0dc640:1:71 [0] NCCL INFO comm 0x5c5d2667b7f0 rank 0 nRanks 2 nNodes 1 localRanks 2 localRank 0 MNNVL 0
+4c023a0dc640:1:72 [1] NCCL INFO Trees [0] -1/-1/-1->1->0 [1] -1/-1/-1->1->0
+4c023a0dc640:1:71 [0] NCCL INFO Channel 00/02 : 0 1
+4c023a0dc640:1:72 [1] NCCL INFO P2P Chunksize set to 131072
+4c023a0dc640:1:71 [0] NCCL INFO Channel 01/02 : 0 1
+4c023a0dc640:1:71 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1
+4c023a0dc640:1:71 [0] NCCL INFO P2P Chunksize set to 131072
+4c023a0dc640:1:72 [1] NCCL INFO ncclOsDlopen(libnccl-profiler.so) failed: libnccl-profiler.so: cannot open shared object file: No such file or directory
+4c023a0dc640:1:72 [1] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+4c023a0dc640:1:72 [1] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+4c023a0dc640:1:71 [0] NCCL INFO ncclOsDlopen(libnccl-profiler.so) failed: libnccl-profiler.so: cannot open shared object file: No such file or directory
+4c023a0dc640:1:71 [0] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+4c023a0dc640:1:71 [0] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+4c023a0dc640:1:74 [0] NCCL INFO [Proxy Service] Device 1 CPU core 16
+4c023a0dc640:1:74 [1] NCCL INFO proxy listening socket at 172.17.0.2<36535>
+4c023a0dc640:1:76 [0] NCCL INFO [Proxy Service UDS] Device 1 CPU core 17
+4c023a0dc640:1:75 [0] NCCL INFO [Proxy Service] Device 0 CPU core 21
+4c023a0dc640:1:75 [0] NCCL INFO proxy listening socket at 172.17.0.2<45017>
+4c023a0dc640:1:77 [0] NCCL INFO [Proxy Service UDS] Device 0 CPU core 20
+4c023a0dc640:1:72 [1] NCCL INFO ncclOsDlopen(libnccl-tuner.so) failed: libnccl-tuner.so: cannot open shared object file: No such file or directory
+4c023a0dc640:1:72 [1] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+4c023a0dc640:1:72 [1] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+4c023a0dc640:1:72 [1] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+4c023a0dc640:1:72 [1] NCCL INFO Symmetric memory is not supported. cuMemEnable 1, globalGinSupport 0, cuMemGdrSupport 0
+4c023a0dc640:1:71 [0] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+4c023a0dc640:1:71 [0] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+4c023a0dc640:1:71 [0] NCCL INFO Symmetric memory is not supported. cuMemEnable 1, globalGinSupport 0, cuMemGdrSupport 0
+4c023a0dc640:1:71 [0] NCCL INFO CC Off, workFifoBytes 1048576
+4c023a0dc640:1:72 [1] NCCL INFO ncclCommInitRankConfig comm 0x5c5d267a2610 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0x2c050338c84f46e4 - Init COMPLETE
+4c023a0dc640:1:72 [1] NCCL INFO Init timings - ncclCommInitRankConfig: rank 1 nranks 2 total 0.23 (kernels 0.19, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.01, graphs 0.00, connections 0.00, rest 0.00)
+4c023a0dc640:1:71 [0] NCCL INFO ncclCommInitRankConfig comm 0x5c5d2667b7f0 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0x2c050338c84f46e4 - Init COMPLETE
+4c023a0dc640:1:71 [0] NCCL INFO Init timings - ncclCommInitRankConfig: rank 0 nranks 2 total 0.23 (kernels 0.19, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.01, graphs 0.00, connections 0.00, rest 0.00)
+#
+#                                                              out-of-place                       in-place
+#       size         count      type   redop    root     time   algbw   busbw  #wrong     time   algbw   busbw  #wrong
+#        (B)    (elements)                               (us)  (GB/s)  (GB/s)             (us)  (GB/s)  (GB/s)        
+    41943040      20971520  bfloat16     sum      -14c023a0dc640:1:75 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-h2Y2mU size 9637888 ptr 0x75bab96ce000
+4c023a0dc640:1:74 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-98fQg8 size 9637888 ptr 0x75bab8d9c000
+4c023a0dc640:1:75 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-JxASIu size 9637888 ptr 0x75bab846a000
+4c023a0dc640:1:74 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-j4NfOb size 9637888 ptr 0x75baac32a000
+4c023a0dc640:1:75 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-3gsu16 size 4096 ptr 0x75bd377a5000
+4c023a0dc640:1:79 [0] NCCL INFO Channel 00 : 0[0] -> 1[1] via SHM/direct
+4c023a0dc640:1:74 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-Mq5XEV size 4096 ptr 0x75bd377a3000
+4c023a0dc640:1:78 [1] NCCL INFO Channel 00 : 1[1] -> 0[0] via SHM/direct
+4c023a0dc640:1:75 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-V7qPcW size 4096 ptr 0x75bd2a9b4000
+4c023a0dc640:1:79 [0] NCCL INFO Channel 01 : 0[0] -> 1[1] via SHM/direct
+4c023a0dc640:1:74 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-aA1QHj size 4096 ptr 0x75bd2a9b2000
+4c023a0dc640:1:78 [1] NCCL INFO Channel 01 : 1[1] -> 0[0] via SHM/direct
+4c023a0dc640:1:79 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-98fQg8 size 9637888 ptr 0x75ba9f6ce000
+4c023a0dc640:1:78 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-h2Y2mU size 9637888 ptr 0x75ba9ed9c000
+4c023a0dc640:1:79 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-Mq5XEV size 4096 ptr 0x75bd2a9b0000
+4c023a0dc640:1:79 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-j4NfOb size 9637888 ptr 0x75ba9e46a000
+4c023a0dc640:1:78 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-3gsu16 size 4096 ptr 0x75bd2a9ae000
+4c023a0dc640:1:79 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-aA1QHj size 4096 ptr 0x75bd2a9ac000
+4c023a0dc640:1:78 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-JxASIu size 9637888 ptr 0x75ba9db38000
+4c023a0dc640:1:78 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-V7qPcW size 4096 ptr 0x75bd24153000
+4c023a0dc640:1:79 [0] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+4c023a0dc640:1:78 [1] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+  5570.04    7.53    7.53       0  5562.70    7.54    7.54       0
+# Out of bounds values : 0 OK
+# Avg bus bandwidth    : 7.53508 
+#
+# Collective test concluded: all_reduce_perf
+#
+

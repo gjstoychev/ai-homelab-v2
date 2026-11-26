@@ -474,3 +474,35 @@ Transport in both settings: `via SHM/direct/direct` (the driver's `CNS`, as in 9
 Caveats: (1) nccl-tests used the host's NCCL 2.28.9; vLLM's images carry NCCL 2.29.7 (torch 2.13.0+cu130 in both). The same transport is chosen, but not measured. (2) The two all-reduces per layer, and the absence of overlap with compute, are assumptions; a profile of one prefill chunk (nsys or the torch profiler) would settle both. (3) The host here: DDR5-6000 CL40 2×32 GB (`docs/hardware.md`), i7-14700; the source's memory and CPU are not published beyond "9800X3D with DDR5".
 
 **Next:** an NCCL run inside the vLLM image (2.29.7) is a cheap check of caveat 1; a profiled prefill chunk would settle 2. Strata and Basalt do not use NCCL (their prompt reading is also unchanged by the driver); the optional steps 10, 11, 12 remain.
+
+### 9g. In-container NCCL, a profiled prefill chunk, and the protocol (2026-11-26)
+
+**Caveat 1 of 9f closed.** `scripts/run-nccl-tests.sh OUTDIR IMAGE` runs the same nccl-tests binary inside the vLLM images (the image's own NCCL and CUDA runtime via `LD_LIBRARY_PATH`; the build lives on the host and is mounted read-only). A mistake on the way: `~/nccl-tests/current` is a symlink with an absolute target, dangling inside the container (exit 127); the script now resolves it to `v2.22.0`. Both images load NCCL 2.30.7 (the library reports 23007, torch's `nccl.version()` says 2.29.7), the host's is 2.28.9:
+
+| 40 MiB all-reduce | Host (2.28.9) | v0.30.0 image | v0.32.0 image |
+|---|---|---|---|
+| `P2P_DISABLE=1` | 5.71 ms (7.35 GB/s) | 5.58 ms (7.52) | 5.57 ms (7.53) |
+| `P2P_DISABLE=0` | 5.66 ms (7.41) | 5.56 ms (7.54) | |
+| 10 KiB / 50 KiB | 10.35 / 22.04 µs | 10.3 / 22.2 µs | 10.3 / 21.9 µs |
+
+2.5 % faster than the host's library, same transport (`SHM/direct`), so 9f's estimates hold (about 2 % lower). Files `runs/9-driver595/nccl-tests/allreduce-{host,container-v0.30.0,container-v0.32.0}-p2pdisable{1,0}.*` (the host files were renamed from `allreduce-p2pdisable*`).
+
+**The profile.** `configs/fp8-nomtp-profile.args` (`fp8-nomtp.args` plus `--profiler-config` torch, no stacks, gzip, traces into the mounted cache directory), `scripts/profile-client.py` (two warm-up requests, `/start_profile`, one request of 4,220 tokens with `max_tokens` 1, `/stop_profile`), `scripts/trace-summary.py`. Run through `bench-run.sh` as usual; the profiled TTFT was 1.317 s against 1.30 s for the unprofiled warm-ups, so the profiler hardly disturbs it. Files: `runs/9-driver595/profile/` (`summary.md`, `profile.jsonl`, the two gzip traces in `traces/`, 2.7 MB; the root-owned originals in the container's cache directory were deleted with an `alpine` container).
+
+| Per rank (0 / 1) | Value |
+|---|---|
+| Span first to last kernel | 1,299.3 / 1,299.4 ms (GPU busy 98 / 99 %) |
+| NCCL all-reduce kernels | 260 / 260, 725.7 / 742.8 ms = **55.8 % / 57.2 % of the span** |
+| of which the full chunk (129 kernels of about 40 MiB) | mean 5.35 / 5.37 ms, 690 / 693 ms |
+| of which the remainder chunk (131 kernels, 116 tokens) | mean 275 / 286 µs |
+| cutlass GEMMs (514) | 309 / 307 ms = 23.8 / 23.6 % |
+| flashinfer prefill attention (32 full-attention layers) | 58 ms = 4.5 % |
+| delta-rule / conv / norm / quantization kernels | 1–2 % each |
+
+**Result: the estimate of 9f was right.** All-reduce is 56–57 % of a 4.2K-token prefill (estimated 57 %), and the GEMMs, which are the actual model, 24 %. The two ranks are almost symmetric (mean kernel times within 0.5 %), so the 5.35 ms is not mostly waiting for the other card; it is the copy through host memory. In vLLM the full-chunk all-reduce runs at 5.35 ms against 5.57 ms standalone, so the benchmark's number carries over to the real run (the 4 % is overlap with neighbouring kernels, or the 129th kernel's mix). Without the all-reduce this prefill would take about 0.57 s instead of 1.3 s.
+
+**A wrong guess, corrected.** The kernel is named `ncclDevKernel_AllReduce_Sum_bf16_RING_LL`, which I took for the low-latency protocol (half the bandwidth, built for small messages) and a tuning chance. `scripts/run-nccl-proto.sh` forces `NCCL_PROTO` in the v0.30.0 image (`proto-container-v0.30.0.out`): at 40 MiB, unset 5.56 ms (7.54 GB/s), `Simple` 5.57 ms (7.53), `LL128` 9.81 ms (4.28), `LL` 13.85 ms (3.03); at 10 KiB / 50 KiB, LL 10.3 / 22.0 µs, unset 15.5 (one noisy start; 10.3 in the other runs) / 22.3. NCCL already picks the fast protocol at 40 MiB; the `RING_LL` in the name is the entry point NCCL uses for the ring algorithm with every protocol, not the protocol that ran. No tuning gain here.
+
+**What this leaves:** about 0.7 s of every 4K prompt, and 5.8 s of every 32K prompt, is moving 40 MiB twice per layer through host memory at 7.4 GB/s. The source's faster TTFT would need that to be about 40 % cheaper; that is a property of the host's memory path (copy in, copy out through DDR5), not of the driver, the NCCL flags or the protocol. Options that would change it are outside this machine's current setup: P2P-capable cards or board (no), a smaller message (sequence parallelism or fp8 all-reduce: not in vLLM's TP path here), or pipeline parallelism, which step 8 already measured (32K in 9.3 s against 13.2 s with TP, at a 40 % cost on one stream).
+
+**Next:** step 10 (Basalt on the 27B).

@@ -301,3 +301,36 @@ Files: `runs/9-driver595/smoke/fp8-mtp4.*`, requests in `results.jsonl`. Image v
 One rep each, so the decode differences (+7 % prose, +3 % JSON) are indications, not results; the acceptance lengths differ too, so part of it may be the prompt/sampling noise rather than the driver. The KV pool difference is a memory-accounting effect (the driver's reserved memory, or the way vLLM's profiler sees it) and is not noise. The ready time is not comparable: page cache state differed. Container stopped cleanly (no `vllm-bench` left).
 
 **Next:** step 4 again (baseline-client on fp8-mtp4 and fp8-nomtp), the key question being TTFT at 4K and 32K.
+
+### 9b. Step 4 again: baseline on driver 595 (2026-11-26)
+
+```
+BENCH_CLIENT=experiments/2026-11-vllm-27b-tp2/scripts/baseline-client.py scripts/bench-run.sh \
+  experiments/2026-11-vllm-27b-tp2/runs/9-driver595/baseline <config> 5 -- \
+  experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/<config>.args
+# fp8-mtp4, then fp8-nomtp; summary: runs/9-driver595/baseline/summary.md
+```
+
+Everything else as in step 4 (v0.30.0, same client, same prompts); only the driver changed. Both runs finished, no container left.
+
+| | Source | Driver 580 (step 4) | Driver 595 |
+|---|---|---|---|
+| KV pool, MTP off | 351,618 | 348,478 | **351,618** |
+| KV pool, MTP k=4 | 278,927 | 273,333 | **278,927** |
+| Ready (cold→warm) | | 97.3 / 78.6 s | 78.0 / 62.4 s |
+| Decode, MTP off (all kinds) | 41.99 | 42.05–42.15 | 42.25–42.35 (+0.5 %) |
+| Decode k=4, shared prose / JSON | | 62.75 / 117.02 | 64.76 / 116.44 |
+| Decode k=4, repro prose / structured / mixed | 78.31 / 124.89 / 81.61 | 69.81 / 81.10 / 73.97 | 67.82 / 85.76 / 78.25 |
+| TTFT ~0.5K (MTP off / k=4) | 0.141 s | 0.187 / 0.200 s | 0.184 / 0.197 s |
+| TTFT ~4K (MTP off / k=4) | 0.987 s | 1.314 / 1.355 s | 1.310 / 1.347 s |
+| TTFT ~32K (MTP off / k=4) | 10.521 s | 12.417 / 13.146 s | **12.404 / 13.112 s** |
+| Needle at the three lengths | | 9/9 | 9/9 |
+| Peak VRAM per card (off / k=4) | | 15,668 / 15,790 MiB | 15,692 / 15,792 MiB |
+
+What it shows:
+
+- **The driver does not explain the slow prompt reading.** TTFT at 0.5K / 4K / 32K is identical to phase A within 0.3 % (32K: 12.40 s against 12.42 s without MTP; 13.11 s against 13.15 s with). The gap to the source stays at +33 % / +33 % / +18 % (MTP off). The candidates left from step 4 are the host path (CPU and memory: i7-14700 against the 9800X3D with DDR5), the NCCL path (`NCCL_P2P_DISABLE=1`, all-reduce through host memory), and the source's unpublished measurement.
+- **Decode is unchanged.** MTP off is +0.5 % (42.3 against 42.1, tiny but consistent across all five kinds; the spread is 0.01). The k=4 differences (prose 62.75 → 64.76, repro structured 81.1 → 85.8) are inside the run-to-run spread, and the acceptance lengths move with them (structured repro 2.92 → 3.04). The smoke test's apparent +7 % was noise.
+- **The KV pools now equal the source's to the token** (351,618 and 278,927), 0.9 % and 2.0 % higher than on 580: the new driver leaves vLLM's profiler the same free memory the source saw.
+
+**Next:** step 6 (the 252K needle) and step 7 (the v0.32.0 NVFP4 recipe) on 595, then the NCCL P2P question as a separate test.

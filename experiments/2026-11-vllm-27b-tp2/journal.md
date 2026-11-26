@@ -545,3 +545,26 @@ What it shows:
 - Not compared here: output quality (the weights differ, QUASAR's QAT against vLLM's checkpoint; step 11), several requests at once, and `peer` mode on one card with a smaller context.
 
 **Next:** step 11, the quality check with the ten prompts.
+
+## 11. Quality check (2026-11-26)
+
+The ten fixed prompts of `scripts/quality-check.py` (greedy, seed 42, thinking off, non-streamed, two repetitions each), compared with `scripts/quality-compare.py` against vLLM fp8 without MTP as the reference. Five runs, each its own server start through `scripts/bench-run.sh` with `BENCH_CLIENT=scripts/quality-check.py` (vLLM: the configs `fp8-nomtp`, `fp8-mtp4`, `nvfp4-mtp4` (v0.32.0, NVFP4 KV); Basalt: `basalt27-split-nodraft` and `basalt27-split`, labels `basalt-split-nodraft`, `basalt-split`), driver 595.91.07. Files: `runs/11-quality/` (`results.jsonl` with the full texts, `quality.md` the comparison, one `.cmd`/`.out` per run).
+
+| prompt | fp8-nomtp (reference) | fp8-mtp4 | nvfp4-mtp4 | basalt-split-nodraft | basalt-split |
+|---|---|---|---|---|---|
+| arith, capital, primes, sort, author, german | = ✓ | = ✓ | = ✓ | = ✓ | = ✓ |
+| time | ✓ | = ✓ | ≠ ✓ | = ✓ | = ✓ |
+| json | ✓ | ≠ ✓ | ≠ ✓ | ≠ ✓ | ≠ ✓ |
+| code | ✓ | ≠ ✓ | ≠ ✓ | = ✓ | = ✓ |
+| explain | ✓ | ≠ ✓ | ≠ ✓ | ≠ ✓ | ≠ ✓ |
+
+(= the same text as the reference in both repetitions, ≠ different, ✓ the prompt's check passes; no run disagrees with its own repetition, no `~`.)
+
+What it shows:
+
+- **Every prompt's check passes in every setting, 10 of 10 in all five runs, and the answers of the two repetitions are always identical.** The differences are wording, not correctness.
+- **Drafting changes vLLM's text, not Basalt's.** vLLM with MTP k=4 differs from vLLM without it on 3 prompts (json: a different name, "Evelyn" for "Elias"; code: `''.join(...)` for a list; explain: a different first sentence), and the NVFP4 KV run differs on 4 (the same three and `time`, a rephrased sentence). That is what speculative decoding does when the verification pass runs on other batch shapes than plain decoding: the logits differ in the last bits and a greedy tie goes the other way; vLLM does not promise the same text. Basalt's `split` with its drafter gives, on every prompt, the same text as `split-nodraft` (the cells equal, and the grouped notes below the table list them together), as its guide says (output "exactly plain decoding's"). Determinism is a property of the engine's kernels here, not of the model.
+- **Basalt's QUASAR pack answers like vLLM's checkpoint on 7 of 10 prompts** (text identical to vLLM fp8 without MTP), and differs on json (another invented name), explain (a different second clause) and, for no draft, on nothing else. The weights are not the same file, so this is about the same level of agreement as between vLLM's own settings.
+- **Not shown by this test:** whether one setting is *better*. Ten prompts, greedy, a simple check each; the KV cache type (fp8, NVFP4) and the quantizations would need a distribution-level measure (KL against BF16, or the source's `kv-quality-test.md` method, which was not run). The statement is only: no setting broke an answer, and the engines differ in whether drafting is invisible.
+
+**Next:** step 12, the write-up (README: setup, results table, what was found; the root `README.md` index).

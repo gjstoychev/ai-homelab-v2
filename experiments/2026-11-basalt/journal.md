@@ -233,3 +233,7 @@ Step 6's one-GPU run again with no download running (`runs/6-7-modes-control/`):
 - The skip changed the JSON tags only.
 
 **Verdict:** Basalt's answers are as correct as llama.cpp's and Strata's, and closer to llama.cpp's than Strata's.
+
+## 12. Write-up (2026-11-26)
+
+README: status, the three-engine table, Basalt's two-GPU modes, the UD pack, findings, the recommended two-GPU setup, what was not measured. `docs/stack.md`: the Basalt build and the two packs. Repository README: status.

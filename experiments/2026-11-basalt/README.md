@@ -1,6 +1,6 @@
 # Basalt: Qwen3.8-Flash-Next on 2× RTX 5060 Ti, against Strata on the same weights
 
-Status: **planned** (2026-11-25), after [`2026-11-strata`](../2026-11-strata/). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
+Status: **done** (2026-11-26), after [`2026-11-strata`](../2026-11-strata/). Recommended setup: [below](#the-recommended-two-gpu-setup). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
 
 ## Question
 
@@ -93,8 +93,49 @@ The next experiment reproduces the dual RTX 5060 Ti vLLM recipe for Qwen3.8-27B 
 
 ## Results
 
-Pending.
+Every number traces to a file in `runs/` and a step in the journal. All runs: kernel 7.0.0-43, driver 580.178.04, CUDA 13.0.88, Basalt v0.5.7 (`400b411`, built from source for sm_120, Flash-Next only), the GSQ-RCO IQ3_XXS pack at `aa76f46` unless stated, route tail skip off unless stated; Strata and llama.cpp numbers from [`2026-11-strata`](../2026-11-strata/) on the same weights (the GGUF the pack was built from), with the same clients and prompts (temperature 0, thinking off, nothing reused unless stated). No page-cache drops and no CPU power (runs made without sudo).
+
+**Three engines, the best setup of each, on this machine:**
+
+| Use | llama.cpp v1.0.0 | Strata v0.2.21 | **Basalt v0.5.7** | Basalt setup |
+|---|---|---|---|---|
+| One chat, 1 GPU, exact (decode t/s, prose / JSON) | 45.2 / 42.4 | 62.8 / 62.9 | **72.3 / 71.7** | one card |
+| One chat, 1 GPU, MTP | – | 77.8 / 118.2 | **104.8 / 170.5** | one card |
+| One chat, 2 GPUs, exact | 53.1 / 52.9 | 66.9 / 66.6 | **77.4 / 78.4** | peer |
+| One chat, 2 GPUs, MTP | – | 93.4 / 159.2 | **113.1 / 193.3** | peer |
+| Prompt, 4.3K tokens (t/s) | 872 (1 GPU) | 1,878 (2 GPUs) | 1,876 (peer) | |
+| 126K-token prompt, time to first token | 153.4 s | 36.3 s | **34.7 s** | peer |
+| Four-turn job over a 32K document | 64.2 s | 29.0 s | **25.5 s** | peer |
+| 2 / 4 requests at once (short, total t/s) | 86 / 117 | 113 / 173 | **144 / 173** | peer + MTP, 4 slots |
+| 8 requests at once | 151 | **≈ 229** | 200.5 | peer + MTP, 8 slots, `vram-reserve-mib` 1500 |
+| 4 requests at once, 4.3K-token prompts | 37 | **62** | 58 | split |
+| Quality: correct / same text as llama.cpp (of 10) | 10 / 10 | 10 / 8 | 10 / 9 | |
+
+**Basalt's two-GPU modes** (decode t/s, 4.3K-token prompt; steps 6, 7, 11):
+
+| Mode | Exact | MTP, prose | MTP, JSON | 4 requests (short) | 126K prompt |
+|---|---|---|---|---|---|
+| One card | 72.3 | 104.8 | 170.5 | 125 | 54.6 s |
+| peer | 77.4 | 113.1 | 193.3 | 146 (exact) / 173 (MTP) | 34.7 s |
+| split | 71.0 | 107.4 | 184.5 | 121 / 165 | 35.8 s |
+| `gpu-share` 0.4,0.6 / 0.6,0.4 (split), 1,1 (peer) | 70.4–77.6 | – | – | – | – |
+
+**The UD-IQ3_XXS pack** (better quality, 46.8 GiB of experts): 0–8 % slower than GSQ-RCO IQ3_XXS; peer + MTP 112.3 / 200.9 t/s; fits in RAM in every mode.
 
 ## Findings
 
-Pending.
+1. **Basalt is the fastest engine here for one user**, on the same weights as Strata and llama.cpp: +14–18 % over Strata exact, +21–44 % with the drafter, 1.4–1.7× llama.cpp exact. It also reads prompts slightly faster (126K tokens in 34.7 s).
+2. **Peer is Basalt's best two-GPU mode**: the main card runs every layer, the second card holds 34 % of the experts and computes their rows, and reads part of long prompts. One chat gains 7–13 % over one card, a long prompt 1.6×.
+3. **For several requests the engines trade places.** Basalt keeps the MTP drafter in batches (peer + MTP: 144 t/s for 2, 173 for 4, 200 for 8); Strata's layer split pipelines batches across the cards but without drafts (113 / 173 / 229). Up to four requests Basalt is ahead or level; at eight Strata's layer split is ahead.
+4. **Split mode does not pay on these cards for Basalt** (no better than one card for one chat, behind peer for batches). Shares change nothing.
+5. **The route tail skip** drops half of the misses (1.5–6 % of all routed experts) for 1–8 % speed, the same picture as Strata. Off by default in both and stays off.
+6. **Memory:** peer mode needs the most RAM (lowest MemAvailable 3.5 GB at 128K context, 5.1 GB with the UD pack); 8 slots in peer mode need `vram-reserve-mib` 1500 or GPU 0 runs out of memory while capturing the slots' windows.
+7. **Pitfalls:** Basalt checks the request's `model` name (alias the config), writes a token-totals file next to the config (`"totals-file": "none"`), appends every start to one engine log per model, and has no `--version` flag.
+
+## The recommended two-GPU setup
+
+Basalt v0.5.7 with `"gpu": "0,1"`, `"gpu-mode": "peer"`, the pack's MTP drafter (default `spec` 8), `"kv": "int8"`, `"parallel": 4`, Basalt's default prompt cache, and the UD-IQ3_XXS pack for quality ([`configs/basalt-ud-peer-mtp.json`](configs/basalt-ud-peer-mtp.json) plus `"parallel": 4`; measured as [`configs/basalt-peer-mtp-par4.json`](configs/basalt-peer-mtp-par4.json) on the GSQ-RCO pack). For long contexts set `"max-context": 131072`. For a server that mostly takes eight or more simultaneous requests, Strata's layer split with `"parallel": 8` delivered more ([`2026-11-strata`](../2026-11-strata/README.md#the-recommended-two-gpu-setup)).
+
+## Not measured
+
+Long mixed workloads, sampled decoding, `relaxed-drafting` and `route-prior`, the NVFP4 packs (they need more RAM than 64 GB for all experts), more than 8 requests, context beyond 128K, the UD pack at long context and under concurrency, CPU power and cold-cache load times.

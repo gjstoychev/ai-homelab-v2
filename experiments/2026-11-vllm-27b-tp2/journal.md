@@ -229,9 +229,9 @@ Base: the recipe of step 7 (v0.32.0, NVFP4 KV, util 0.94, k=4, thinking off). `s
 | 2 (the recipe) | 463,166 | 44.2 / 68.6 / 70.0 | 68.5 / 96.9 / 97.1 | 13.14 s |
 | 4 | 446,867 | 45.6 / 69.4 / **94.0** | 67.6 / 97.2 / 120.2 (one group; the others had a request that stopped early) | 13.16 s |
 
-- Total throughput rises only up to as many requests as there are slots: with `max-num-seqs` 1 two or four requests simply queue (4th request's first token at 19 s), with 2 the last of four waits 10 s, with 4 it waits 5.7 s. Per-stream decode falls as streams share the steps (prose 58 → 52 → 38 t/s at 1 / 2 / 4 requests with 4 slots), the total still rises.
+- Total throughput rises only up to as many requests as there are slots: with `max-num-seqs` 1 two or four requests simply queue (4th request's first token at 19 s), with 2 the last of four waits 10 s, with 4 it waits 5.7 s. Per-stream decode falls as streams share the steps (prose 61 → 51 → 38 t/s at 1 / 2 / 4 requests with 4 slots), the total still rises.
 - Each extra slot costs KV pool (463K → 447K from 2 to 4 slots). Time to first token at 32K is the same for all three: one prompt is read at a time, whatever the slots.
-- Early stops: under concurrency 8 of the 36 structured streams of the TP runs ended early with a short answer (an error object, a single record, `[]`): the "Request n.i of a batch test" line at the top changes what the model answers. They are flagged in `results.jsonl` (`short`) and the groups containing them are left out of the totals above.
+- Early stops: under concurrency 7 of the 63 measured structured streams of the TP runs (none of the 21 of the PP run, none of the prose streams) ended early with a short answer (an error object, a single record, `[]`): the "Request n.i of a batch test" line at the top changes what the model answers. They are flagged in `results.jsonl` (`short`) and the groups containing them are left out of the totals above.
 
 **Pipeline parallelism** (`--pipeline-parallel-size 2` in place of `--tensor-parallel-size 2`, `--max-num-seqs 4`, MTP k=4, NVFP4 KV). It took five starts (`runs/8-parallel/pp2*.out`, `console-1.txt` … `console-5.txt`):
 

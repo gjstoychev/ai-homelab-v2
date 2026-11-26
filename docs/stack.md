@@ -4,12 +4,12 @@ What is installed on each node right now, and every change to it. Experiments re
 
 ## formula — current state
 
-Recorded 2026-11-25.
+Recorded 2026-11-26.
 
 | Layer | Version | Source |
 |---|---|---|
 | OS | Ubuntu 24.04.5 LTS | |
-| Kernel | 7.0.0-43-generic | Ubuntu |
+| Kernel | 7.0.0-44-generic (`linux-image-7.0.0-44-generic` 7.0.0-44.44~24.04.1, HWE) | Ubuntu, installed by unattended-upgrades |
 | NVIDIA driver | 580.178.04, open kernel module (`nvidia-driver-580-server-open` 580.178.04-0ubuntu0.24.04.1) | Ubuntu; supports CUDA up to 13.0 |
 | GPU VBIOS | 98.06.4E.00.8B (both cards) | |
 | CUDA toolkit | 13.0 (`cuda-nvcc-13-0` 13.0.88-1, `libcublas-dev-13-0` 13.1.1.3-1), in `/usr/local/cuda-13.0` | NVIDIA apt repository |
@@ -21,6 +21,7 @@ Recorded 2026-11-25.
 | Basalt | v0.5.7 (commit `400b411`, engine 0.5.7), CUDA, `sm_120`/`sm_120a`, Qwen3.8-Flash-Next only (`BASALT_MODELS=qwen4exp`), in `~/basalt/v0.5.7/src/bin`; `~/basalt/current` points to it; server venv `src/.venv` (pinned `requirements.txt`) | built from source with `scripts/build-basalt.sh` |
 | Hugging Face CLI | `huggingface_hub` 2.4.0, `hf-xet` 1.8.0, in `~/venvs/hf` | pip in a venv |
 | Ollama | 0.32.14, installed, disabled at boot; started by hand when needed | v1 (Lab 0b; disabled by its role `ollama` on 2026-11-24) |
+| vLLM | Docker images `local/vllm-openai:v0.30.0` (`vllm/vllm-openai@sha256:8a69ffad…200a4b90`) and `local/vllm-openai:v0.32.0` (`@sha256:befccf0e…7957c5b34`), both CUDA 13.0.2 | pulled by digest (experiment `2026-11-vllm-27b-tp2`) |
 | Python | 3.12.3 | Ubuntu |
 
 ## Model storage
@@ -59,6 +60,8 @@ Not built yet.
 
 | Date | Node | Change |
 |---|---|---|
+| 2026-11-26 | formula | Docker: removed `local/llama.cpp:b12464-nccl`, `local/nvbandwidth:cuda13.0.0`, `ghcr.io/ggml-org/llama.cpp:full-cuda`, `ollama/ollama:0.32.14`, `nvidia/cuda:13.0.0-base-ubuntu24.04`, hello-world, and the build cache (15.8 GB); images 97.4 → 65.9 GB. vLLM v0.30.0 and v0.32.0 images pulled by digest (experiment `2026-11-vllm-27b-tp2`). |
+| 2026-11-26 | formula | Kernel 7.0.0-43 → 7.0.0-44 (HWE), installed by unattended-upgrades at 08:28 and running since the reboot at 12:50; the NVIDIA 580.178.04 open module loads on it. |
 | 2026-11-26 | formula | Basalt v0.5.7 built from source (experiment `2026-11-basalt`); Basalt packs GSQ-RCO IQ3_XXS (79.9 GB) and UD-IQ3_XXS (87.6 GB) downloaded to `~/models`. |
 | 2026-11-25 | formula | Strata v0.2.21 built from source (experiment `2026-11-strata`); Hugging Face CLI in `~/venvs/hf`; models: GSQ-RCO IQ3_XXS downloaded to `~/models`, batiai IQ3_XXS archived to `/mnt/models`. |
 | 2026-11-25 | formula | DeepSeek-V4-Flash-0731 UD-IQ1_M (81 GB) moved to `/mnt/models` with `scripts/move-model.sh`: copy 351 s (about 250 MB/s), direct-read verification 269 s, all three checksums OK. |

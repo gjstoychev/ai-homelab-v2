@@ -1,0 +1,18 @@
+date: Thu Nov 26 12:54:50 PM UTC 2026
+label: fp8-mtp4, reps: 1
+kernel: 7.0.0-44-generic
+driver: 580.178.04
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp4.args
+== ready in 119.1 s
+fp8-mtp4 prose      rep 0 (warm-up) prompt 4315 tok, ttft 1.4205 s, 256 tok at 57.32 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+fp8-mtp4 prose      rep 1           prompt 4315 tok, ttft 0.3022 s, 256 tok at 62.95 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+fp8-mtp4 structured rep 0 (warm-up) prompt 4335 tok, ttft 0.3074 s, 256 tok at 114.42 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+fp8-mtp4 structured rep 1           prompt 4335 tok, ttft 0.3401 s, 256 tok at 114.41 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+== peak VRAM per GPU (MiB):
+  GPU0: 15790
+  GPU1: 15790
+== peak server RSS / lowest MemAvailable (MiB): 36 / 51598

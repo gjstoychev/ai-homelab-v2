@@ -19,7 +19,7 @@ Full component list and topologies: [`docs/hardware.md`](docs/hardware.md). Kern
 | [`2026-11-llamacpp-flags`](experiments/2026-11-llamacpp-flags/) | How fast do 80 GB MoE models run on 32 GB of VRAM, one llama.cpp setting at a time? | done | [llama.cpp: 80 GB MoE models on 32 GB of VRAM](https://gshell.dev/blog/llamacpp-moe-beyond-vram/) |
 | [`2026-11-strata`](experiments/2026-11-strata/) | How fast does Strata run Qwen3.8-Flash-Next with the whole model (no route tail skip), against llama.cpp on the same GGUF, and what is the best way to use both GPUs? | done | |
 | [`2026-11-basalt`](experiments/2026-11-basalt/) | Is Basalt, Strata's Blackwell fork, faster on the same weights, and which two-card mode suits two 16 GB cards? | done | |
-| [`2026-11-vllm-27b-tp2`](experiments/2026-11-vllm-27b-tp2/) | Can this machine reproduce the published dual RTX 5060 Ti vLLM numbers for Qwen3.8-27B (TP=2, NVFP4, MTP) with the source's pinned versions, and what is the best two-GPU mode for a dense model that does not fit one card? | planned | |
+| [`2026-11-vllm-27b-tp2`](experiments/2026-11-vllm-27b-tp2/) | Can this machine reproduce the published dual RTX 5060 Ti vLLM numbers for Qwen3.8-27B (TP=2, NVFP4, MTP) with the source's pinned versions, and what is the best two-GPU mode for a dense model that does not fit one card? | in progress | |
 
 Each experiment directory has a `README.md` (question, setup with the full stack, results, findings), a `journal.md` (every step: why, the exact command, expected vs actual) and the scripts and raw output behind every number.
 

@@ -27,7 +27,9 @@ done < "$cfg"
 [[ -n $image ]] || { echo "no image in $cfg" >&2; exit 1; }
 
 docker rm -f "$NAME" > /dev/null 2>&1 || true
-stop() { docker stop -t 60 "$NAME" > /dev/null 2>&1 || true; }
+# -t 15: vLLM 0.30.0's shutdown can hang after it signals EngineCore; docker stop must end (SIGKILL) well inside
+# bench-run.sh's 30 s before it kills this script's process group, docker stop with it, and leaves the container up.
+stop() { docker stop -t 15 "$NAME" > /dev/null 2>&1 || true; }
 trap 'stop; exit 0' TERM INT
 
 echo "image: $image ($(docker image inspect "$image" --format '{{index .RepoDigests 0}}'))"

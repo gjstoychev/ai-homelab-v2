@@ -1,6 +1,6 @@
 # vLLM: Qwen3.8-27B on 2× RTX 5060 Ti with tensor parallelism, a reproduction
 
-Status: **planned** (2026-11-26). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
+Status: **in progress** (started 2026-11-26; phase A, smoke test done). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
 
 ## Question
 
@@ -23,7 +23,7 @@ The video and the repository pin the checkpoint on purpose: later revisions of `
 | NVIDIA driver, phase A | 580.178.04 (installed now) | runs CUDA 13.0.2 images (minimum 580.95.05) |
 | NVIDIA driver, phase B | **595.91.07**, the source's: Ubuntu's `nvidia-driver-595-server-open` 595.91.07-0ubuntu0.24.04.1 | the same package family as now (server, open kernel module) |
 
-The source's host: Ubuntu 26.04, kernel 7.0.0-31, driver 595.91.07, CUDA 13.2 (on the host; the containers use their own 13.0.2). Here: Ubuntu 24.04.5, kernel 7.0.0-43, i7-14700. Inside Docker the host's CUDA toolkit does not matter; the driver does.
+The source's host: Ubuntu 26.04, kernel 7.0.0-31, driver 595.91.07, CUDA 13.2 (on the host; the containers use their own 13.0.2). Here: Ubuntu 24.04.5, kernel 7.0.0-44 (since the reboot at 12:50 on 2026-11-26; the first, unfinished smoke try ran on 7.0.0-43), i7-14700. Inside Docker the host's CUDA toolkit does not matter; the driver does.
 
 **Two phases** separate the driver from everything else: phase A measures on the current driver, phase B installs 595.91.07 by hand and repeats the key runs. The difference is the driver's effect, and phase B is the exact reproduction.
 

@@ -1,0 +1,54 @@
+date: Thu Nov 26 01:07:08 PM UTC 2026
+label: fp8-mtp4, reps: 5
+kernel: 7.0.0-44-generic
+driver: 580.178.04
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp4.args
+== ready in 78.6 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 78.6 --label fp8-mtp4 --out experiments/2026-11-vllm-27b-tp2/runs/4-baseline/results.jsonl --reps 5 --kinds prose,structured --max-tokens 256
+fp8-mtp4 prose      rep 0 (warm-up) prompt 4328 tok, ttft 1.3868 s, 256 tok at 68.28 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.471
+fp8-mtp4 prose      rep 1           prompt 4331 tok, ttft 1.4013 s, 256 tok at 60.27 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.178
+fp8-mtp4 prose      rep 2           prompt 4329 tok, ttft 1.3777 s, 256 tok at 58.27 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.09
+fp8-mtp4 prose      rep 3           prompt 4330 tok, ttft 1.3803 s, 256 tok at 65.82 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.389
+fp8-mtp4 prose      rep 4           prompt 4330 tok, ttft 1.3804 s, 256 tok at 62.34 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.237
+fp8-mtp4 prose      rep 5           prompt 4330 tok, ttft 1.4028 s, 256 tok at 67.04 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.415
+fp8-mtp4 structured rep 0 (warm-up) prompt 4351 tok, ttft 1.3846 s, 256 tok at 122.15 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.414
+fp8-mtp4 structured rep 1           prompt 4350 tok, ttft 1.4087 s, 256 tok at 120.16 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.373
+fp8-mtp4 structured rep 2           prompt 4350 tok, ttft 1.4113 s, 256 tok at 116.25 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.18
+fp8-mtp4 structured rep 3           prompt 4348 tok, ttft 1.4125 s, 256 tok at 118.16 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.25
+fp8-mtp4 structured rep 4           prompt 4347 tok, ttft 1.4115 s, 256 tok at 116.2 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.18
+fp8-mtp4 structured rep 5           prompt 4350 tok, ttft 1.4117 s, 256 tok at 114.33 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.145
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 78.6 --label fp8-mtp4-repro --out experiments/2026-11-vllm-27b-tp2/runs/4-baseline/results.jsonl --reps 3 --kinds prose,structured,mixed --max-tokens 800 --thinking
+fp8-mtp4-repro prose      rep 0 (warm-up) prompt 4367 tok, ttft 1.3894 s, 800 tok at 68.73 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.472
+fp8-mtp4-repro prose      rep 1           prompt 4369 tok, ttft 1.416 s, 800 tok at 69.36 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.495
+fp8-mtp4-repro prose      rep 2           prompt 4369 tok, ttft 1.4177 s, 800 tok at 64.03 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.299
+fp8-mtp4-repro prose      rep 3           prompt 4370 tok, ttft 1.4199 s, 800 tok at 76.03 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.73
+fp8-mtp4-repro structured rep 0 (warm-up) prompt 4390 tok, ttft 1.3953 s, 800 tok at 83.69 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 3.008
+fp8-mtp4-repro structured rep 1           prompt 4390 tok, ttft 1.4229 s, 800 tok at 81.0 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.913
+fp8-mtp4-repro structured rep 2           prompt 4389 tok, ttft 1.3966 s, 800 tok at 79.8 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.875
+fp8-mtp4-repro structured rep 3           prompt 4388 tok, ttft 1.4228 s, 800 tok at 82.49 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.963
+fp8-mtp4-repro mixed      rep 0 (warm-up) prompt 4392 tok, ttft 1.4238 s, 800 tok at 75.72 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.728
+fp8-mtp4-repro mixed      rep 1           prompt 4397 tok, ttft 1.3975 s, 800 tok at 73.99 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.664
+fp8-mtp4-repro mixed      rep 2           prompt 4398 tok, ttft 1.3998 s, 800 tok at 77.03 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.768
+fp8-mtp4-repro mixed      rep 3           prompt 4396 tok, ttft 1.3966 s, 800 tok at 70.9 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.551
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/long-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 78.6 --label fp8-mtp4 --mode ttft --out experiments/2026-11-vllm-27b-tp2/runs/4-baseline/long.jsonl --targets 700,4500,34700 --reps 3
+fp8-mtp4: corpus 1527726 chars, needle obsidian-2824
+fp8-mtp4 700: 2130 chars at 4.48 chars/token
+fp8-mtp4 700 rep 1: prompt 580 tok, ttft 0.176 s (server - t/s), decode 90.17 t/s, needle found: 'obsidian-2824'
+fp8-mtp4 700 rep 2: prompt 579 tok, ttft 0.212 s (server - t/s), decode 90.06 t/s, needle found: 'obsidian-2824'
+fp8-mtp4 700 rep 3: prompt 577 tok, ttft 0.211 s (server - t/s), decode 89.88 t/s, needle found: 'obsidian-2824'
+fp8-mtp4 4500: 15387 chars at 3.77 chars/token
+fp8-mtp4 4500 rep 1: prompt 4211 tok, ttft 1.341 s (server - t/s), decode 74.59 t/s, needle found: 'obsidian-2824'
+fp8-mtp4 4500 rep 2: prompt 4213 tok, ttft 1.362 s (server - t/s), decode 74.59 t/s, needle found: 'obsidian-2824'
+fp8-mtp4 4500 rep 3: prompt 4212 tok, ttft 1.361 s (server - t/s), decode 74.95 t/s, needle found: 'obsidian-2824'
+fp8-mtp4 34700: 104124 chars at 3.18 chars/token
+fp8-mtp4 34700 rep 1: prompt 32266 tok, ttft 13.164 s (server - t/s), decode 81.25 t/s, needle found: 'obsidian-2824'
+fp8-mtp4 34700 rep 2: prompt 32266 tok, ttft 13.133 s (server - t/s), decode 78.8 t/s, needle found: 'obsidian-2824'
+fp8-mtp4 34700 rep 3: prompt 32267 tok, ttft 13.14 s (server - t/s), decode 86.56 t/s, needle found: 'obsidian-2824'
+== peak VRAM per GPU (MiB):
+  GPU0: 15790
+  GPU1: 15790
+== peak server RSS / lowest MemAvailable (MiB): 36 / 51366

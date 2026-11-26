@@ -1,6 +1,6 @@
 # vLLM: Qwen3.8-27B on 2× RTX 5060 Ti with tensor parallelism, a reproduction
 
-Status: **in progress** (started 2026-11-26; phase A, smoke test done). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
+Status: **in progress** (started 2026-11-26; phase A, steps 3–4 done). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
 
 ## Question
 
@@ -88,7 +88,17 @@ After step 0 the NVMe has about 268 GB free.
 
 ## Results
 
-Pending.
+Phase A (driver 580.178.04, kernel 7.0.0-44, 180 W), vLLM 0.30.0, fp8 KV. Decode in t/s; the source's prompts are not published, so the reproduction mode is in kind. Details and the shared client's numbers: [`runs/4-baseline/summary.md`](runs/4-baseline/summary.md), journal step 4.
+
+| | Source | Here, MTP off | Here, MTP k=4 |
+|---|---|---|---|
+| KV pool, tokens | 351,618 / 278,927 | 348,478 | 273,333 |
+| Decode, prose (thinking on, 800 tokens) | 41.99 / 78.31 | 42.05 | 69.81 (64.0–76.0) |
+| Decode, structured | 41.99 / 124.89 | 42.05 | 81.10 with thinking (all reasoning); 117.02 as JSON, thinking off |
+| Decode, mixed | 41.99 / 81.61 | 42.05 | 73.97 |
+| TTFT at ~0.5K / 4K / 32K tokens | 0.141 / 0.987 / 10.521 s | 0.187 / 1.314 / 12.417 s | 0.200 / 1.355 / 13.146 s |
+
+More steps to come.
 
 ## Findings
 

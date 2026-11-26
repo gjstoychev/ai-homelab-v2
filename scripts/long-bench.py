@@ -12,6 +12,8 @@ is read badly shows as a wrong answer, not only as a time.
 ttft: for each target, one calibration request on a short slice gives the characters per token; then REPS requests
       of the same prompt (streamed, temperature 0, thinking off, max_tokens 64, no prompt reuse). Measured: TTFT,
       prompt t/s (server timings), decode t/s after the prompt, and whether the needle came back.
+      --unique-prefix: each request starts with its own random line, so no rep reuses an earlier one's prompt from a
+      server-side prefix cache (vLLM's --enable-prefix-caching ignores cache_prompt).
 job:  REPS runs of a four-turn conversation over a document of --job-tokens: summary, a list from the text, a script,
       the needle. Prompt reuse ON (the server's own caches, as an agent would have them); a random session tag at the
       start of every run, so a run does not reuse an earlier run's prompt. Measured: the wall time of the whole job,
@@ -133,6 +135,7 @@ def main():
     ap.add_argument("--corpus-dir", default=os.environ.get("LONG_CORPUS", str(Path.home() / "strata/v0.2.21/src/docs")))
     ap.add_argument("--load-s", type=float, default=None)
     ap.add_argument("--timeout", type=float, default=3600)
+    ap.add_argument("--unique-prefix", action="store_true", default=os.environ.get("BENCH_UNIQUE_PREFIX") == "1")
     a = ap.parse_args()
 
     text = corpus(a.corpus_dir)
@@ -149,8 +152,9 @@ def main():
                 n_chars, cpt = sized(a.url, text, target, a.timeout)
                 doc = document(text, n_chars, needle)
                 print(f"{a.label} {target}: {n_chars} chars at {cpt:.2f} chars/token", flush=True)
-                msgs = [{"role": "user", "content": doc + "\n\n" + QUESTION}]
                 for rep in range(1, a.reps + 1):
+                    tag = f"Request {uuid.uuid4().hex[:12]}.\n\n" if a.unique_prefix else ""
+                    msgs = [{"role": "user", "content": tag + doc + "\n\n" + QUESTION}]
                     try:
                         out, m = chat(a.url, msgs, 64, a.timeout, False)
                     except urllib.error.HTTPError as e:       # e.g. 400: the prompt does not fit the context
@@ -159,7 +163,8 @@ def main():
                         print(f"{a.label} {target} rep {rep}: HTTP {e.code}: {err}", flush=True)
                         break
                     rec = {**meta, "target": target, "rep": rep, "chars_per_token": round(cpt, 3),
-                           "needle": needle_word, "needle_found": needle_word in out, "text": out[:200], **m,
+                           "needle": needle_word, "needle_found": needle_word in out, "text": out[:200],
+                           "unique_prefix": a.unique_prefix, **m,
                            "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
                     f.write(json.dumps(rec) + "\n")
                     f.flush()

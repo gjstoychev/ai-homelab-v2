@@ -10,7 +10,7 @@ Recorded 2026-11-26.
 |---|---|---|
 | OS | Ubuntu 24.04.5 LTS | |
 | Kernel | 7.0.0-44-generic (`linux-image-7.0.0-44-generic` 7.0.0-44.44~24.04.1, HWE) | Ubuntu, installed by unattended-upgrades |
-| NVIDIA driver | 580.178.04, open kernel module (`nvidia-driver-580-server-open` 580.178.04-0ubuntu0.24.04.1) | Ubuntu; supports CUDA up to 13.0 |
+| NVIDIA driver | 595.91.07, open kernel module (`nvidia-driver-595-server-open`, on apt hold); `nvidia-smi` reports CUDA 13.2; `nvidia-persistenced` active | Ubuntu; DKMS built for 7.0.0-44 only |
 | GPU VBIOS | 98.06.4E.00.8B (both cards) | |
 | CUDA toolkit | 13.0 (`cuda-nvcc-13-0` 13.0.88-1, `libcublas-dev-13-0` 13.1.1.3-1), in `/usr/local/cuda-13.0` | NVIDIA apt repository |
 | NCCL | 2.28.9-1+cuda13.0 (`libnccl2`, `libnccl-dev`) | NVIDIA apt repository |
@@ -60,6 +60,7 @@ Not built yet.
 
 | Date | Node | Change |
 |---|---|---|
+| 2026-11-26 | formula | NVIDIA driver 580.178.04 → 595.91.07 (`nvidia-driver-595-server-open`, installed by hand with `apt-get install`, package on `apt-mark hold`), rebooted on kernel 7.0.0-44. Verified: both RTX 5060 Ti at 595.91.07, power limit 180 W, both cards visible inside `local/vllm-openai:v0.32.0`, `nvidia-persistenced` active. Way back: `nvidia-driver-580-server-open`. |
 | 2026-11-26 | formula | Docker: removed `local/llama.cpp:b12464-nccl`, `local/nvbandwidth:cuda13.0.0`, `ghcr.io/ggml-org/llama.cpp:full-cuda`, `ollama/ollama:0.32.14`, `nvidia/cuda:13.0.0-base-ubuntu24.04`, hello-world, and the build cache (15.8 GB); images 97.4 → 65.9 GB. vLLM v0.30.0 and v0.32.0 images pulled by digest (experiment `2026-11-vllm-27b-tp2`). |
 | 2026-11-26 | formula | Kernel 7.0.0-43 → 7.0.0-44 (HWE), installed by unattended-upgrades at 08:28 and running since the reboot at 12:50; the NVIDIA 580.178.04 open module loads on it. |
 | 2026-11-26 | formula | Basalt v0.5.7 built from source (experiment `2026-11-basalt`); Basalt packs GSQ-RCO IQ3_XXS (79.9 GB) and UD-IQ3_XXS (87.6 GB) downloaded to `~/models`. |

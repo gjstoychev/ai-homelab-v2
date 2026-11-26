@@ -1,0 +1,21 @@
+{
+ "version": 2,
+ "models": [
+  {
+   "model": "/home/llama/models/qwen3.8-flash-next-basalt-gsq-rco-iq3xxs/Qwen3.8-FN-GSQ-RCO-IQ3_XXS.basalt",
+   "gpu": "0,1",
+   "max-context": 131072,
+   "kv": "int8",
+   "prompt-cache": 0,
+   "gpu-mode": "split",
+   "spec": 0,
+   "suffix-draft": 0,
+   "alias": "bench"
+  }
+ ],
+ "server": {
+  "host": "127.0.0.1",
+  "port": 8080,
+  "totals-file": "none"
+ }
+}

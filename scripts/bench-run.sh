@@ -3,6 +3,8 @@
 #
 #   scripts/bench-run.sh OUTDIR LABEL [REPS] -- <server command ...>
 #   (REPS 0: start, report the load, stop; no requests)
+#   BENCH_ENGINE_LOG=<file>: an engine log the server appends to across starts (Basalt: ~/.cache/basalt/<id>/engine.log);
+#   the part written during this run is saved as OUTDIR/LABEL.engine.log.
 #   BENCH_CLIENT=<script> runs another client with the same arguments (scripts/quality-check.py), writing
 #   OUTDIR/results.jsonl as well.
 #   e.g. scripts/bench-run.sh experiments/2026-11-strata/runs/7-llamacpp 1gpu-fit 5 -- \
@@ -73,10 +75,14 @@ cleanup() {
     for _ in $(seq 60); do kill -0 -- "-$SERVER" 2>/dev/null || break; sleep 0.5; done
     kill -KILL -- "-$SERVER" 2>/dev/null
   fi
+  [ -z "$ELOG" ] || [ ! -f "$ELOG" ] || tail -c +$(( ELOG_OFF + 1 )) "$ELOG" > "$P.engine.log"
   kill "$GPU_SAMPLER" "${RAM_SAMPLER:-}" 2>/dev/null
   [ -z "$CPU_SAMPLER" ] || { sudo -n kill "$CPU_SAMPLER" 2>/dev/null; sudo -n chown "$(id -u):$(id -g)" "$P.cpu.csv" 2>/dev/null; }
 }
 trap cleanup EXIT
+
+ELOG=${BENCH_ENGINE_LOG:-}
+ELOG_OFF=0; [ -n "$ELOG" ] && [ -f "$ELOG" ] && ELOG_OFF=$(stat -c %s "$ELOG")
 
 t0=$(date +%s.%N)
 setsid "${CMD[@]}" > "$P.out" 2>&1 < /dev/null &

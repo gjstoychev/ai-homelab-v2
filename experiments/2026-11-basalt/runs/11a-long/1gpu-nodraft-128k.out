@@ -1,0 +1,72 @@
+[server] legend   pp=prompt read  tg=generation  c=cached  acc=drafts accepted  dl=tokens per window  hit=expert cache  pcie=routed experts over PCIe
+[server] bench  ctx=131072 kv=int8 prompt-cache=0 suffix-draft=0 spec=0 temp=1.0 top_p=0.95 top_k=20
+[server] engine log: /home/llama/.cache/basalt/2d72cadc08663624/engine.log
+[server] ready    http://127.0.0.1:8080/v1  openai+anthropic  stats http://127.0.0.1:8080/
+[server] warning: this CPU has no AVX-512: the expert kernels run on AVX-2 (multi-token for the i-quant gate/up rows)
+[server] planning weight allocation
+[server] auto     ram-experts=42.1GB pool-affinity=auto pool=19
+[server] placed   ram 29.4GiB 11.5s
+[server] placed   cuda0 13.8GiB 13.1s
+[server] warning: fallback: dense_tc projection on native_mmvq (types 4 / 21)
+[server] warning: fallback: dense_tc projection on native_mmvq (types 8 / 21)
+[server] loaded   43.3GiB 13.5s  cuda0=13.8GiB ram=29.5GiB
+[server] kv       0.6/1.9GiB cuda0 elastic
+[server] weights  loaded, ctx=131072 images=off
+[server] live | s1 tg=1/1 | total 0t/s
+[server] s1 done  pp=4631/0c 2.6s 1813t/s  tg=1 66.2t/s  ttft=2.6s  end=length  hit=60.0%  pcie=0.0%
+[server] live | s1 tg=1/1 | total 0t/s
+[server] s1 done  pp=4720/0c 2.6s 1850t/s  tg=1 64.9t/s  ttft=2.6s  end=length  hit=58.1%  pcie=0.0%
+[server] s1 read  pp=14336/32804 2635t/s 5s
+[server] s1 read  pp=26987/32804 2518t/s 11s
+[server] live | s1 tg=1/64 | total 0t/s
+[server] s1 done  pp=32804/0c 13.6s 2416t/s  tg=8 57.8t/s  ttft=13.6s  end=stop  hit=41.7%  pcie=0.0%
+[server] s1 read  pp=13312/32804 2650t/s 5s
+[server] s1 read  pp=26987/32804 2549t/s 11s
+[server] live | s1 tg=1/64 | total 0t/s
+[server] s1 done  pp=32804/0c 13.5s 2438t/s  tg=8 66.0t/s  ttft=13.5s  end=stop  hit=66.4%  pcie=0.0%
+[server] s1 read  pp=13312/32804 2646t/s 5s
+[server] s1 read  pp=25619/32804 2552t/s 10s
+[server] live | s1 tg=1/64 | total 0t/s
+[server] s1 done  pp=32804/0c 13.5s 2435t/s  tg=8 68.1t/s  ttft=13.5s  end=stop  hit=72.8%  pcie=0.0%
+[server] live | s1 tg=1/1 | total 0t/s
+[server] s1 done  pp=4631/0c 2.5s 1861t/s  tg=1 70.4t/s  ttft=2.5s  end=length  hit=73.5%  pcie=0.0%
+[server] live | s1 tg=1/1 | total 0t/s
+[server] s1 done  pp=4743/0c 2.9s 1658t/s  tg=1 70.9t/s  ttft=2.9s  end=length  hit=73.3%  pcie=0.0%
+[server] s1 read  pp=14336/126586 2615t/s 5s
+[server] s1 read  pp=28480/126586 2592t/s 11s
+[server] s1 read  pp=42304/126586 2554t/s 17s
+[server] s1 read  pp=54400/126586 2502t/s 22s
+[server] s1 read  pp=66496/126586 2480t/s 27s
+[server] s1 read  pp=79168/126586 2459t/s 32s
+[server] s1 read  pp=91264/126586 2422t/s 38s
+[server] s1 read  pp=103302/126586 2404t/s 43s
+[server] s1 read  pp=114092/126586 2376t/s 48s
+[server] s1 read  pp=126017/126586 2361t/s 53s
+[server] live | s1 tg=1/64 | total 0t/s
+[server] s1 done  pp=126586/0c 54.6s 2320t/s  tg=8 63.9t/s  ttft=54.6s  end=stop  hit=62.6%  pcie=0.0%
+[server] s1 read  pp=14336/126586 2612t/s 5s
+[server] s1 read  pp=28480/126586 2589t/s 11s
+[server] s1 read  pp=42304/126586 2552t/s 17s
+[server] s1 read  pp=54400/126586 2500t/s 22s
+[server] s1 read  pp=66496/126586 2479t/s 27s
+[server] s1 read  pp=79168/126586 2458t/s 32s
+[server] s1 read  pp=91264/126586 2421t/s 38s
+[server] s1 read  pp=103302/126586 2404t/s 43s
+[server] s1 read  pp=114092/126586 2376t/s 48s
+[server] s1 read  pp=126017/126586 2361t/s 53s
+[server] live | s1 tg=1/64 | total 0t/s
+[server] s1 done  pp=126586/0c 54.6s 2320t/s  tg=8 66.0t/s  ttft=54.6s  end=stop  hit=69.5%  pcie=0.0%
+[server] s1 read  pp=14336/126586 2620t/s 5s
+[server] s1 read  pp=28480/126586 2594t/s 11s
+[server] s1 read  pp=42304/126586 2555t/s 17s
+[server] s1 read  pp=54400/126586 2502t/s 22s
+[server] s1 read  pp=66496/126586 2481t/s 27s
+[server] s1 read  pp=79168/126586 2460t/s 32s
+[server] s1 read  pp=91264/126586 2423t/s 38s
+[server] s1 read  pp=103302/126586 2406t/s 43s
+[server] s1 read  pp=114092/126586 2378t/s 48s
+[server] s1 read  pp=126017/126586 2362t/s 53s
+[server] live | s1 tg=1/64 | total 0t/s
+[server] s1 done  pp=126586/0c 54.5s 2321t/s  tg=8 67.0t/s  ttft=54.6s  end=stop  hit=72.6%  pcie=0.0%
+[server] stopping (Ctrl+C again to force)
+[server] stopped

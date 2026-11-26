@@ -117,3 +117,64 @@ for `<run>` = `1gpu-nodraft`, `1gpu-mtp`, `peer-nodraft`, `peer-mtp`, `split-nod
 - Basalt is faster than Strata in every configuration: +14–18 % exact, +21–44 % with the drafter. Part of the drafter gap is the window (8 against 4 tokens); exact decoding has no drafter and still gains 15 %.
 - **Basalt's best two-card mode for one chat is peer**: +7 % exact and +8 % (prose) / +13 % (JSON) with MTP over one card. Split is no better than one card without drafting (71.0 against 72.3) and in between with MTP.
 - As with Strata, the second card adds little to one chat: 7–13 %.
+
+## 11. Two GPUs, every mode (2026-11-26)
+
+**Why:** the main question, with the matrix of `2026-11-strata` step 13 and the same clients. Run as one batch, `experiments/2026-11-basalt/scripts/run-matrix.sh`; every run through `scripts/bench-run.sh`, which now saves the run's part of Basalt's appended engine log (`BENCH_ENGINE_LOG`) as `<run>.engine.log`. The UD-IQ3_XXS download ran during the first half (paused 08:38–08:49 at the user's request).
+
+### 11a. Long context and the four-turn job
+
+**Configs:** the no-drafting configs with `"max-context": 131072` (`basalt-{1gpu,peer,split}-nodraft-128k.json`), and the same without `"prompt-cache": 0` for the job (Basalt's default of 6 checkpoints). No `kv-resident`: Basalt's own elastic KV handles a long context on one card and in peer mode ("each session backs its first 32,768 cells at start … more cells come from the expert cache when a request needs them"); split keeps its KV on its cards.
+
+**Actual** (`runs/11a-long/summary.md`; needle found in all 18 long requests and all 9 jobs):
+
+| | Basalt 1 GPU | Basalt peer | Basalt split | Strata best (layer split) | llama.cpp, 2 GPUs |
+|---|---|---|---|---|---|
+| 32,804 tokens: TTFT | 13.5 s (2,430 t/s) | **10.5 s** (3,131) | 10.6 s (3,107) | 10.5 s | 39.7 s |
+| 126,586 tokens: TTFT | 54.6 s (2,320) | **34.7 s** (3,649) | 35.8 s (3,544) | 36.3 s | 153.4 s |
+| Four-turn job | 30.7–31.0 s | **25.2–25.8 s** | 27.0–28.7 s | 28.7–29.4 s | 62.2–65.3 s |
+
+Decode with 126K behind it: 75–79 t/s on one card and split, 87–88 in peer mode. Peer mode at 128K left the least RAM: lowest MemAvailable 3.5 GB (RSS 47 GiB).
+
+### 11b. Shares
+
+**Configs:** split with `"gpu-share": "0.4,0.6"` (layers 0–17 / 18–47) and `"0.6,0.4"` (0–28 / 29–47); peer with `"gpu-share": "1,1"` (also interleaves the hottest experts between the cards; 8,414 experts on GPU 1).
+
+**Actual** (`runs/11b-shares/summary.md`): split 70.4 / 71.2 decode (default cut 71.0), prompt 1,804 / 1,860; peer 77.6 / 78.5 (default 77.4 / 78.4). **Verdict:** no effect, as the split point had none in Strata.
+
+### 11c. Several requests at once
+
+**Configs:** `"parallel": 4` (one card, peer, split; peer and split also with MTP) and `"parallel": 8` (peer, split). Peer with 8 slots did not start: "error: capturing slot 4's solo windows failed: verify: instantiate: out of memory" on GPU 0. With `"vram-reserve-mib": 1500` it starts (`basalt-peer-{nodraft,mtp}-par8-res1500.json`).
+
+**Actual, short prompts** (512 tokens per stream, total t/s; `runs/11c-concurrency-short/summary.md`):
+
+| | 1 request (decode t/s) | 2 at once | 4 at once | 8 at once |
+|---|---|---|---|---|
+| Basalt, 1 GPU | 70.4 | 96.2 | 125.2 | – |
+| Basalt peer | 77.7 | 107.4 | 145.8 | 189.8 |
+| Basalt split | 70.8 | 91.0 | 120.6 | 147.4 |
+| **Basalt peer + MTP** | **121.2** | **144.2** | **173.4** | **200.5** |
+| Basalt split + MTP | 115.7 | 138.4 | 164.7 | – |
+| Strata layer split (step 13e) | 65.3 | 113.1 | 173.1 | ≈ 229 |
+| Strata layer split + MTP | 94.1 | 112.4 | 172.2 | – |
+| llama.cpp, 2 GPUs | 52.1 | 85.5 | 117.1 | 151.2 |
+
+**Actual, 4.3K-token prompts** (total t/s including prompt reading; `runs/11c-concurrency/summary.md`): one card 41.8 / 54.4 (2 / 4 at once), peer 44.0 / 56.4, split 43.2 / 58.2. Strata's layer split: 46.8 / 61.7.
+
+**Verdict:**
+- Basalt keeps the MTP drafter when several requests run; Strata's pipelined batches do not draft. So Basalt peer + MTP is the best at 1–2 requests (121 / 144 t/s against Strata's 94 / 113) and level with Strata at 4 (173).
+- Basalt's split does not pipeline batches across the cards the way Strata's layer split does: from 4 requests on without drafting, Strata's layer split is ahead (173 against 121–146 at 4; ≈ 229 against 190–200 at 8).
+- With long prompts both engines are prompt-bound and within 10 % of each other.
+
+### 11d. Basalt's best two-GPU setup per use
+
+| Use | Best Basalt setup | Basalt | Strata's best | llama.cpp, 2 GPUs |
+|---|---|---|---|---|
+| One chat, exact | peer | 77.4 t/s | 66.9 | 53.1 |
+| One chat, MTP, prose / JSON | peer + MTP | 113.1 / 193.3 t/s | 93.4 / 159.2 | – |
+| 126K-token prompt | peer | 34.7 s | 36.3 s | 153.4 s |
+| Four-turn job | peer | 25.5 s | 29.0 s | 64.2 s |
+| 2 / 4 requests (short) | peer + MTP, 4 slots | 144 / 173 t/s | 113 / 173 | 86 / 117 |
+| 8 requests (short) | peer + MTP, 8 slots, `vram-reserve-mib` 1500 | 200.5 t/s | ≈ 229 | 151 |
+
+The all-round Basalt setup is **peer + MTP** (`basalt-peer-mtp-par4.json`): the fastest single chat measured on this machine, the fastest long prompt and job, and level with Strata at four requests. Strata's layer split is still ahead from about four to eight simultaneous requests.

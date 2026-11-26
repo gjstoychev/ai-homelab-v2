@@ -1,0 +1,17 @@
+[server] legend   pp=prompt read  tg=generation  c=cached  acc=drafts accepted  dl=tokens per window  hit=expert cache  pcie=routed experts over PCIe
+[server] bench  ctx=4096 (32768/8 slots) kv=int8 prompt-cache=0 suffix-draft=0 batch=8 spec=0 temp=1.0 top_p=0.95 top_k=20
+[server] engine log: /home/llama/.cache/basalt/2d72cadc08663624/engine.log
+[server] ready    http://127.0.0.1:8080/v1  openai+anthropic  stats http://127.0.0.1:8080/
+[server] warning: this CPU has no AVX-512: the expert kernels run on AVX-2 (multi-token for the i-quant gate/up rows)
+[server] planning weight allocation
+[server] auto     peer-excl=off ram-experts=35.1GB pool-affinity=auto pool=19
+[server] placed   ram 30.5GiB 9.0s
+[server] placed   cuda0 12.7GiB 11.0s
+[server] warning: fallback: dense_tc projection on native_mmvq (types 4 / 21)
+[server] warning: fallback: dense_tc projection on native_mmvq (types 8 / 21)
+[server] warning: the 6-token window failed with programmatic dependent launch (out of memory): capturing it without
+[server] loaded   43.3GiB 13.7s  cuda0=12.7GiB cuda1=0.0GiB ram=30.6GiB
+[server] kv       1.4GiB cuda0 slots=8x4096
+[server] error: capturing slot 4's solo windows failed: verify: instantiate: out of memory
+[server] engine log: /home/llama/.cache/basalt/2d72cadc08663624/engine.log
+[server] stopped

@@ -1,0 +1,114 @@
+[server] legend   pp=prompt read  tg=generation  c=cached  acc=drafts accepted  dl=tokens per window  hit=expert cache  pcie=routed experts over PCIe
+[server] bench  ctx=8192 (32768/4 slots) kv=int8 prompt-cache=0 suffix-draft=0 batch=4 spec=0 temp=1.0 top_p=0.95 top_k=20
+[server] engine log: /home/llama/.cache/basalt/2d72cadc08663624/engine.log
+[server] ready    http://127.0.0.1:8080/v1  openai+anthropic  stats http://127.0.0.1:8080/
+[server] warning: this CPU has no AVX-512: the expert kernels run on AVX-2 (multi-token for the i-quant gate/up rows)
+[server] planning weight allocation
+[server] auto     ram-experts=25.3GB pool-affinity=auto pool=19
+[server] placed   ram 20.3GiB 9.3s
+[server] placed   cuda1 13.6GiB 10.4s
+[server] placed   cuda0 13.5GiB 10.4s
+[server] loaded   47.5GiB 10.9s  cuda0=13.6GiB cuda1=13.6GiB ram=20.3GiB
+[server] kv       0.6GiB cuda1 solo=8192 slots=4x8192
+[server] kv       0.6GiB cuda0 solo=8192 slots=4x8192
+[server] slots    slots 4 × 8192 ctx (slot-full-context: 32768 each), others queue
+[server] weights  loaded, ctx=8192 images=off
+basalt verify: warning: fallback: dense_tc projection on native_mmvq (types 4 / 21)
+basalt verify: warning: fallback: dense_tc projection on native_mmvq (types 8 / 21)
+[server] live | s1 tg=7/512 | total 0t/s
+[server] live | s1 tg=148/512 70.2t/s | total 70t/s
+[server] live | s1 tg=291/512 70.6t/s | total 71t/s
+[server] live | s1 tg=435/512 70.8t/s | total 71t/s
+[server] s1 done  pp=63/0c 0.9s  tg=512 70.6t/s  ttft=0.9s  end=length  hit=96.5%  pcie=0.0%
+[server] live | s1 tg=9/512 | total 0t/s
+[server] live | s1 tg=154/512 71.8t/s | total 72t/s
+[server] live | s1 tg=298/512 71.7t/s | total 72t/s
+[server] live | s1 tg=442/512 71.6t/s | total 72t/s
+[server] s1 done  pp=63/0c 0.9s  tg=512 71.4t/s  ttft=0.9s  end=length  hit=98.2%  pcie=0.0%
+[server] live | s1 tg=83/512 72.7t/s | total 73t/s
+[server] live | s1 tg=228/512 72.2t/s | total 72t/s
+[server] live | s1 tg=372/512 72.0t/s | total 72t/s
+[server] live | s1 tg=498/512 69.3t/s | total 69t/s
+[server] s1 done  pp=63/0c 0.9s  tg=512 69.3t/s  ttft=0.9s  end=length  hit=98.5%  pcie=0.0%
+[server] live | s1 tg=83/512 72.8t/s | total 73t/s
+[server] live | s1 tg=228/512 72.1t/s | total 72t/s
+[server] live | s1 tg=372/512 72.0t/s | total 72t/s
+[server] s1 done  pp=63/0c 0.9s  tg=512 71.7t/s  ttft=0.9s  end=length  hit=98.7%  pcie=0.0%
+[server] live | s1 tg=2/512 2.2t/s | total 2t/s
+[server] live | s1 tg=65/512 22.1t/s | s2 tg=59/512 55.7t/s | total 78t/s
+[server] live | s1 tg=178/512 35.9t/s | s2 tg=172/512 55.9t/s | total 92t/s
+[server] live | s1 tg=290/512 41.7t/s | s2 tg=283/512 55.7t/s | total 97t/s
+[server] live | s1 tg=402/512 44.8t/s | s2 tg=396/512 55.8t/s | total 101t/s
+[server] s1 done  pp=63/0c 1.7s  tg=512 51.1t/s  ttft=0.9s  end=length  hit=100.0%  pcie=0.0%
+[server] s2 done  pp=63/0c 0.9s  tg=512 56.2t/s  ttft=2.7s  end=length  hit=99.2%  pcie=0.0%
+[server] live | s3 tg=1/512 1.1t/s | total 1t/s
+[server] live | s3 tg=65/512 22.5t/s | s4 tg=60/512 56.5t/s | total 79t/s
+[server] live | s3 tg=177/512 36.2t/s | s4 tg=172/512 56.1t/s | total 92t/s
+[server] live | s3 tg=289/512 41.9t/s | s4 tg=283/512 55.8t/s | total 98t/s
+[server] live | s3 tg=401/512 45.0t/s | s4 tg=396/512 55.9t/s | total 101t/s
+[server] s3 done  pp=63/0c 1.7s  tg=512 51.2t/s  ttft=0.9s  end=length  hit=99.6%  pcie=0.0%
+[server] s4 done  pp=63/0c 0.9s  tg=512 56.2t/s  ttft=2.7s  end=length  hit=99.2%  pcie=0.0%
+[server] live | s1 tg=5/512 5.3t/s | total 5t/s
+[server] live | s1 tg=117/512 39.6t/s | s2 tg=113/512 56.4t/s | total 96t/s
+[server] live | s1 tg=226/512 45.5t/s | s2 tg=221/512 55.1t/s | total 101t/s
+[server] live | s1 tg=338/512 48.5t/s | s2 tg=333/512 55.3t/s | total 104t/s
+[server] live | s1 tg=450/512 50.1t/s | s2 tg=446/512 55.6t/s | total 106t/s
+[server] s1 done  pp=63/0c 0.9s  tg=512 50.9t/s  ttft=0.9s  end=length  hit=99.0%  pcie=0.0%
+[server] s2 done  pp=63/0c 0.9s  tg=512 55.8t/s  ttft=1.8s  end=length  hit=99.6%  pcie=0.0%
+[server] live | s3 tg=5/512 5.4t/s | total 5t/s
+[server] live | s3 tg=119/512 40.3t/s | s4 tg=115/512 57.3t/s | total 98t/s
+[server] live | s3 tg=232/512 46.7t/s | s4 tg=228/512 56.6t/s | total 103t/s
+[server] live | s3 tg=344/512 49.3t/s | s4 tg=340/512 56.3t/s | total 106t/s
+[server] live | s3 tg=456/512 50.7t/s | s4 tg=452/512 56.2t/s | total 107t/s
+[server] s3 done  pp=63/0c 0.9s  tg=512 51.3t/s  ttft=0.9s  end=length  hit=99.6%  pcie=0.0%
+[server] s4 done  pp=63/0c 0.9s  tg=512 56.3t/s  ttft=1.8s  end=length  hit=99.4%  pcie=0.0%
+[server] live | s1 tg=1/512 1.1t/s | total 1t/s
+[server] live | s1 tg=14/512 3.7t/s | s2 tg=9/512 4.7t/s | s3 tg=5/512 5.2t/s | total 14t/s
+[server] live | s1 tg=95/512 16.4t/s | s2 tg=89/512 22.6t/s | s3 tg=85/512 28.5t/s | s4 tg=82/512 40.9t/s | total 108t/s
+[server] live | s1 tg=177/512 22.7t/s | s2 tg=171/512 28.7t/s | s3 tg=167/512 33.4t/s | s4 tg=163/512 40.5t/s | total 125t/s
+[server] live | s1 tg=260/512 26.4t/s | s2 tg=255/512 31.9t/s | s3 tg=250/512 35.5t/s | s4 tg=247/512 40.7t/s | total 135t/s
+[server] live | s1 tg=340/512 28.7t/s | s2 tg=335/512 33.5t/s | s3 tg=331/512 36.6t/s | s4 tg=327/512 40.5t/s | total 139t/s
+[server] live | s1 tg=422/512 30.4t/s | s2 tg=416/512 34.5t/s | s3 tg=412/512 37.2t/s | s4 tg=408/512 40.3t/s | total 142t/s
+[server] live | s1 tg=503/512 31.6t/s | s2 tg=498/512 35.4t/s | s3 tg=494/512 37.7t/s | s4 tg=490/512 40.4t/s | total 145t/s
+[server] s1 done  pp=63/0c 1.7s  tg=512 33.6t/s  ttft=0.9s  end=length  hit=99.8%  pcie=0.0%
+[server] s2 done  pp=63/0c 0.9s  tg=512 35.6t/s  ttft=2.7s  end=length  hit=99.8%  pcie=0.0%
+[server] s3 done  pp=63/0c 0.9s  tg=512 37.9t/s  ttft=3.7s  end=length  hit=99.8%  pcie=0.0%
+[server] s4 done  pp=63/0c 0.9s  tg=512 40.7t/s  ttft=4.6s  end=length  hit=99.8%  pcie=0.0%
+[server] live | s1 tg=1/512 1.1t/s | total 1t/s
+[server] live | s1 tg=13/512 4.5t/s | s2 tg=8/512 7.5t/s | s3 tg=4/512 | total 12t/s
+[server] live | s1 tg=59/512 12.0t/s | s2 tg=53/512 17.1t/s | s3 tg=49/512 23.0t/s | s4 tg=46/512 40.4t/s | total 93t/s
+[server] live | s1 tg=141/512 20.3t/s | s2 tg=136/512 26.6t/s | s3 tg=131/512 31.6t/s | s4 tg=128/512 40.5t/s | total 119t/s
+[server] live | s1 tg=223/512 24.8t/s | s2 tg=218/512 30.5t/s | s3 tg=213/512 34.4t/s | s4 tg=210/512 40.4t/s | total 130t/s
+[server] live | s1 tg=304/512 27.6t/s | s2 tg=299/512 32.6t/s | s3 tg=294/512 35.8t/s | s4 tg=291/512 40.3t/s | total 136t/s
+[server] live | s1 tg=384/512 29.5t/s | s2 tg=379/512 33.9t/s | s3 tg=375/512 36.7t/s | s4 tg=371/512 40.2t/s | total 140t/s
+[server] live | s1 tg=465/512 30.9t/s | s2 tg=459/512 34.8t/s | s3 tg=456/512 37.2t/s | s4 tg=452/512 40.2t/s | total 143t/s
+[server] s1 done  pp=63/0c 1.7s  tg=512 33.4t/s  ttft=0.9s  end=length  hit=100.0%  pcie=0.0%
+[server] s2 done  pp=63/0c 0.9s  tg=512 35.4t/s  ttft=2.7s  end=length  hit=99.8%  pcie=0.0%
+[server] s3 done  pp=63/0c 0.9s  tg=512 37.7t/s  ttft=3.7s  end=length  hit=99.6%  pcie=0.0%
+[server] s4 done  pp=63/0c 0.9s  tg=512 40.5t/s  ttft=4.6s  end=length  hit=99.6%  pcie=0.0%
+[server] live | s1 tg=1/512 1.1t/s | total 1t/s
+[server] live | s1 tg=13/512 4.5t/s | s2 tg=8/512 7.5t/s | s3 tg=4/512 | total 12t/s
+[server] live | s1 tg=60/512 12.2t/s | s2 tg=55/512 17.8t/s | s3 tg=50/512 23.6t/s | s4 tg=47/512 41.6t/s | total 95t/s
+[server] live | s1 tg=145/512 20.9t/s | s2 tg=139/512 27.2t/s | s3 tg=135/512 32.6t/s | s4 tg=131/512 41.5t/s | total 122t/s
+[server] live | s1 tg=227/512 25.3t/s | s2 tg=222/512 31.1t/s | s3 tg=217/512 35.2t/s | s4 tg=214/512 41.3t/s | total 133t/s
+[server] live | s1 tg=309/512 28.1t/s | s2 tg=303/512 33.0t/s | s3 tg=300/512 36.6t/s | s4 tg=296/512 41.0t/s | total 139t/s
+[server] live | s1 tg=391/512 30.0t/s | s2 tg=386/512 34.5t/s | s3 tg=381/512 37.2t/s | s4 tg=378/512 40.9t/s | total 143t/s
+[server] live | s1 tg=472/512 31.4t/s | s2 tg=466/512 35.2t/s | s3 tg=462/512 37.7t/s | s4 tg=458/512 40.7t/s | total 145t/s
+[server] s1 done  pp=63/0c 1.7s  tg=512 33.8t/s  ttft=0.9s  end=length  hit=99.8%  pcie=0.0%
+[server] s2 done  pp=63/0c 0.9s  tg=512 35.8t/s  ttft=2.7s  end=length  hit=99.8%  pcie=0.0%
+[server] s3 done  pp=63/0c 0.9s  tg=512 38.2t/s  ttft=3.7s  end=length  hit=99.6%  pcie=0.0%
+[server] s4 done  pp=63/0c 0.9s  tg=512 41.1t/s  ttft=4.7s  end=length  hit=99.6%  pcie=0.0%
+[server] live | s1 tg=5/512 5.4t/s | total 5t/s
+[server] live | s1 tg=13/512 4.4t/s | s2 tg=10/512 5.0t/s | s3 tg=6/512 5.8t/s | s4 tg=1/512 | total 15t/s
+[server] live | s1 tg=98/512 19.7t/s | s2 tg=94/512 23.4t/s | s3 tg=90/512 29.5t/s | s4 tg=86/512 41.6t/s | total 114t/s
+[server] live | s1 tg=174/512 24.9t/s | s2 tg=169/512 28.0t/s | s3 tg=166/512 32.8t/s | s4 tg=161/512 39.5t/s | total 125t/s
+[server] live | s1 tg=252/512 28.1t/s | s2 tg=248/512 30.9t/s | s3 tg=243/512 34.4t/s | s4 tg=240/512 39.5t/s | total 133t/s
+[server] live | s1 tg=334/512 30.4t/s | s2 tg=330/512 32.9t/s | s3 tg=325/512 35.8t/s | s4 tg=322/512 39.8t/s | total 139t/s
+[server] live | s1 tg=415/512 31.9t/s | s2 tg=411/512 34.0t/s | s3 tg=407/512 36.6t/s | s4 tg=404/512 39.9t/s | total 142t/s
+[server] live | s1 tg=497/512 33.0t/s | s2 tg=493/512 34.9t/s | s3 tg=489/512 37.2t/s | s4 tg=486/512 39.9t/s | total 145t/s
+[server] s1 done  pp=63/0c 0.9s  tg=512 33.3t/s  ttft=0.9s  end=length  hit=99.6%  pcie=0.0%
+[server] s2 done  pp=63/0c 0.9s  tg=512 35.3t/s  ttft=1.8s  end=length  hit=99.8%  pcie=0.0%
+[server] s3 done  pp=63/0c 0.9s  tg=512 37.6t/s  ttft=2.8s  end=length  hit=99.6%  pcie=0.0%
+[server] s4 done  pp=63/0c 0.9s  tg=512 40.3t/s  ttft=3.8s  end=length  hit=99.6%  pcie=0.0%
+[server] stopping (Ctrl+C again to force)
+[server] stopped

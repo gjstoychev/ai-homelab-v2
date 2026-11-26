@@ -184,3 +184,35 @@ The calibration is noisy at this size (the corpus changes character along its le
 **Result:** 272.2 s for 252,872 tokens against the source's 246.7 s for 249,450: **929 against 1,011 prompt tokens per second, 8 % slower** (the prompt is 1.4 % longer, which accounts for about 1 % of it: the rate falls with depth, 1,008 t/s average at 225K). That is the smallest of the prompt-reading gaps measured: −18 % at 0.5–4K, −27 % at 32K (TTFT 13.1 against 10.5 s with MTP, 12.4 s without), −8 % at 249K. The needle was recovered in every rep of both long runs. Decode after the prompt, 41–47 t/s for the 8-token answer, is not a decode measurement.
 
 **Next:** step 7, the recipe: v0.32.0, NVFP4 KV, util 0.94 (the source's KV pool: 474,032), decode, the needle.
+
+## 7. The recipe: v0.32.0, NVFP4 KV, util 0.94 (2026-11-26)
+
+`configs/nvfp4-mtp4.args`: `fp8-mtp4.args` with image `local/vllm-openai:v0.32.0` (`sha256:befccf0e…`), `--kv-cache-dtype nvfp4`, `--gpu_memory_utilization 0.94`; everything else the source's compose (k=4, `max-num-seqs 2`, 262,144, PIECEWISE graphs). `scripts/recipe-client.py` runs, on one server start, step 4's three passes, step 5's depth pass (1K / 32K / 131K, k=4) and step 6's needle (835,000 characters, 252,877 tokens, 3 reps); `RECIPE_PASSES` picks passes.
+
+**A mistake:** the first start (`runs/7-recipe/nvfp4-mtp4.*`, 150.6 s to ready: v0.32.0's first compile) completed the baseline passes, then `recipe-client.py` failed to find `long-bench.py` (a path one level too high: `experiments/scripts/…`), and `bench-run.sh` stopped the server (clean, no container left). Fixed, and the depth and needle passes ran on a second start (`nvfp4-mtp4-b.*`, ready in 94.8 s, same config, same image). The first run's console log is `nvfp4-mtp4.console.txt`, the second's `nvfp4-mtp4-b.console.txt`.
+
+**Results** (`runs/7-recipe/summary.md`; the source's NVFP4 numbers in brackets, measured on nightly v0.32.0rc1.dev100, and fp8 from steps 4–5 for the same client):
+
+| | NVFP4 here | fp8 here | Source NVFP4 |
+|---|---|---|---|
+| KV pool, tokens | **463,166** (1.77× at 262,144) | 273,333 | [474,032, 1.81×] (−2.3 %) |
+| Decode, shared, prose / structured (thinking off, 256) | 58.50 / 108.25 | 62.75 / 117.02 | |
+| Decode, reproduction, prose / structured / mixed (thinking on, 800) | 62.55 / 92.17 (80.2–104.4) / 71.95 | 69.81 / 81.10 / 73.97 | |
+| TTFT at ~0.5K / 4K / 32K | 0.214 / 1.379 / 13.169 s | 0.200 / 1.355 / 13.146 s | [0.141 / 0.987 / 10.5 s, fp8 source] |
+| Steps/s at ~1K / 32K / 127K, k=4 | 26.26 / 25.46 / 23.33 | 27.91 / 26.68 / 23.73 | [27.1 / 26.2 / 23.6 at 0 / 32K / 131K] |
+| Acceptance length, depth-pass prose / structured, 1K | 2.58 / 4.14 | 2.78 / 4.23 | [prose 2.72 against 2.94 for fp8, −7.5 %] |
+| Decode at 1K / 32K / 127K, prose | 67.88 / 68.17 / 61.58 | 77.98 / 70.12 / 68.30 | |
+| Decode at 1K / 32K / 127K, structured | 108.44 / 110.42 / 95.09 | 117.63 / 112.94 / 92.16 | |
+| TTFT at 127K | 89.3 s | 88.6 s | |
+| Needle, 252,877 tokens (3 reps) | **279.3 s**, 905 t/s, found 3/3 | 272.2 s, 929 t/s (k=6) | [250.8K tokens in 274.8 s, 912.7 t/s; fp8 249,450 in 246.7 s] |
+| Peak VRAM per card | 15,836 MiB | 15,790 MiB | |
+
+What it shows:
+
+- **The recipe works as published** on this machine: the KV pool is 2.3 % below the source's (the same gap as every fp8 pool), 1.77× of the full context, the needle is recovered at 253K tokens, no restart, no Xid.
+- **NVFP4 costs a few per cent of steps/s and some acceptance, as the source found:** steps/s −6 % / −5 % / −2 % at 1K / 32K / 127K against fp8 (source: −5 % at depth 0), prose acceptance −7 % at 1K (source: −7.5 %), so prose decode is −13 % at 1K and −10 % at 127K, structured −8 % at 1K and +3 % at 127K (acceptance there 4.08 against 3.88 for fp8; one sample each). The step-rate decay at depth is −11 % from 1K to 127K against fp8's −15 %: the source's lead (−13 % against −18 %) points the same way.
+- **Prompt reading: the NVFP4 needle is within 1 % of the source's** (905 against 912.7 t/s), but the source's own claim of a 10 % prefill cost against fp8 at 250K does not show here (279.3 against 272.2 s, 2.6 %): its fp8 number is 8 % ahead of ours, its NVFP4 number is not. At 4K and 32K the gap to the source remains (TTFT 1.38 s against about 1.0 s, 13.2 against 10.5 s: the source's own tokens/s for NVFP4 at those lengths, 4,093–4,178 and 3,051, equal its fp8). So the gap is not specific to the KV type; it shrinks with the prompt (in seconds it grows: +0.4 s, +2.7 s, +4.5 s). Not explained.
+- **Variance:** the thinking-on structured request varies from 80 to 104 t/s between random first lines (3 reps), so a mean of 3 is soft there; the shared client's JSON (5 reps) is steady at 103–114.
+- Peak power 183 W in one sample of the needle start (limit 180 W; sampling every 0.5 s).
+
+**Next:** step 8, two GPUs other ways: pipeline parallelism, `--max-num-seqs` 1 / 2 / 4 with 1, 2 and 4 requests at once, and the 150 W cap.

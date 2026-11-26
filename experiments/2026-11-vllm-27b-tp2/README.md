@@ -1,6 +1,6 @@
 # vLLM: Qwen3.8-27B on 2× RTX 5060 Ti with tensor parallelism, a reproduction
 
-Status: **in progress** (started 2026-11-26; phase A, steps 3–6 done). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
+Status: **in progress** (started 2026-11-26; phase A, steps 3–7 done). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
 
 ## Question
 
@@ -114,6 +114,8 @@ Phase A (driver 580.178.04, kernel 7.0.0-44, 180 W), vLLM 0.30.0, fp8 KV. Decode
 Steps/s is within 1–4 % of the source's at every k, and the step time follows a straight line, 25.3 ms + 2.64 ms × k (the source: 25.4 + 2.37 × k). Prose and mixed peak at k=2–4 and fall after, structured keeps climbing to k=7. Decode at depth, k=0 / k=4, at about 1K / 32K / 127K tokens: 42.25 / 40.25 / 35.08 and prose 78.0 / 70.1 / 68.3, JSON 117.6 / 112.9 / 92.2 t/s (the source's, at 0 / 32K / 131K: 41.99 / 39.98 / 34.66, prose 80.1 / 69.6 / 68.8, JSON 123.3 / 115.6 / 92.4). The one open difference so far is prompt reading (TTFT 12.4 s at 32K against 10.5 s; 83 s at 127K).
 
 **Long needle** (step 6; k=6, util 0.95, MTP; journal step 6): 252,872 prompt tokens in 272.2 s (929 prompt t/s), needle recovered 3/3; the source: 249,450 tokens in 246.7 s (1,011 t/s). At 225,215 tokens: 223.5 s (1,008 t/s). The prompt-reading gap to the source is 8 % at this size, against 18–27 % at 0.5–32K.
+
+**The recipe** (step 7; v0.32.0, NVFP4 KV, util 0.94, k=4): KV pool 463,166 tokens (source 474,032), needle recovered at 252,877 tokens in 279.3 s (905 t/s; the source's NVFP4 needle 912.7 t/s). Against fp8 here: steps/s −6 / −5 / −2 % at 1K / 32K / 127K, prose acceptance −7 % (source −7.5 %), decode at 1K prose 67.9 against 78.0 t/s, JSON 108.4 against 117.6; time to first token the same (13.17 s at 32K, 89.3 s at 127K).
 
 More steps to come.
 

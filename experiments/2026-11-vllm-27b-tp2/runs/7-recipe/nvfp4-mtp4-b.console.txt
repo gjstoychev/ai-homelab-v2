@@ -1,0 +1,37 @@
+date: Thu Nov 26 02:57:08 PM UTC 2026
+label: nvfp4-mtp4-b, reps: 5
+kernel: 7.0.0-44-generic
+driver: 580.178.04
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/nvfp4-mtp4.args
+== ready in 94.8 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/long-bench.py --url http://127.0.0.1:8080 --label nvfp4-mtp4-b --mode depth --out experiments/2026-11-vllm-27b-tp2/runs/7-recipe/depth.jsonl --targets 1000,32768,131072 --reps 2 --max-tokens 512 --unique-prefix --load-s 94.8
+nvfp4-mtp4-b: corpus 1527726 chars, needle obsidian-2824
+nvfp4-mtp4-b depth 1000: 3228 chars at 4.25 chars/token
+nvfp4-mtp4-b depth 1000 prose      rep 1: prompt 941 tok, ttft 0.306 s, 512 tok at 68.13 t/s | MTP acceptance length 2.586
+nvfp4-mtp4-b depth 1000 prose      rep 2: prompt 943 tok, ttft 0.329 s, 512 tok at 67.62 t/s | MTP acceptance length 2.568
+nvfp4-mtp4-b depth 1000 structured rep 1: prompt 959 tok, ttft 0.333 s, 512 tok at 108.4 t/s | MTP acceptance length 4.137
+nvfp4-mtp4-b depth 1000 structured rep 2: prompt 957 tok, ttft 0.334 s, 512 tok at 108.48 t/s | MTP acceptance length 4.145
+nvfp4-mtp4-b depth 32768: 105425 chars at 3.41 chars/token
+nvfp4-mtp4-b depth 32768 prose      rep 1: prompt 32826 tok, ttft 13.44 s, 512 tok at 68.21 t/s | MTP acceptance length 2.677
+nvfp4-mtp4-b depth 32768 prose      rep 2: prompt 32825 tok, ttft 13.423 s, 512 tok at 68.13 t/s | MTP acceptance length 2.677
+nvfp4-mtp4-b depth 32768 structured rep 1: prompt 32840 tok, ttft 13.435 s, 512 tok at 110.88 t/s | MTP acceptance length 4.347
+nvfp4-mtp4-b depth 32768 structured rep 2: prompt 32843 tok, ttft 13.441 s, 512 tok at 109.97 t/s | MTP acceptance length 4.328
+nvfp4-mtp4-b depth 131072: 421579 chars at 3.39 chars/token
+nvfp4-mtp4-b depth 131072 prose      rep 1: prompt 126598 tok, ttft 89.258 s, 512 tok at 60.18 t/s | MTP acceptance length 2.578
+nvfp4-mtp4-b depth 131072 prose      rep 2: prompt 126598 tok, ttft 89.242 s, 512 tok at 62.98 t/s | MTP acceptance length 2.695
+nvfp4-mtp4-b depth 131072 structured rep 1: prompt 126611 tok, ttft 89.255 s, 512 tok at 95.11 t/s | MTP acceptance length 4.071
+nvfp4-mtp4-b depth 131072 structured rep 2: prompt 126612 tok, ttft 89.267 s, 512 tok at 95.08 t/s | MTP acceptance length 4.087
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/long-bench.py --url http://127.0.0.1:8080 --label nvfp4-mtp4-b --mode ttft --out experiments/2026-11-vllm-27b-tp2/runs/7-recipe/needle.jsonl --targets 249450 --chars 835000 --reps 3 --unique-prefix --load-s 94.8
+nvfp4-mtp4-b: corpus 1527726 chars, needle obsidian-2824
+nvfp4-mtp4-b 249450: 835000 chars (fixed)
+nvfp4-mtp4-b 249450 rep 1: prompt 252877 tok, ttft 279.285 s (server - t/s), decode 149.21 t/s, needle found: 'obsidian-2824'
+nvfp4-mtp4-b 249450 rep 2: prompt 252875 tok, ttft 279.313 s (server - t/s), decode 148.84 t/s, needle found: 'obsidian-2824'
+nvfp4-mtp4-b 249450 rep 3: prompt 252874 tok, ttft 279.348 s (server - t/s), decode 149.86 t/s, needle found: 'obsidian-2824'
+== peak VRAM per GPU (MiB):
+  GPU0: 15836
+  GPU1: 15836
+== peak server RSS / lowest MemAvailable (MiB): 36 / 49939

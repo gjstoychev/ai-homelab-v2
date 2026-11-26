@@ -1,0 +1,61 @@
+date: Thu Nov 26 02:49:37 PM UTC 2026
+label: nvfp4-mtp4, reps: 5
+kernel: 7.0.0-44-generic
+driver: 580.178.04
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/nvfp4-mtp4.args
+== ready in 150.6 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/experiments/2026-11-vllm-27b-tp2/scripts/baseline-client.py --url http://127.0.0.1:8080 --label nvfp4-mtp4 --out experiments/2026-11-vllm-27b-tp2/runs/7-recipe/results.jsonl --reps 5 --load-s 150.6
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 150.6 --label nvfp4-mtp4 --out experiments/2026-11-vllm-27b-tp2/runs/7-recipe/results.jsonl --reps 5 --kinds prose,structured --max-tokens 256
+nvfp4-mtp4 prose      rep 0 (warm-up) prompt 4330 tok, ttft 1.3943 s, 256 tok at 53.94 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.217
+nvfp4-mtp4 prose      rep 1           prompt 4328 tok, ttft 1.4147 s, 256 tok at 58.33 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.235
+nvfp4-mtp4 prose      rep 2           prompt 4328 tok, ttft 1.3934 s, 256 tok at 57.35 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.179
+nvfp4-mtp4 prose      rep 3           prompt 4327 tok, ttft 1.3935 s, 256 tok at 57.88 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.198
+nvfp4-mtp4 prose      rep 4           prompt 4329 tok, ttft 1.416 s, 256 tok at 57.88 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.207
+nvfp4-mtp4 prose      rep 5           prompt 4329 tok, ttft 1.3925 s, 256 tok at 61.07 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.327
+nvfp4-mtp4 structured rep 0 (warm-up) prompt 4351 tok, ttft 1.4 s, 256 tok at 100.34 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 3.836
+nvfp4-mtp4 structured rep 1           prompt 4350 tok, ttft 1.4217 s, 256 tok at 103.45 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 3.923
+nvfp4-mtp4 structured rep 2           prompt 4348 tok, ttft 1.4205 s, 256 tok at 103.38 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 3.969
+nvfp4-mtp4 structured rep 3           prompt 4349 tok, ttft 1.4208 s, 256 tok at 112.0 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.283
+nvfp4-mtp4 structured rep 4           prompt 4349 tok, ttft 1.4216 s, 256 tok at 113.9 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.373
+nvfp4-mtp4 structured rep 5           prompt 4350 tok, ttft 1.4217 s, 256 tok at 108.52 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.177
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 150.6 --label nvfp4-mtp4-repro --out experiments/2026-11-vllm-27b-tp2/runs/7-recipe/results.jsonl --reps 3 --kinds prose,structured,mixed --max-tokens 800 --thinking
+nvfp4-mtp4-repro prose      rep 0 (warm-up) prompt 4369 tok, ttft 1.4027 s, 800 tok at 63.67 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.423
+nvfp4-mtp4-repro prose      rep 1           prompt 4369 tok, ttft 1.4235 s, 800 tok at 61.79 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.346
+nvfp4-mtp4-repro prose      rep 2           prompt 4370 tok, ttft 1.4261 s, 800 tok at 63.69 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.42
+nvfp4-mtp4-repro prose      rep 3           prompt 4370 tok, ttft 1.4033 s, 800 tok at 62.17 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.36
+nvfp4-mtp4-repro structured rep 0 (warm-up) prompt 4389 tok, ttft 1.4094 s, 800 tok at 75.83 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.881
+nvfp4-mtp4-repro structured rep 1           prompt 4390 tok, ttft 1.4333 s, 800 tok at 104.39 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 3.96
+nvfp4-mtp4-repro structured rep 2           prompt 4389 tok, ttft 1.4331 s, 800 tok at 80.15 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 3.038
+nvfp4-mtp4-repro structured rep 3           prompt 4388 tok, ttft 1.4314 s, 800 tok at 91.97 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 3.493
+nvfp4-mtp4-repro mixed      rep 0 (warm-up) prompt 4397 tok, ttft 1.4342 s, 800 tok at 77.49 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.941
+nvfp4-mtp4-repro mixed      rep 1           prompt 4395 tok, ttft 1.4355 s, 800 tok at 70.45 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.686
+nvfp4-mtp4-repro mixed      rep 2           prompt 4397 tok, ttft 1.4127 s, 800 tok at 71.92 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.73
+nvfp4-mtp4-repro mixed      rep 3           prompt 4397 tok, ttft 1.4351 s, 800 tok at 73.48 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok | MTP acceptance length 2.787
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/long-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 150.6 --label nvfp4-mtp4 --mode ttft --out experiments/2026-11-vllm-27b-tp2/runs/7-recipe/long.jsonl --targets 700,4500,34700 --reps 3
+nvfp4-mtp4: corpus 1527726 chars, needle obsidian-2824
+nvfp4-mtp4 700: 2130 chars at 4.48 chars/token
+nvfp4-mtp4 700 rep 1: prompt 576 tok, ttft 0.191 s (server - t/s), decode 91.03 t/s, needle found: 'obsidian-2824'
+nvfp4-mtp4 700 rep 2: prompt 579 tok, ttft 0.225 s (server - t/s), decode 92.34 t/s, needle found: 'obsidian-2824'
+nvfp4-mtp4 700 rep 3: prompt 580 tok, ttft 0.225 s (server - t/s), decode 92.71 t/s, needle found: 'obsidian-2824'
+nvfp4-mtp4 4500: 15387 chars at 3.77 chars/token
+nvfp4-mtp4 4500 rep 1: prompt 4211 tok, ttft 1.361 s (server - t/s), decode 92.4 t/s, needle found: 'obsidian-2824'
+nvfp4-mtp4 4500 rep 2: prompt 4211 tok, ttft 1.388 s (server - t/s), decode 92.11 t/s, needle found: 'obsidian-2824'
+nvfp4-mtp4 4500 rep 3: prompt 4212 tok, ttft 1.387 s (server - t/s), decode 93.56 t/s, needle found: 'obsidian-2824'
+nvfp4-mtp4 34700: 104124 chars at 3.18 chars/token
+nvfp4-mtp4 34700 rep 1: prompt 32269 tok, ttft 13.173 s (server - t/s), decode 98.5 t/s, needle found: 'obsidian-2824'
+nvfp4-mtp4 34700 rep 2: prompt 32268 tok, ttft 13.171 s (server - t/s), decode 101.18 t/s, needle found: 'obsidian-2824'
+nvfp4-mtp4 34700 rep 3: prompt 32268 tok, ttft 13.163 s (server - t/s), decode 97.76 t/s, needle found: 'obsidian-2824'
+== /usr/bin/python3 /home/llama/ai-homelab-v2/experiments/scripts/long-bench.py --url http://127.0.0.1:8080 --label nvfp4-mtp4 --mode depth --out experiments/2026-11-vllm-27b-tp2/runs/7-recipe/depth.jsonl --targets 1000,32768,131072 --reps 2 --max-tokens 512 --unique-prefix --load-s 150.6
+/usr/bin/python3: can't open file '/home/llama/ai-homelab-v2/experiments/scripts/long-bench.py': [Errno 2] No such file or directory
+Traceback (most recent call last):
+  File "/home/llama/ai-homelab-v2/experiments/2026-11-vllm-27b-tp2/scripts/recipe-client.py", line 37, in <module>
+    run([py, str(SCRIPTS / "long-bench.py"), "--url", a.url, "--label", a.label, "--mode", "depth", "--out",
+  File "/home/llama/ai-homelab-v2/experiments/2026-11-vllm-27b-tp2/scripts/recipe-client.py", line 24, in run
+    subprocess.run(cmd, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/usr/bin/python3', '/home/llama/ai-homelab-v2/experiments/scripts/long-bench.py', '--url', 'http://127.0.0.1:8080', '--label', 'nvfp4-mtp4', '--mode', 'depth', '--out', 'experiments/2026-11-vllm-27b-tp2/runs/7-recipe/depth.jsonl', '--targets', '1000,32768,131072', '--reps', '2', '--max-tokens', '512', '--unique-prefix', '--load-s', '150.6']' returned non-zero exit status 2.

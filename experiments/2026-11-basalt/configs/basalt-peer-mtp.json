@@ -7,11 +7,13 @@
    "max-context": 32768,
    "kv": "int8",
    "prompt-cache": 0,
-   "gpu-mode": "peer"
+   "gpu-mode": "peer",
+   "alias": "bench"
   }
  ],
  "server": {
   "host": "127.0.0.1",
-  "port": 8080
+  "port": 8080,
+  "totals-file": "none"
  }
 }

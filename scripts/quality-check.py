@@ -69,7 +69,7 @@ PROMPTS = [
 
 
 def ask(url, prompt, max_tokens, timeout):
-    body = {"model": "quality", "messages": [{"role": "user", "content": prompt}], "max_tokens": max_tokens,
+    body = {"model": "bench", "messages": [{"role": "user", "content": prompt}], "max_tokens": max_tokens,
             "temperature": 0, "seed": 42, "stream": False, "cache_prompt": False,
             "chat_template_kwargs": {"enable_thinking": False}}
     req = urllib.request.Request(url + "/v1/chat/completions", json.dumps(body).encode(),

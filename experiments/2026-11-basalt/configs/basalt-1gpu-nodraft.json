@@ -8,11 +8,13 @@
    "kv": "int8",
    "prompt-cache": 0,
    "spec": 0,
-   "suffix-draft": 0
+   "suffix-draft": 0,
+   "alias": "bench"
   }
  ],
  "server": {
   "host": "127.0.0.1",
-  "port": 8080
+  "port": 8080,
+  "totals-file": "none"
  }
 }

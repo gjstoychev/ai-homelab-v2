@@ -67,7 +67,7 @@ def post(url, body, timeout, stream):
 
 def chat(url, messages, max_tokens, timeout, reuse):
     """One streamed request; returns the text and the measurements."""
-    body = {"model": "long", "messages": messages, "max_tokens": max_tokens, "temperature": 0, "seed": 42,
+    body = {"model": "bench", "messages": messages, "max_tokens": max_tokens, "temperature": 0, "seed": 42,
             "stream": True, "stream_options": {"include_usage": True},
             "chat_template_kwargs": {"enable_thinking": False}, "cache_prompt": reuse}
     t0 = time.perf_counter()

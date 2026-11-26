@@ -17,6 +17,7 @@ Recorded 2026-11-26.
 | Docker | 29.8.0 (`docker-ce` 5:29.8.0-1~ubuntu.24.04~noble) | Docker apt repository |
 | NVIDIA Container Toolkit | 1.20.2-1 | NVIDIA apt repository |
 | llama.cpp | v1.0.0 (build 12359, commit `b1b770d9`), CUDA, `sm_120`, in `~/llama.cpp/v1.0.0`; `~/llama.cpp/current` points to it | built from source with `scripts/build-llamacpp.sh` |
+| nccl-tests | v2.22.0 (commit `826b3e6`), CUDA 13.0, `sm_120`, no MPI, in `~/nccl-tests/v2.22.0`; `~/nccl-tests/current` points to it | built from source with `scripts/build-nccl-tests.sh` |
 | Strata | v0.2.21 (commit `d46f5f2`, engine 0.1.67), CUDA, `sm_120`/`sm_120a`, in `~/strata/v0.2.21`; `~/strata/current` points to it; server venv `src/terminal/.venv` (pinned `requirements.txt`); MTP draft layer in `data/mtp/rt` | built from source with `scripts/build-strata.sh` (setup.py's CUDA flags; `setup.sh` not run) |
 | Basalt | v0.5.7 (commit `400b411`, engine 0.5.7), CUDA, `sm_120`/`sm_120a`, Qwen3.8-Flash-Next only (`BASALT_MODELS=qwen4exp`), in `~/basalt/v0.5.7/src/bin`; `~/basalt/current` points to it; server venv `src/.venv` (pinned `requirements.txt`) | built from source with `scripts/build-basalt.sh` |
 | Hugging Face CLI | `huggingface_hub` 2.4.0, `hf-xet` 1.8.0, in `~/venvs/hf` | pip in a venv |
@@ -60,6 +61,7 @@ Not built yet.
 
 | Date | Node | Change |
 |---|---|---|
+| 2026-11-26 | formula | nccl-tests v2.22.0 built from source against the host's NCCL 2.28.9 and CUDA 13.0 (`scripts/build-nccl-tests.sh`; experiment `2026-11-vllm-27b-tp2`, step 9f). |
 | 2026-11-26 | formula | NVIDIA driver 580.178.04 → 595.91.07 (`nvidia-driver-595-server-open`, installed by hand with `apt-get install`, package on `apt-mark hold`), rebooted on kernel 7.0.0-44. Verified: both RTX 5060 Ti at 595.91.07, power limit 180 W, both cards visible inside `local/vllm-openai:v0.32.0`, `nvidia-persistenced` active. Way back: `nvidia-driver-580-server-open`. |
 | 2026-11-26 | formula | Docker: removed `local/llama.cpp:b12464-nccl`, `local/nvbandwidth:cuda13.0.0`, `ghcr.io/ggml-org/llama.cpp:full-cuda`, `ollama/ollama:0.32.14`, `nvidia/cuda:13.0.0-base-ubuntu24.04`, hello-world, and the build cache (15.8 GB); images 97.4 → 65.9 GB. vLLM v0.30.0 and v0.32.0 images pulled by digest (experiment `2026-11-vllm-27b-tp2`). |
 | 2026-11-26 | formula | Kernel 7.0.0-43 → 7.0.0-44 (HWE), installed by unattended-upgrades at 08:28 and running since the reboot at 12:50; the NVIDIA 580.178.04 open module loads on it. |

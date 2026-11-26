@@ -1,0 +1,386 @@
+### -b 8K -e 128M -f 2
+# nccl-tests version 2.22.0 (826b3e6) nccl-headers=22809 nccl-library=22809
+# Collective test starting: all_reduce_perf
+# nThread 1 nGpus 2 minBytes 8192 maxBytes 134217728 step: 2(factor) warmup iters: 20 iters: 100 agg iters: 1 validation: 1 graph: 0 unalign: 0
+#
+# Using devices
+#  Rank  0 Group  0 Pid  69204 on    formula device  0 [0000:01:00] NVIDIA GeForce RTX 5060 Ti
+#  Rank  1 Group  0 Pid  69204 on    formula device  1 [0000:02:00] NVIDIA GeForce RTX 5060 Ti
+formula:69204:69204 [0] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+formula:69204:69204 [0] NCCL INFO cudaDriverVersion 13020
+formula:69204:69204 [0] NCCL INFO NCCL version 2.28.9+cuda13.0
+formula:69204:69221 [1] NCCL INFO NET/Plugin: Could not find: libnccl-net.so
+formula:69204:69221 [1] NCCL INFO NET/IB : No device found.
+formula:69204:69221 [1] NCCL INFO NET/IB : Using [RO]; OOB lan0:192.168.100.100<0>
+formula:69204:69221 [1] NCCL INFO Failed to initialize NET plugin IB
+formula:69204:69221 [1] NCCL INFO NET/Socket : Using [0]lan0:192.168.100.100<0> [1]br-2ad3c039826d:172.18.0.1<0> [2]veth3e175ab:fe80::fcc0:d8ff:fe3f:cc9c%veth3e175ab<0>
+formula:69204:69221 [1] NCCL INFO Initialized NET plugin Socket
+formula:69204:69221 [1] NCCL INFO Assigned NET plugin Socket to comm
+formula:69204:69221 [1] NCCL INFO Using network Socket
+formula:69204:69220 [0] NCCL INFO Initialized NET plugin Socket
+formula:69204:69220 [0] NCCL INFO Assigned NET plugin Socket to comm
+formula:69204:69220 [0] NCCL INFO Using network Socket
+formula:69204:69220 [0] NCCL INFO ncclCommInitRankConfig comm 0x5fcda448d930 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0xbc627358c5a8fcad - Init START
+formula:69204:69221 [1] NCCL INFO ncclCommInitRankConfig comm 0x5fcda4597e80 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0xbc627358c5a8fcad - Init START
+formula:69204:69220 [0] NCCL INFO RAS client listening socket at 127.0.0.1<28028>
+formula:69204:69221 [1] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+formula:69204:69220 [0] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+formula:69204:69221 [1] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 1 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+formula:69204:69221 [1] NCCL INFO NVLS multicast support is not available on dev 1 (NVLS_NCHANNELS 0)
+formula:69204:69220 [0] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 0 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+formula:69204:69220 [0] NCCL INFO NVLS multicast support is not available on dev 0 (NVLS_NCHANNELS 0)
+formula:69204:69220 [0] NCCL INFO comm 0x5fcda448d930 rank 0 nRanks 2 nNodes 1 localRanks 2 localRank 0 MNNVL 0
+formula:69204:69221 [1] NCCL INFO comm 0x5fcda4597e80 rank 1 nRanks 2 nNodes 1 localRanks 2 localRank 1 MNNVL 0
+formula:69204:69220 [0] NCCL INFO Channel 00/02 : 0 1
+formula:69204:69220 [0] NCCL INFO Channel 01/02 : 0 1
+formula:69204:69221 [1] NCCL INFO Trees [0] -1/-1/-1->1->0 [1] -1/-1/-1->1->0
+formula:69204:69220 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1
+formula:69204:69221 [1] NCCL INFO P2P Chunksize set to 131072
+formula:69204:69220 [0] NCCL INFO P2P Chunksize set to 131072
+formula:69204:69221 [1] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+formula:69204:69221 [1] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+formula:69204:69220 [0] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+formula:69204:69220 [0] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+formula:69204:69223 [0] NCCL INFO [Proxy Service] Device 1 CPU core 26
+formula:69204:69225 [0] NCCL INFO [Proxy Service UDS] Device 1 CPU core 24
+formula:69204:69226 [0] NCCL INFO [Proxy Service UDS] Device 0 CPU core 22
+formula:69204:69224 [0] NCCL INFO [Proxy Service] Device 0 CPU core 20
+formula:69204:69220 [0] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+formula:69204:69221 [1] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+formula:69204:69221 [1] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+formula:69204:69220 [0] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+formula:69204:69220 [0] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+formula:69204:69220 [0] NCCL INFO CC Off, workFifoBytes 1048576
+formula:69204:69221 [1] NCCL INFO ncclCommInitRankConfig comm 0x5fcda4597e80 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0xbc627358c5a8fcad - Init COMPLETE
+formula:69204:69221 [1] NCCL INFO Init timings - ncclCommInitRankConfig: rank 1 nranks 2 total 0.21 (kernels 0.18, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.00, graphs 0.00, connections 0.00, rest 0.00)
+formula:69204:69220 [0] NCCL INFO ncclCommInitRankConfig comm 0x5fcda448d930 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0xbc627358c5a8fcad - Init COMPLETE
+formula:69204:69220 [0] NCCL INFO Init timings - ncclCommInitRankConfig: rank 0 nranks 2 total 0.21 (kernels 0.18, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.00, graphs 0.00, connections 0.00, rest 0.00)
+#
+#                                                              out-of-place                       in-place
+#       size         count      type   redop    root     time   algbw   busbw  #wrong     time   algbw   busbw  #wrong
+#        (B)    (elements)                               (us)  (GB/s)  (GB/s)             (us)  (GB/s)  (GB/s)        
+        8192          4096  bfloat16     sum      -1formula:69204:69223 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-JZMPsc size 9637888 ptr 0x73adf76ce000
+formula:69204:69224 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-dNFDHl size 9637888 ptr 0x73adf6d9c000
+formula:69204:69223 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-cjyxMf size 9637888 ptr 0x73adf646a000
+formula:69204:69223 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-Lh5Ojw size 4096 ptr 0x73b088ac7000
+formula:69204:69227 [1] NCCL INFO Channel 00 : 1[1] -> 0[0] via SHM/direct/direct
+formula:69204:69224 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-8mZTHn size 9637888 ptr 0x73adf5b38000
+formula:69204:69223 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-mGyo6v size 4096 ptr 0x73b088ac5000
+formula:69204:69227 [1] NCCL INFO Channel 01 : 1[1] -> 0[0] via SHM/direct/direct
+formula:69204:69224 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-1zp30W size 4096 ptr 0x73b088ac3000
+formula:69204:69228 [0] NCCL INFO Channel 00 : 0[0] -> 1[1] via SHM/direct/direct
+formula:69204:69224 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-OWpqYC size 4096 ptr 0x73b088763000
+formula:69204:69228 [0] NCCL INFO Channel 01 : 0[0] -> 1[1] via SHM/direct/direct
+formula:69204:69227 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-dNFDHl size 9637888 ptr 0x73adf5206000
+formula:69204:69228 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-JZMPsc size 9637888 ptr 0x73adf48d4000
+formula:69204:69227 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-1zp30W size 4096 ptr 0x73b088761000
+formula:69204:69227 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-8mZTHn size 9637888 ptr 0x73adef6ce000
+formula:69204:69228 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-Lh5Ojw size 4096 ptr 0x73b08875f000
+formula:69204:69227 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-OWpqYC size 4096 ptr 0x73b08875d000
+formula:69204:69228 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-cjyxMf size 9637888 ptr 0x73adeed9c000
+formula:69204:69228 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-mGyo6v size 4096 ptr 0x73b08875b000
+formula:69204:69228 [0] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+formula:69204:69227 [1] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+    11.10    0.74    0.74       0    11.35    0.72    0.72       0
+       16384          8192  bfloat16     sum      -1    10.93    1.50    1.50       0    10.54    1.55    1.55       0
+       32768         16384  bfloat16     sum      -1    15.55    2.11    2.11       0    14.91    2.20    2.20       0
+       65536         32768  bfloat16     sum      -1    23.51    2.79    2.79       0    23.28    2.82    2.82       0
+      131072         65536  bfloat16     sum      -1    41.23    3.18    3.18       0    41.40    3.17    3.17       0
+      262144        131072  bfloat16     sum      -1    48.13    5.45    5.45       0    48.17    5.44    5.44       0
+      524288        262144  bfloat16     sum      -1    81.63    6.42    6.42       0    81.84    6.41    6.41       0
+     1048576        524288  bfloat16     sum      -1   151.14    6.94    6.94       0   151.58    6.92    6.92       0
+     2097152       1048576  bfloat16     sum      -1   298.91    7.02    7.02       0   299.63    7.00    7.00       0
+     4194304       2097152  bfloat16     sum      -1   581.08    7.22    7.22       0   580.50    7.23    7.23       0
+     8388608       4194304  bfloat16     sum      -1  1148.70    7.30    7.30       0  1145.27    7.32    7.32       0
+    16777216       8388608  bfloat16     sum      -1  2269.47    7.39    7.39       0  2263.28    7.41    7.41       0
+    33554432      16777216  bfloat16     sum      -1  4586.32    7.32    7.32       0  4553.41    7.37    7.37       0
+    67108864      33554432  bfloat16     sum      -1  9092.00    7.38    7.38       0  9090.55    7.38    7.38       0
+   134217728      67108864  bfloat16     sum      -1  18087.7    7.42    7.42       0  18148.2    7.40    7.40       0
+formula:69204:69204 [0] NCCL INFO comm 0x5fcda448d930 rank 0 nranks 2 cudaDev 0 busId 1000 - Destroy COMPLETE
+formula:69204:69204 [1] NCCL INFO comm 0x5fcda4597e80 rank 1 nranks 2 cudaDev 1 busId 2000 - Destroy COMPLETE
+# Out of bounds values : 0 OK
+# Avg bus bandwidth    : 5.34987 
+#
+# Collective test concluded: all_reduce_perf
+#
+
+formula:69204:69204 [1] NCCL INFO ENV/Plugin: Closing env plugin ncclEnvDefault
+### -b 10K -e 10K
+# nccl-tests version 2.22.0 (826b3e6) nccl-headers=22809 nccl-library=22809
+# Collective test starting: all_reduce_perf
+# nThread 1 nGpus 2 minBytes 10240 maxBytes 10240 step: 1048576(bytes) warmup iters: 20 iters: 100 agg iters: 1 validation: 1 graph: 0 unalign: 0
+#
+# Using devices
+#  Rank  0 Group  0 Pid  69283 on    formula device  0 [0000:01:00] NVIDIA GeForce RTX 5060 Ti
+#  Rank  1 Group  0 Pid  69283 on    formula device  1 [0000:02:00] NVIDIA GeForce RTX 5060 Ti
+formula:69283:69283 [0] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+formula:69283:69283 [0] NCCL INFO cudaDriverVersion 13020
+formula:69283:69283 [0] NCCL INFO NCCL version 2.28.9+cuda13.0
+formula:69283:69298 [1] NCCL INFO NET/Plugin: Could not find: libnccl-net.so
+formula:69283:69298 [1] NCCL INFO NET/IB : No device found.
+formula:69283:69298 [1] NCCL INFO NET/IB : Using [RO]; OOB lan0:192.168.100.100<0>
+formula:69283:69298 [1] NCCL INFO Failed to initialize NET plugin IB
+formula:69283:69298 [1] NCCL INFO NET/Socket : Using [0]lan0:192.168.100.100<0> [1]br-2ad3c039826d:172.18.0.1<0> [2]veth3e175ab:fe80::fcc0:d8ff:fe3f:cc9c%veth3e175ab<0>
+formula:69283:69298 [1] NCCL INFO Initialized NET plugin Socket
+formula:69283:69298 [1] NCCL INFO Assigned NET plugin Socket to comm
+formula:69283:69298 [1] NCCL INFO Using network Socket
+formula:69283:69297 [0] NCCL INFO Initialized NET plugin Socket
+formula:69283:69297 [0] NCCL INFO Assigned NET plugin Socket to comm
+formula:69283:69297 [0] NCCL INFO Using network Socket
+formula:69283:69298 [1] NCCL INFO ncclCommInitRankConfig comm 0x5ef545096e90 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0xfff8273a7bbea64e - Init START
+formula:69283:69297 [0] NCCL INFO ncclCommInitRankConfig comm 0x5ef544f8c940 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0xfff8273a7bbea64e - Init START
+formula:69283:69298 [1] NCCL INFO RAS client listening socket at 127.0.0.1<28028>
+formula:69283:69298 [1] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+formula:69283:69297 [0] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+formula:69283:69297 [0] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 0 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+formula:69283:69297 [0] NCCL INFO NVLS multicast support is not available on dev 0 (NVLS_NCHANNELS 0)
+formula:69283:69298 [1] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 1 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+formula:69283:69298 [1] NCCL INFO NVLS multicast support is not available on dev 1 (NVLS_NCHANNELS 0)
+formula:69283:69297 [0] NCCL INFO comm 0x5ef544f8c940 rank 0 nRanks 2 nNodes 1 localRanks 2 localRank 0 MNNVL 0
+formula:69283:69298 [1] NCCL INFO comm 0x5ef545096e90 rank 1 nRanks 2 nNodes 1 localRanks 2 localRank 1 MNNVL 0
+formula:69283:69297 [0] NCCL INFO Channel 00/02 : 0 1
+formula:69283:69298 [1] NCCL INFO Trees [0] -1/-1/-1->1->0 [1] -1/-1/-1->1->0
+formula:69283:69298 [1] NCCL INFO P2P Chunksize set to 131072
+formula:69283:69297 [0] NCCL INFO Channel 01/02 : 0 1
+formula:69283:69297 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1
+formula:69283:69297 [0] NCCL INFO P2P Chunksize set to 131072
+formula:69283:69298 [1] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+formula:69283:69298 [1] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+formula:69283:69297 [0] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+formula:69283:69297 [0] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+formula:69283:69302 [0] NCCL INFO [Proxy Service] Device 1 CPU core 22
+formula:69283:69304 [0] NCCL INFO [Proxy Service UDS] Device 1 CPU core 18
+formula:69283:69305 [0] NCCL INFO [Proxy Service UDS] Device 0 CPU core 21
+formula:69283:69303 [0] NCCL INFO [Proxy Service] Device 0 CPU core 27
+formula:69283:69298 [1] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+formula:69283:69298 [1] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+formula:69283:69298 [1] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+formula:69283:69297 [0] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+formula:69283:69297 [0] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+formula:69283:69297 [0] NCCL INFO CC Off, workFifoBytes 1048576
+formula:69283:69298 [1] NCCL INFO ncclCommInitRankConfig comm 0x5ef545096e90 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0xfff8273a7bbea64e - Init COMPLETE
+formula:69283:69298 [1] NCCL INFO Init timings - ncclCommInitRankConfig: rank 1 nranks 2 total 0.19 (kernels 0.17, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.00, graphs 0.00, connections 0.00, rest 0.00)
+formula:69283:69297 [0] NCCL INFO ncclCommInitRankConfig comm 0x5ef544f8c940 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0xfff8273a7bbea64e - Init COMPLETE
+formula:69283:69297 [0] NCCL INFO Init timings - ncclCommInitRankConfig: rank 0 nranks 2 total 0.19 (kernels 0.17, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.00, graphs 0.00, connections 0.00, rest 0.00)
+#
+#                                                              out-of-place                       in-place
+#       size         count      type   redop    root     time   algbw   busbw  #wrong     time   algbw   busbw  #wrong
+#        (B)    (elements)                               (us)  (GB/s)  (GB/s)             (us)  (GB/s)  (GB/s)        
+       10240          5120  bfloat16     sum      -1formula:69283:69303 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-dvBvzN size 9637888 ptr 0x7a8746ecd000
+formula:69283:69302 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-LzVPfv size 9637888 ptr 0x7a874659b000
+formula:69283:69303 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-Pm2kM0 size 9637888 ptr 0x7a8745c69000
+formula:69283:69303 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-f7qYiV size 4096 ptr 0x7a89cbacc000
+formula:69283:69307 [0] NCCL INFO Channel 00 : 0[0] -> 1[1] via SHM/direct/direct
+formula:69283:69303 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-RBqebT size 4096 ptr 0x7a89cbaca000
+formula:69283:69307 [0] NCCL INFO Channel 01 : 0[0] -> 1[1] via SHM/direct/direct
+formula:69283:69302 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-p3CiJr size 9637888 ptr 0x7a8745337000
+formula:69283:69302 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-JnlHJX size 4096 ptr 0x7a89cbac8000
+formula:69283:69306 [1] NCCL INFO Channel 00 : 1[1] -> 0[0] via SHM/direct/direct
+formula:69283:69302 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-eLbqe9 size 4096 ptr 0x7a89cbab0000
+formula:69283:69306 [1] NCCL INFO Channel 01 : 1[1] -> 0[0] via SHM/direct/direct
+formula:69283:69306 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-dvBvzN size 9637888 ptr 0x7a87440d3000
+formula:69283:69306 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-f7qYiV size 4096 ptr 0x7a89cbaae000
+formula:69283:69307 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-LzVPfv size 9637888 ptr 0x7a8744a05000
+formula:69283:69306 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-Pm2kM0 size 9637888 ptr 0x7a87376ce000
+formula:69283:69306 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-RBqebT size 4096 ptr 0x7a89cb763000
+formula:69283:69307 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-JnlHJX size 4096 ptr 0x7a89cb765000
+formula:69283:69307 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-p3CiJr size 9637888 ptr 0x7a8736d9c000
+formula:69283:69307 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-eLbqe9 size 4096 ptr 0x7a89cb761000
+formula:69283:69306 [1] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+formula:69283:69307 [0] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+    10.35    0.99    0.99       0    10.28    1.00    1.00       0
+formula:69283:69283 [0] NCCL INFO comm 0x5ef544f8c940 rank 0 nranks 2 cudaDev 0 busId 1000 - Destroy COMPLETE
+formula:69283:69283 [1] NCCL INFO comm 0x5ef545096e90 rank 1 nranks 2 cudaDev 1 busId 2000 - Destroy COMPLETE
+# Out of bounds values : 0 OK
+# Avg bus bandwidth    : 0.992701 
+#
+# Collective test concluded: all_reduce_perf
+#
+
+formula:69283:69283 [1] NCCL INFO ENV/Plugin: Closing env plugin ncclEnvDefault
+### -b 50K -e 50K
+# nccl-tests version 2.22.0 (826b3e6) nccl-headers=22809 nccl-library=22809
+# Collective test starting: all_reduce_perf
+# nThread 1 nGpus 2 minBytes 51200 maxBytes 51200 step: 1048576(bytes) warmup iters: 20 iters: 100 agg iters: 1 validation: 1 graph: 0 unalign: 0
+#
+# Using devices
+#  Rank  0 Group  0 Pid  69310 on    formula device  0 [0000:01:00] NVIDIA GeForce RTX 5060 Ti
+#  Rank  1 Group  0 Pid  69310 on    formula device  1 [0000:02:00] NVIDIA GeForce RTX 5060 Ti
+formula:69310:69310 [0] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+formula:69310:69310 [0] NCCL INFO cudaDriverVersion 13020
+formula:69310:69310 [0] NCCL INFO NCCL version 2.28.9+cuda13.0
+formula:69310:69325 [1] NCCL INFO NET/Plugin: Could not find: libnccl-net.so
+formula:69310:69325 [1] NCCL INFO NET/IB : No device found.
+formula:69310:69325 [1] NCCL INFO NET/IB : Using [RO]; OOB lan0:192.168.100.100<0>
+formula:69310:69325 [1] NCCL INFO Failed to initialize NET plugin IB
+formula:69310:69325 [1] NCCL INFO NET/Socket : Using [0]lan0:192.168.100.100<0> [1]br-2ad3c039826d:172.18.0.1<0> [2]veth3e175ab:fe80::fcc0:d8ff:fe3f:cc9c%veth3e175ab<0>
+formula:69310:69325 [1] NCCL INFO Initialized NET plugin Socket
+formula:69310:69325 [1] NCCL INFO Assigned NET plugin Socket to comm
+formula:69310:69325 [1] NCCL INFO Using network Socket
+formula:69310:69324 [0] NCCL INFO Initialized NET plugin Socket
+formula:69310:69324 [0] NCCL INFO Assigned NET plugin Socket to comm
+formula:69310:69324 [0] NCCL INFO Using network Socket
+formula:69310:69324 [0] NCCL INFO ncclCommInitRankConfig comm 0x5ec904c9e750 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0xbe0b884757091d07 - Init START
+formula:69310:69325 [1] NCCL INFO ncclCommInitRankConfig comm 0x5ec904da8ca0 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0xbe0b884757091d07 - Init START
+formula:69310:69325 [1] NCCL INFO RAS client listening socket at 127.0.0.1<28028>
+formula:69310:69325 [1] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+formula:69310:69324 [0] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+formula:69310:69324 [0] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 0 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+formula:69310:69324 [0] NCCL INFO NVLS multicast support is not available on dev 0 (NVLS_NCHANNELS 0)
+formula:69310:69325 [1] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 1 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+formula:69310:69325 [1] NCCL INFO NVLS multicast support is not available on dev 1 (NVLS_NCHANNELS 0)
+formula:69310:69325 [1] NCCL INFO comm 0x5ec904da8ca0 rank 1 nRanks 2 nNodes 1 localRanks 2 localRank 1 MNNVL 0
+formula:69310:69324 [0] NCCL INFO comm 0x5ec904c9e750 rank 0 nRanks 2 nNodes 1 localRanks 2 localRank 0 MNNVL 0
+formula:69310:69325 [1] NCCL INFO Trees [0] -1/-1/-1->1->0 [1] -1/-1/-1->1->0
+formula:69310:69324 [0] NCCL INFO Channel 00/02 : 0 1
+formula:69310:69324 [0] NCCL INFO Channel 01/02 : 0 1
+formula:69310:69324 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1
+formula:69310:69324 [0] NCCL INFO P2P Chunksize set to 131072
+formula:69310:69325 [1] NCCL INFO P2P Chunksize set to 131072
+formula:69310:69324 [0] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+formula:69310:69324 [0] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+formula:69310:69325 [1] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+formula:69310:69325 [1] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+formula:69310:69329 [0] NCCL INFO [Proxy Service] Device 0 CPU core 22
+formula:69310:69332 [0] NCCL INFO [Proxy Service UDS] Device 1 CPU core 21
+formula:69310:69331 [0] NCCL INFO [Proxy Service UDS] Device 0 CPU core 17
+formula:69310:69330 [0] NCCL INFO [Proxy Service] Device 1 CPU core 26
+formula:69310:69325 [1] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+formula:69310:69325 [1] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+formula:69310:69325 [1] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+formula:69310:69324 [0] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+formula:69310:69324 [0] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+formula:69310:69324 [0] NCCL INFO CC Off, workFifoBytes 1048576
+formula:69310:69325 [1] NCCL INFO ncclCommInitRankConfig comm 0x5ec904da8ca0 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0xbe0b884757091d07 - Init COMPLETE
+formula:69310:69325 [1] NCCL INFO Init timings - ncclCommInitRankConfig: rank 1 nranks 2 total 0.20 (kernels 0.18, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.00, graphs 0.00, connections 0.00, rest 0.00)
+formula:69310:69324 [0] NCCL INFO ncclCommInitRankConfig comm 0x5ec904c9e750 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0xbe0b884757091d07 - Init COMPLETE
+formula:69310:69324 [0] NCCL INFO Init timings - ncclCommInitRankConfig: rank 0 nranks 2 total 0.20 (kernels 0.18, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.00, graphs 0.00, connections 0.00, rest 0.00)
+#
+#                                                              out-of-place                       in-place
+#       size         count      type   redop    root     time   algbw   busbw  #wrong     time   algbw   busbw  #wrong
+#        (B)    (elements)                               (us)  (GB/s)  (GB/s)             (us)  (GB/s)  (GB/s)        
+       51200         25600  bfloat16     sum      -1formula:69310:69330 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-aIDc15 size 9637888 ptr 0x756790534000
+formula:69310:69329 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-52eFyi size 9637888 ptr 0x75677d6ce000
+formula:69310:69329 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-xkD25X size 9637888 ptr 0x75677c46a000
+formula:69310:69329 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-XZRhzP size 4096 ptr 0x7569f15f7000
+formula:69310:69334 [0] NCCL INFO Channel 00 : 0[0] -> 1[1] via SHM/direct/direct
+formula:69310:69329 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-QMtngs size 4096 ptr 0x7569f15f5000
+formula:69310:69334 [0] NCCL INFO Channel 01 : 0[0] -> 1[1] via SHM/direct/direct
+formula:69310:69330 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-HJUoe5 size 9637888 ptr 0x75677cd9c000
+formula:69310:69330 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-ZP4Tbv size 4096 ptr 0x7569f15f3000
+formula:69310:69333 [1] NCCL INFO Channel 00 : 1[1] -> 0[0] via SHM/direct/direct
+formula:69310:69330 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-YpHATo size 4096 ptr 0x7569f14bb000
+formula:69310:69333 [1] NCCL INFO Channel 01 : 1[1] -> 0[0] via SHM/direct/direct
+formula:69310:69334 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-aIDc15 size 9637888 ptr 0x75676d6ce000
+formula:69310:69333 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-52eFyi size 9637888 ptr 0x75676cd9c000
+formula:69310:69333 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-XZRhzP size 4096 ptr 0x7569f14b9000
+formula:69310:69334 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-ZP4Tbv size 4096 ptr 0x7569f14b7000
+formula:69310:69334 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-HJUoe5 size 9637888 ptr 0x7567576ce000
+formula:69310:69333 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-xkD25X size 9637888 ptr 0x75676c46a000
+formula:69310:69333 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-QMtngs size 4096 ptr 0x7569f14b5000
+formula:69310:69334 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-YpHATo size 4096 ptr 0x7569f14b3000
+formula:69310:69333 [1] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+formula:69310:69334 [0] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+    22.04    2.32    2.32       0    22.40    2.29    2.29       0
+formula:69310:69310 [0] NCCL INFO comm 0x5ec904c9e750 rank 0 nranks 2 cudaDev 0 busId 1000 - Destroy COMPLETE
+formula:69310:69310 [1] NCCL INFO comm 0x5ec904da8ca0 rank 1 nranks 2 cudaDev 1 busId 2000 - Destroy COMPLETE
+# Out of bounds values : 0 OK
+# Avg bus bandwidth    : 2.30394 
+#
+# Collective test concluded: all_reduce_perf
+#
+
+formula:69310:69310 [1] NCCL INFO ENV/Plugin: Closing env plugin ncclEnvDefault
+### -b 40M -e 40M
+# nccl-tests version 2.22.0 (826b3e6) nccl-headers=22809 nccl-library=22809
+# Collective test starting: all_reduce_perf
+# nThread 1 nGpus 2 minBytes 41943040 maxBytes 41943040 step: 1048576(bytes) warmup iters: 20 iters: 100 agg iters: 1 validation: 1 graph: 0 unalign: 0
+#
+# Using devices
+#  Rank  0 Group  0 Pid  69337 on    formula device  0 [0000:01:00] NVIDIA GeForce RTX 5060 Ti
+#  Rank  1 Group  0 Pid  69337 on    formula device  1 [0000:02:00] NVIDIA GeForce RTX 5060 Ti
+formula:69337:69337 [0] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+formula:69337:69337 [0] NCCL INFO cudaDriverVersion 13020
+formula:69337:69337 [0] NCCL INFO NCCL version 2.28.9+cuda13.0
+formula:69337:69352 [1] NCCL INFO NET/Plugin: Could not find: libnccl-net.so
+formula:69337:69352 [1] NCCL INFO NET/IB : No device found.
+formula:69337:69352 [1] NCCL INFO NET/IB : Using [RO]; OOB lan0:192.168.100.100<0>
+formula:69337:69352 [1] NCCL INFO Failed to initialize NET plugin IB
+formula:69337:69352 [1] NCCL INFO NET/Socket : Using [0]lan0:192.168.100.100<0> [1]br-2ad3c039826d:172.18.0.1<0> [2]veth3e175ab:fe80::fcc0:d8ff:fe3f:cc9c%veth3e175ab<0>
+formula:69337:69352 [1] NCCL INFO Initialized NET plugin Socket
+formula:69337:69352 [1] NCCL INFO Assigned NET plugin Socket to comm
+formula:69337:69352 [1] NCCL INFO Using network Socket
+formula:69337:69351 [0] NCCL INFO Initialized NET plugin Socket
+formula:69337:69351 [0] NCCL INFO Assigned NET plugin Socket to comm
+formula:69337:69351 [0] NCCL INFO Using network Socket
+formula:69337:69352 [1] NCCL INFO ncclCommInitRankConfig comm 0x5b49db402f00 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0x9ee160eafab93a42 - Init START
+formula:69337:69351 [0] NCCL INFO ncclCommInitRankConfig comm 0x5b49db2f89b0 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0x9ee160eafab93a42 - Init START
+formula:69337:69351 [0] NCCL INFO RAS client listening socket at 127.0.0.1<28028>
+formula:69337:69351 [0] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+formula:69337:69352 [1] NCCL INFO NCCL_P2P_DISABLE set by environment to 1
+formula:69337:69351 [0] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 0 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+formula:69337:69351 [0] NCCL INFO NVLS multicast support is not available on dev 0 (NVLS_NCHANNELS 0)
+formula:69337:69352 [1] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 1 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+formula:69337:69352 [1] NCCL INFO NVLS multicast support is not available on dev 1 (NVLS_NCHANNELS 0)
+formula:69337:69351 [0] NCCL INFO comm 0x5b49db2f89b0 rank 0 nRanks 2 nNodes 1 localRanks 2 localRank 0 MNNVL 0
+formula:69337:69352 [1] NCCL INFO comm 0x5b49db402f00 rank 1 nRanks 2 nNodes 1 localRanks 2 localRank 1 MNNVL 0
+formula:69337:69351 [0] NCCL INFO Channel 00/02 : 0 1
+formula:69337:69352 [1] NCCL INFO Trees [0] -1/-1/-1->1->0 [1] -1/-1/-1->1->0
+formula:69337:69352 [1] NCCL INFO P2P Chunksize set to 131072
+formula:69337:69351 [0] NCCL INFO Channel 01/02 : 0 1
+formula:69337:69351 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1
+formula:69337:69351 [0] NCCL INFO P2P Chunksize set to 131072
+formula:69337:69352 [1] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+formula:69337:69352 [1] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+formula:69337:69351 [0] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+formula:69337:69351 [0] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+formula:69337:69364 [0] NCCL INFO [Proxy Service] Device 0 CPU core 16
+formula:69337:69363 [0] NCCL INFO [Proxy Service] Device 1 CPU core 26
+formula:69337:69366 [0] NCCL INFO [Proxy Service UDS] Device 0 CPU core 27
+formula:69337:69365 [0] NCCL INFO [Proxy Service UDS] Device 1 CPU core 23
+formula:69337:69352 [1] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+formula:69337:69352 [1] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+formula:69337:69352 [1] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+formula:69337:69351 [0] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+formula:69337:69351 [0] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+formula:69337:69351 [0] NCCL INFO CC Off, workFifoBytes 1048576
+formula:69337:69352 [1] NCCL INFO ncclCommInitRankConfig comm 0x5b49db402f00 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0x9ee160eafab93a42 - Init COMPLETE
+formula:69337:69352 [1] NCCL INFO Init timings - ncclCommInitRankConfig: rank 1 nranks 2 total 0.19 (kernels 0.17, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.00, graphs 0.00, connections 0.00, rest 0.00)
+formula:69337:69351 [0] NCCL INFO ncclCommInitRankConfig comm 0x5b49db2f89b0 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0x9ee160eafab93a42 - Init COMPLETE
+formula:69337:69351 [0] NCCL INFO Init timings - ncclCommInitRankConfig: rank 0 nranks 2 total 0.19 (kernels 0.17, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.00, graphs 0.00, connections 0.00, rest 0.00)
+#
+#                                                              out-of-place                       in-place
+#       size         count      type   redop    root     time   algbw   busbw  #wrong     time   algbw   busbw  #wrong
+#        (B)    (elements)                               (us)  (GB/s)  (GB/s)             (us)  (GB/s)  (GB/s)        
+    41943040      20971520  bfloat16     sum      -1formula:69337:69363 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-Zxlfiu size 9637888 ptr 0x705c046cc000
+formula:69337:69364 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-bndurf size 9637888 ptr 0x705bef6ce000
+formula:69337:69363 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-Aqj8Da size 9637888 ptr 0x705beed9c000
+formula:69337:69363 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-1Uxukc size 4096 ptr 0x705e8614b000
+formula:69337:69367 [1] NCCL INFO Channel 00 : 1[1] -> 0[0] via SHM/direct/direct
+formula:69337:69364 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-6Uo9zg size 9637888 ptr 0x705bee46a000
+formula:69337:69363 [1] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-qi0yNU size 4096 ptr 0x705e86149000
+formula:69337:69367 [1] NCCL INFO Channel 01 : 1[1] -> 0[0] via SHM/direct/direct
+formula:69337:69364 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-E91tie size 4096 ptr 0x705e86147000
+formula:69337:69368 [0] NCCL INFO Channel 00 : 0[0] -> 1[1] via SHM/direct/direct
+formula:69337:69364 [0] NCCL INFO MMAP allocated shareable host buffer /dev/shm/nccl-LZao2A size 4096 ptr 0x705e860b8000
+formula:69337:69368 [0] NCCL INFO Channel 01 : 0[0] -> 1[1] via SHM/direct/direct
+formula:69337:69368 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-Zxlfiu size 9637888 ptr 0x705bed206000
+formula:69337:69367 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-bndurf size 9637888 ptr 0x705bedb38000
+formula:69337:69368 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-1Uxukc size 4096 ptr 0x705e860b6000
+formula:69337:69367 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-E91tie size 4096 ptr 0x705e860b4000
+formula:69337:69368 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-Aqj8Da size 9637888 ptr 0x705bec8d4000
+formula:69337:69367 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-6Uo9zg size 9637888 ptr 0x705bebfa2000
+formula:69337:69368 [0] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-qi0yNU size 4096 ptr 0x705e860b2000
+formula:69337:69367 [1] NCCL INFO MMAP imported shareable host buffer /dev/shm/nccl-LZao2A size 4096 ptr 0x705e860b0000
+formula:69337:69368 [0] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+formula:69337:69367 [1] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+  5708.58    7.35    7.35       0  5709.37    7.35    7.35       0
+formula:69337:69337 [0] NCCL INFO comm 0x5b49db2f89b0 rank 0 nranks 2 cudaDev 0 busId 1000 - Destroy COMPLETE
+formula:69337:69337 [1] NCCL INFO comm 0x5b49db402f00 rank 1 nranks 2 cudaDev 1 busId 2000 - Destroy COMPLETE
+# Out of bounds values : 0 OK
+# Avg bus bandwidth    : 7.34686 
+#
+# Collective test concluded: all_reduce_perf
+#
+
+formula:69337:69337 [1] NCCL INFO ENV/Plugin: Closing env plugin ncclEnvDefault

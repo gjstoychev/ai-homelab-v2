@@ -441,3 +441,36 @@ Files: `runs/9-driver595/strata/`, `runs/9-driver595/basalt/`. The 580 reference
 **Phase B in one line:** driver 595.91.07 corrects vLLM's KV memory accounting (pools now equal the source's) and changes nothing else measured: not TTFT, not prompt reading, not the needle, not Strata or Basalt.
 
 **Next:** the two models go back to the archive; then the optional steps 10 (Basalt on the 27B), 11 (quality), 12 (write-up).
+
+### 9f. NCCL all-reduce between the cards (2026-11-26)
+
+Question left by 9d: how much of the prompt-reading time is the tensor-parallel all-reduce through host memory? nccl-tests v2.22.0 built with `scripts/build-nccl-tests.sh` (commit `826b3e6`, against the host's NCCL 2.28.9, CUDA 13.0, `sm_120`, no MPI; `docs/stack.md` updated), run with `experiments/2026-11-vllm-27b-tp2/scripts/run-nccl-tests.sh runs/9-driver595/nccl-tests` (GPUs idle, both settings of `NCCL_P2P_DISABLE`, bf16 sum, 20 warm-up and 100 timed iterations, validation on: 0 wrong). Files: `runs/9-driver595/nccl-tests/allreduce-p2pdisable{1,0}.{cmd,out}`; the single-size runs' result rows are interleaved with NCCL's log lines in the `.out`.
+
+**Message sizes** (from the model's `config.json`: hidden 5120, 64 layers): one all-reduce moves tokens × 5120 × 2 bytes. A prefill chunk is `--max-num-batched-tokens 4096` tokens = **40 MiB**; one decode token is 10 KiB, five tokens (MTP k=4 verifies 5) 50 KiB. Assumed: two all-reduces per layer (attention or linear-attention output, MLP output), 128 per forward pass, bf16.
+
+| Size | Time, `P2P_DISABLE=1` | Time, `P2P_DISABLE=0` | Bus bandwidth |
+|---|---|---|---|
+| 10 KiB (1 decode token) | 10.35 µs | 10.33 µs | 1.0 GB/s |
+| 50 KiB (5 tokens, MTP k=4) | 22.04 µs | 22.15 µs | 2.3 GB/s |
+| 1 MiB | 151 µs | 152 µs | 6.9 GB/s |
+| 4 MiB / 8 MiB | 581 / 1,149 µs | | 7.2 / 7.3 GB/s |
+| **40 MiB (a 4,096-token prefill chunk)** | **5.71 ms** | **5.66 ms** | **7.35 / 7.41 GB/s** |
+| 128 MiB | 18.1 ms | | 7.4 GB/s |
+
+Transport in both settings: `via SHM/direct/direct` (the driver's `CNS`, as in 9d), so the flag is again irrelevant; the link tops out near 7.4 GB/s, which is host memory (copy in, copy out), not the PCIe x8 links (about 28 GB/s each way, Gen5).
+
+**What it means for the measured TTFT** (all-reduce time only, 128 per chunk at the sizes above, interpolated in the sweep for partial chunks; not overlapped with compute, as in a plain TP run):
+
+| Prompt | all-reduce estimate | TTFT measured (9b, MTP off) | share |
+|---|---|---|---|
+| 578 tokens (one chunk, 5.7 MiB, about 0.8 ms each) | about 0.10 s | 0.184 s | about 56 % |
+| 4,212 tokens (4,096 + 116) | 0.731 + 0.022 = 0.75 s | 1.310 s | about 57 % |
+| 32,267 tokens (7 × 4,096 + 3,595) | 7 × 0.731 + 0.64 = 5.76 s | 12.40 s | about 46 % |
+| Decode, one token (k=0) | 128 × 10.3 µs = 1.3 ms | step 23.8 ms | about 5.5 % |
+| Decode, k=4 step | 128 × 22 µs = 2.8 ms | step 35.9 ms | about 7.8 % |
+
+**Result: about half of every prompt read is the all-reduce, through host memory at 7.4 GB/s.** Decode is spared (small messages, 5–8 % of a step), which fits the finding that decode reproduces the source's numbers while prompt reading does not. If the source's machine reduced faster, the gap to its TTFT (0.99 s at 4K, 10.5 s at 32K, that is 0.32 s and 1.9 s less than here) needs the all-reduce to be about 40 % cheaper (0.75 → 0.43 s at 4K; 5.76 → 3.9 s at 32K): plausible for a different host path, but only a measurement on that machine would show it. This is an estimate, not a profile.
+
+Caveats: (1) nccl-tests used the host's NCCL 2.28.9; vLLM's images carry NCCL 2.29.7 (torch 2.13.0+cu130 in both). The same transport is chosen, but not measured. (2) The two all-reduces per layer, and the absence of overlap with compute, are assumptions; a profile of one prefill chunk (nsys or the torch profiler) would settle both. (3) The host here: DDR5-6000 CL40 2×32 GB (`docs/hardware.md`), i7-14700; the source's memory and CPU are not published beyond "9800X3D with DDR5".
+
+**Next:** an NCCL run inside the vLLM image (2.29.7) is a cheap check of caveat 1; a profiled prefill chunk would settle 2. Strata and Basalt do not use NCCL (their prompt reading is also unchanged by the driver); the optional steps 10, 11, 12 remain.

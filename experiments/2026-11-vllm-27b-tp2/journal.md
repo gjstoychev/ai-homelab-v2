@@ -406,3 +406,38 @@ Files: `runs/9-driver595/p2p/` (`summary.md`, the NCCL log in each `.out`). Thre
 What this leaves for the prompt-reading gap (+33 % at 4K, +18 % at 32K, +10 % at 253K against the source): the flag is not it, and neither is the driver. Remaining: the host (CPU and memory: i7-14700 against the source's 9800X3D with DDR5, since all-reduce goes through host memory), and the source's measurement (not published). An all-reduce cost estimate or an NCCL all-reduce benchmark (`nccl-tests` over SHM at the prefill's message sizes) would say how much of the 12.4 s the host path takes; not run.
 
 **Next:** Strata and Basalt checks on 595 (one config each from the Flash-Next experiments), then the optional steps 10 (Basalt on the 27B), 11 (quality) and 12 (write-up).
+
+### 9e. Strata and Basalt on driver 595 (2026-11-26)
+
+One two-GPU MTP config of each Flash-Next experiment, same configs, same client (`scripts/oai-bench.py` through `scripts/bench-run.sh`, 5 reps, thinking off), to see whether the driver changes the other two engines:
+
+```
+scripts/bench-run.sh experiments/2026-11-vllm-27b-tp2/runs/9-driver595/strata mtp 5 -- \
+  env -C ~/strata/v0.2.21/src/terminal .venv/bin/python serve/server.py --engine strata \
+  --config experiments/2026-11-strata/configs/strata-2gpu-mtp.json --port 8080
+BENCH_ENGINE_LOG=~/.cache/basalt/2d72cadc08663624/engine.log scripts/bench-run.sh \
+  experiments/2026-11-vllm-27b-tp2/runs/9-driver595/basalt peer-mtp 5 -- \
+  env -C ~/basalt/v0.5.7/src bin/basalt serve --config experiments/2026-11-basalt/configs/basalt-peer-mtp.json --python .venv/bin/python
+```
+
+**A dead end first:** the first start of both failed at once ("missing model shard", "file not found"): the Strata GGUF and the Basalt pack were in the archive `/mnt/models` (archived earlier the same day), not in `~/models`. The failed run directories were deleted (nothing was measured). Both models were moved back with `scripts/move-model.sh` (checksums OK after the copy: Strata 71 GB, copy 139 s, verify 48 s; Basalt 75 GB, copy 146 s, verify 50 s; the SATA disk is faster than the 250 MB/s noted on 2026-11-25 when it reads), then the runs repeated.
+
+| | Driver 580 | Driver 595 |
+|---|---|---|
+| Strata 2-GPU MTP, prose decode | 86.2 ± 1.0 t/s (53 % drafts accepted) | 90.6 ± 3.9 t/s (56 %) |
+| Strata, structured decode | 132.4 ± 3.6 (86 %) | 134.4 ± 3.3 (85 %) |
+| Strata, TTFT / prompt t/s (prose) | 2.46 s / 1,765 | 2.47 s / 1,759 |
+| Strata load | 20.4 s | 22.9 s |
+| Basalt peer MTP, prose decode | 113.1 ± 2.3 (65 %) | 114.5 ± 3.3 (66 %) |
+| Basalt, structured decode | 193.3 ± 10.1 (80 %) | 199.2 ± 6.1 (83 %) |
+| Basalt, TTFT / prompt t/s (prose) | 2.34 s / 1,855 | 2.33 s / 1,865 |
+| Basalt load | 23.0 s | 19.9 s |
+| VRAM per card, Strata / Basalt | 15,032 / 14,938; 15,372 / 15,532 MiB | 15,004 / 14,912; 15,256 / 15,534 MiB |
+
+Files: `runs/9-driver595/strata/`, `runs/9-driver595/basalt/`. The 580 references are `2026-11-strata/runs/10-strata-2gpu/summary.md` and `2026-11-basalt/runs/6-7-modes` (peer-mtp).
+
+**Result: the driver changes nothing measurable for either engine.** Prompt reading within 0.4 % in both (so, again, the driver is not what limits it); decode differences (+5 % Strata prose, +3 % Basalt structured) follow the draft acceptance rate (53 → 56 %, 80 → 83 %) and are inside two spreads. Both engines started and ran on 595.91.07 without a change to the build (Strata's and Basalt's CUDA 13.0 builds run on the CUDA 13.2 driver, as they should).
+
+**Phase B in one line:** driver 595.91.07 corrects vLLM's KV memory accounting (pools now equal the source's) and changes nothing else measured: not TTFT, not prompt reading, not the needle, not Strata or Basalt.
+
+**Next:** the two models go back to the archive; then the optional steps 10 (Basalt on the 27B), 11 (quality), 12 (write-up).

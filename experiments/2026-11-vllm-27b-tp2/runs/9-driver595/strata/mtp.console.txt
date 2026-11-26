@@ -1,0 +1,26 @@
+date: Thu Nov 26 07:23:25 PM UTC 2026
+label: mtp, reps: 5
+kernel: 7.0.0-44-generic
+driver: 595.91.07
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: env -C /home/llama/strata/v0.2.21/src/terminal .venv/bin/python serve/server.py --engine strata --config /home/llama/ai-homelab-v2/experiments/2026-11-strata/configs/strata-2gpu-mtp.json --port 8080
+== ready in 22.9 s
+mtp prose      rep 0 (warm-up) prompt 4315 tok, ttft 2.4844 s, 256 tok at 88.11 t/s | server: prompt 1760.3 t/s, decode 87.7 t/s, drafts 123/202
+mtp prose      rep 1           prompt 4315 tok, ttft 2.4679 s, 256 tok at 96.48 t/s | server: prompt 1761.2 t/s, decode 96.3 t/s, drafts 129/201
+mtp prose      rep 2           prompt 4315 tok, ttft 2.4699 s, 256 tok at 87.1 t/s | server: prompt 1759.6 t/s, decode 87.0 t/s, drafts 117/228
+mtp prose      rep 3           prompt 4315 tok, ttft 2.471 s, 256 tok at 90.87 t/s | server: prompt 1758.9 t/s, decode 90.7 t/s, drafts 123/224
+mtp prose      rep 4           prompt 4315 tok, ttft 2.4716 s, 256 tok at 91.59 t/s | server: prompt 1758.4 t/s, decode 91.4 t/s, drafts 123/212
+mtp prose      rep 5           prompt 4315 tok, ttft 2.4721 s, 256 tok at 86.99 t/s | server: prompt 1758.1 t/s, decode 86.9 t/s, drafts 117/231
+mtp structured rep 0 (warm-up) prompt 4335 tok, ttft 2.4857 s, 256 tok at 126.43 t/s | server: prompt 1759.3 t/s, decode 125.9 t/s, drafts 178/211
+mtp structured rep 1           prompt 4335 tok, ttft 2.4823 s, 256 tok at 130.4 t/s | server: prompt 1759.3 t/s, decode 129.9 t/s, drafts 174/209
+mtp structured rep 2           prompt 4335 tok, ttft 2.4832 s, 256 tok at 135.41 t/s | server: prompt 1758.5 t/s, decode 134.8 t/s, drafts 177/204
+mtp structured rep 3           prompt 4335 tok, ttft 2.484 s, 256 tok at 131.65 t/s | server: prompt 1758.1 t/s, decode 131.1 t/s, drafts 175/211
+mtp structured rep 4           prompt 4335 tok, ttft 2.484 s, 256 tok at 137.71 t/s | server: prompt 1758.0 t/s, decode 137.1 t/s, drafts 179/205
+mtp structured rep 5           prompt 4335 tok, ttft 2.4843 s, 256 tok at 137.03 t/s | server: prompt 1757.8 t/s, decode 136.4 t/s, drafts 180/211
+== peak VRAM per GPU (MiB):
+  GPU0: 15004
+  GPU1: 14912
+== peak server RSS / lowest MemAvailable (MiB): 45370 / 15210

@@ -1,0 +1,26 @@
+date: Thu Nov 26 07:24:49 PM UTC 2026
+label: peer-mtp, reps: 5
+kernel: 7.0.0-44-generic
+driver: 595.91.07
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: env -C /home/llama/basalt/v0.5.7/src bin/basalt serve --config /home/llama/ai-homelab-v2/experiments/2026-11-basalt/configs/basalt-peer-mtp.json --python .venv/bin/python
+== ready in 19.9 s
+peer-mtp prose      rep 0 (warm-up) prompt 4315 tok, ttft 2.4218 s, 256 tok at 119.06 t/s | server: prompt 1793.7 t/s, decode 118.8 t/s, drafts 130/195
+peer-mtp prose      rep 1           prompt 4315 tok, ttft 2.3242 s, 256 tok at 116.93 t/s | server: prompt 1868.0 t/s, decode 116.7 t/s, drafts 129/194
+peer-mtp prose      rep 2           prompt 4315 tok, ttft 2.3257 s, 256 tok at 116.34 t/s | server: prompt 1867.1 t/s, decode 116.1 t/s, drafts 131/196
+peer-mtp prose      rep 3           prompt 4315 tok, ttft 2.326 s, 256 tok at 117.27 t/s | server: prompt 1866.9 t/s, decode 117.0 t/s, drafts 130/186
+peer-mtp prose      rep 4           prompt 4315 tok, ttft 2.3347 s, 256 tok at 111.22 t/s | server: prompt 1859.8 t/s, decode 111.0 t/s, drafts 122/198
+peer-mtp prose      rep 5           prompt 4315 tok, ttft 2.3296 s, 256 tok at 110.64 t/s | server: prompt 1863.9 t/s, decode 110.5 t/s, drafts 122/189
+peer-mtp structured rep 0 (warm-up) prompt 4335 tok, ttft 2.3808 s, 256 tok at 204.09 t/s | server: prompt 1832.0 t/s, decode 202.8 t/s, drafts 212/239
+peer-mtp structured rep 1           prompt 4335 tok, ttft 2.3698 s, 256 tok at 191.67 t/s | server: prompt 1840.5 t/s, decode 190.6 t/s, drafts 210/258
+peer-mtp structured rep 2           prompt 4335 tok, ttft 2.3784 s, 256 tok at 205.24 t/s | server: prompt 1836.8 t/s, decode 204.0 t/s, drafts 209/250
+peer-mtp structured rep 3           prompt 4335 tok, ttft 2.3789 s, 256 tok at 205.5 t/s | server: prompt 1837.3 t/s, decode 204.3 t/s, drafts 212/246
+peer-mtp structured rep 4           prompt 4335 tok, ttft 2.3712 s, 256 tok at 198.33 t/s | server: prompt 1839.2 t/s, decode 197.2 t/s, drafts 211/260
+peer-mtp structured rep 5           prompt 4335 tok, ttft 2.376 s, 256 tok at 195.43 t/s | server: prompt 1835.4 t/s, decode 194.4 t/s, drafts 209/252
+== peak VRAM per GPU (MiB):
+  GPU0: 15256
+  GPU1: 15534
+== peak server RSS / lowest MemAvailable (MiB): 48120 / 12550

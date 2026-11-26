@@ -568,3 +568,19 @@ What it shows:
 - **Not shown by this test:** whether one setting is *better*. Ten prompts, greedy, a simple check each; the KV cache type (fp8, NVFP4) and the quantizations would need a distribution-level measure (KL against BF16, or the source's `kv-quality-test.md` method, which was not run). The statement is only: no setting broke an answer, and the engines differ in whether drafting is invisible.
 
 **Next:** step 12, the write-up (README: setup, results table, what was found; the root `README.md` index).
+
+## 13. Basalt peer mode on the 27B (2026-11-26)
+
+Asked for after the write-up: the one Basalt mode step 10 left out. Result: **it does not start on these cards with the published pack**, at any context where it would be of use. `runs/10-basalt27b/peer-probe.txt` has the three starts and their refusals (configs `basalt27-peer-try*.json`; every start ended at "planning weight allocation", nothing was loaded, the cards stayed at 2 MiB):
+
+| Config | Needs on GPU 0 | Free |
+|---|---|---|
+| `peer`, context 32,768, drafting on | 19.7 GiB | 14.8 GiB |
+| `peer`, context 32,768, `"spec": 0` | 17.4 GiB | 14.8 GiB |
+| `peer`, context 8,448 (the smallest that gives a second card anything to read), `"spec": 0` | 16.6 GiB | 14.8 GiB |
+
+Why: in `peer` the main card holds the whole model (the second card only reads the last layers of long prompts), and the pack takes 16.0 GiB with its DFlash 2 drafter; `"spec": 0` stops drafting but the drafter's weights stay in the file and on the card (17.4 against 19.7 GiB is the drafter's cells, not its weights). The Basalt guide's own number for a pack without a drafter is 14.0 GiB, which would be about 14.6 GiB at 8,448 tokens of context: it might fit, but at that context the peer never engages (it reads only prompt parts over two chunks, 8,192 tokens), so it would test nothing. The guide's peer figures (+17–27 % prompt reading) are for an RTX 5090 main card, which holds the model. For two 16 GB cards `split` is the 27B's only useful two-card mode, which is what step 10 measured.
+
+A mistake on the way: my first cleanup used `pkill -f "basalt serve"`, which matched my own shell command and killed it (exit 144); nothing was left running (checked: no Basalt process, cards at 2 MiB), and the second and third probes ran separately.
+
+Not done: building a no-drafter pack from QUASAR's checkpoint (about 20 GB download, converter with 16 processes) to see whether a 14 GiB main card holds it; with a context under 8,448 it would not change the answer for long prompts.

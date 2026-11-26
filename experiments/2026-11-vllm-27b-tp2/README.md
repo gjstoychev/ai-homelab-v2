@@ -181,10 +181,11 @@ It depends on what is read and what is written:
 - **Prompt-heavy work (long documents, agents re-reading context):** pipelined prompt reading. vLLM PP=2 reads 32K in 9.3 s against 13.2 s with TP=2 (at a 40 % cost on one stream, 65K context only); **Basalt split reads 32K in 5.6 s and 252K in 114.5 s**, 2.2–2.4× faster than vLLM TP=2, because it passes a chunk's rows once instead of all-reducing twice per layer.
 - **Structured output:** Basalt's DFlash 2 drafter gets 128 t/s on JSON, 10 % above vLLM's MTP k=4, and loses on prose (−28 %).
 - **Several requests at once:** vLLM's totals rise only up to its slot count (`--max-num-seqs` 4: 44 → 69 → 94 t/s at 1 / 2 / 4); Basalt's concurrency was not measured on the 27B.
+- **Basalt peer mode** does not start on these cards with the published pack (journal 13): the main card must hold the whole 16 GiB model, so `split` is the only two-card mode of the 27B here.
 - **Context:** vLLM TP=2 holds 262,144 tokens (NVFP4 KV: 463K-token pool); PP=2 only 65,536 with five starts to fit; Basalt split holds 262,144 with int8 KV.
 - **Output stability:** Basalt's drafted text equals its undrafted text; vLLM's MTP changes the wording on 3 of 10 prompts (correctness checks pass everywhere).
 
 ### Not measured
 
-Basalt `peer` on the 27B (the pack with its drafter does not fit one card; a no-drafter pack with a small context might), Basalt with several requests, a matched checkpoint (vLLM and Basalt use different NVFP4 weights; the 252K comparison also differs in KV type), sequence-parallel or fp8 all-reduce in vLLM (nothing to switch on in these images), the profile with MTP or at 32K, the source's own KV-quality test (`kv-quality-test.md`), quality at distribution level (KL against BF16), and any run at 150 W with the 250K needle.
+Basalt with several requests, a no-drafter 27B pack (Basalt's `peer` mode, tried in step 13, refuses the published pack at every useful context: it needs 16.6 GiB on GPU 0 at the smallest context where a second card reads anything, 14.8 GiB are free), a matched checkpoint (vLLM and Basalt use different NVFP4 weights; the 252K comparison also differs in KV type), sequence-parallel or fp8 all-reduce in vLLM (nothing to switch on in these images), the profile with MTP or at 32K, the source's own KV-quality test (`kv-quality-test.md`), quality at distribution level (KL against BF16), and any run at 150 W with the 250K needle.
 

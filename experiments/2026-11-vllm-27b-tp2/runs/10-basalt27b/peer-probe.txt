@@ -1,0 +1,11 @@
+Basalt v0.5.7 (build with qwen35, ~/basalt-qwen35), pack Qwen3.8-27B-QUASAR-NVFP4.basalt (jesdga/Qwen3.8-27B-Basalt 10c9a90e),
+gpu 0,1, gpu-mode peer, kv int8, parallel 1, driver 595.91.07, both cards idle (2 MiB used). Command, one per config:
+  timeout 150 env -C ~/basalt-qwen35/v0.5.7/src bin/basalt serve --config experiments/2026-11-vllm-27b-tp2/configs/<config>.json --python .venv/bin/python
+Every start stopped at "planning weight allocation" with the refusal below; nothing was loaded.
+
+basalt27-peer-try.json          max-context 32768, drafting on (spec 16):
+  error: gpu-mode peer: Qwen3.8-27B and its cells need 19.7 GiB on GPU 0 (RTX 5060 Ti), 14.8 GiB free; use gpu-mode split or lower --max-context or --parallel
+basalt27-peer-try-nodraft.json  max-context 32768, "spec": 0:
+  error: gpu-mode peer: Qwen3.8-27B and its cells need 17.4 GiB on GPU 0 (RTX 5060 Ti), 14.8 GiB free; use gpu-mode split or lower --max-context or --parallel
+basalt27-peer-try-min.json      max-context 8448 (the smallest where a second card would read anything: a prompt part over two chunks, 8,192 tokens), "spec": 0:
+  error: gpu-mode peer: Qwen3.8-27B and its cells need 16.6 GiB on GPU 0 (RTX 5060 Ti), 14.8 GiB free; use gpu-mode split or lower --max-context or --parallel

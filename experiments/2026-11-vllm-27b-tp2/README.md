@@ -1,6 +1,6 @@
 # vLLM: Qwen3.8-27B on 2× RTX 5060 Ti with tensor parallelism, a reproduction
 
-Status: **in progress** (started 2026-11-26; phase A, steps 3–4 done). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
+Status: **in progress** (started 2026-11-26; phase A, steps 3–5 done). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
 
 ## Question
 
@@ -97,6 +97,21 @@ Phase A (driver 580.178.04, kernel 7.0.0-44, 180 W), vLLM 0.30.0, fp8 KV. Decode
 | Decode, structured | 41.99 / 124.89 | 42.05 | 81.10 with thinking (all reasoning); 117.02 as JSON, thinking off |
 | Decode, mixed | 41.99 / 81.61 | 42.05 | 73.97 |
 | TTFT at ~0.5K / 4K / 32K tokens | 0.141 / 0.987 / 10.521 s | 0.187 / 1.314 / 12.417 s | 0.200 / 1.355 / 13.146 s |
+
+**k sweep, MTP k=0–7** (step 5; thinking off, 640 tokens, about 4.3K-token prompts; details and the source's numbers per cell in journal step 5, [`runs/5-sweep/summary.md`](runs/5-sweep/summary.md)):
+
+| k | steps/s | prose t/s | structured t/s | mixed t/s |
+|--:|--:|--:|--:|--:|
+| 0 | 42.07 | 42.07 | 42.07 | 42.07 |
+| 1 | 35.64 | 60.1 | 69.6 | 62.6 |
+| 2 | 32.74 | 67.9 | 91.6 | 72.1 |
+| 3 | 30.12 | 67.6 | 107.2 | 73.6 |
+| 4 | 27.84 | 63.9 | 117.6 | 73.0 |
+| 5 | 25.89 | 59.4 | 123.0 | 68.9 |
+| 6 | 24.30 | 56.2 | 127.7 | 62.8 |
+| 7 | 22.81 | 53.0 | 133.9 | 58.5 |
+
+Steps/s is within 1–4 % of the source's at every k, and the step time follows a straight line, 25.3 ms + 2.64 ms × k (the source: 25.4 + 2.37 × k). Prose and mixed peak at k=2–4 and fall after, structured keeps climbing to k=7. Decode at depth, k=0 / k=4, at about 1K / 32K / 127K tokens: 42.25 / 40.25 / 35.08 and prose 78.0 / 70.1 / 68.3, JSON 117.6 / 112.9 / 92.2 t/s (the source's, at 0 / 32K / 131K: 41.99 / 39.98 / 34.66, prose 80.1 / 69.6 / 68.8, JSON 123.3 / 115.6 / 92.4). The one open difference so far is prompt reading (TTFT 12.4 s at 32K against 10.5 s; 83 s at 127K).
 
 More steps to come.
 

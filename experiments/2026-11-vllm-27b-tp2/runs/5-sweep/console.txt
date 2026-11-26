@@ -1,0 +1,258 @@
+==== k=0 (experiments/2026-11-vllm-27b-tp2/configs/fp8-nomtp.args), depth: 1, 13:26:17
+date: Thu Nov 26 01:26:17 PM UTC 2026
+label: k0, reps: 3
+kernel: 7.0.0-44-generic
+driver: 580.178.04
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-nomtp.args
+== ready in 63.4 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 63.4 --label k0 --out experiments/2026-11-vllm-27b-tp2/runs/5-sweep/results.jsonl --reps 3 --kinds prose,structured,mixed --max-tokens 640
+k0 prose      rep 0 (warm-up) prompt 4326 tok, ttft 1.3431 s, 640 tok at 42.12 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+k0 prose      rep 1           prompt 4330 tok, ttft 1.3289 s, 640 tok at 42.08 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+k0 prose      rep 2           prompt 4328 tok, ttft 1.3292 s, 640 tok at 42.07 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+k0 prose      rep 3           prompt 4329 tok, ttft 1.3326 s, 640 tok at 42.07 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+k0 structured rep 0 (warm-up) prompt 4349 tok, ttft 1.3378 s, 640 tok at 42.07 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+k0 structured rep 1           prompt 4350 tok, ttft 1.3375 s, 640 tok at 42.07 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+k0 structured rep 2           prompt 4350 tok, ttft 1.3372 s, 640 tok at 42.06 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+k0 structured rep 3           prompt 4348 tok, ttft 1.3368 s, 640 tok at 42.07 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+k0 mixed      rep 0 (warm-up) prompt 4356 tok, ttft 1.3363 s, 640 tok at 42.06 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+k0 mixed      rep 1           prompt 4357 tok, ttft 1.3358 s, 640 tok at 42.07 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+k0 mixed      rep 2           prompt 4358 tok, ttft 1.3394 s, 640 tok at 42.06 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+k0 mixed      rep 3           prompt 4358 tok, ttft 1.3403 s, 640 tok at 42.07 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/long-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 63.4 --label k0 --mode depth --out experiments/2026-11-vllm-27b-tp2/runs/5-sweep/depth.jsonl --targets 1000,32768,131072 --reps 2 --max-tokens 512
+k0: corpus 1527726 chars, needle obsidian-2824
+k0 depth 1000: 3228 chars at 4.25 chars/token
+k0 depth 1000 prose      rep 1: prompt 942 tok, ttft 0.321 s, 512 tok at 42.25 t/s
+k0 depth 1000 prose      rep 2: prompt 944 tok, ttft 0.314 s, 512 tok at 42.25 t/s
+k0 depth 1000 structured rep 1: prompt 958 tok, ttft 0.314 s, 512 tok at 42.25 t/s
+k0 depth 1000 structured rep 2: prompt 956 tok, ttft 0.312 s, 512 tok at 42.25 t/s
+k0 depth 32768: 105425 chars at 3.41 chars/token
+k0 depth 32768 prose      rep 1: prompt 32827 tok, ttft 12.771 s, 512 tok at 40.25 t/s
+k0 depth 32768 prose      rep 2: prompt 32828 tok, ttft 12.761 s, 512 tok at 40.25 t/s
+k0 depth 32768 structured rep 1: prompt 32841 tok, ttft 12.741 s, 512 tok at 40.25 t/s
+k0 depth 32768 structured rep 2: prompt 32841 tok, ttft 12.746 s, 512 tok at 40.27 t/s
+k0 depth 131072: 421579 chars at 3.39 chars/token
+k0 depth 131072 prose      rep 1: prompt 126595 tok, ttft 83.132 s, 512 tok at 35.1 t/s
+k0 depth 131072 prose      rep 2: prompt 126597 tok, ttft 83.127 s, 512 tok at 35.06 t/s
+k0 depth 131072 structured rep 1: prompt 126611 tok, ttft 83.101 s, 512 tok at 35.06 t/s
+k0 depth 131072 structured rep 2: prompt 126610 tok, ttft 83.116 s, 512 tok at 35.08 t/s
+== peak VRAM per GPU (MiB):
+  GPU0: 15670
+  GPU1: 15670
+== peak server RSS / lowest MemAvailable (MiB): 36 / 51654
+==== k=1 (experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp1.args), depth: 0, 13:40:02
+date: Thu Nov 26 01:40:02 PM UTC 2026
+label: k1, reps: 3
+kernel: 7.0.0-44-generic
+driver: 580.178.04
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp1.args
+== ready in 110.0 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 110.0 --label k1 --out experiments/2026-11-vllm-27b-tp2/runs/5-sweep/results.jsonl --reps 3 --kinds prose,structured,mixed --max-tokens 640
+k1 prose      rep 0 (warm-up) prompt 4331 tok, ttft 1.3724 s, 640 tok at 58.78 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 1.709
+k1 prose      rep 1           prompt 4327 tok, ttft 1.3625 s, 640 tok at 60.77 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 1.707
+k1 prose      rep 2           prompt 4331 tok, ttft 1.3611 s, 640 tok at 59.66 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 1.673
+k1 prose      rep 3           prompt 4329 tok, ttft 1.3597 s, 640 tok at 59.97 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 1.684
+k1 structured rep 0 (warm-up) prompt 4350 tok, ttft 1.3664 s, 640 tok at 68.46 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 1.922
+k1 structured rep 1           prompt 4348 tok, ttft 1.3632 s, 640 tok at 68.86 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 1.934
+k1 structured rep 2           prompt 4349 tok, ttft 1.363 s, 640 tok at 69.68 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 1.954
+k1 structured rep 3           prompt 4351 tok, ttft 1.3779 s, 640 tok at 70.1 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 1.969
+k1 mixed      rep 0 (warm-up) prompt 4354 tok, ttft 1.3944 s, 272 tok at 68.43 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 1.922  [finish: stop]
+k1 mixed      rep 1           prompt 4356 tok, ttft 1.377 s, 640 tok at 62.6 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 1.755
+k1 mixed      rep 2           prompt 4355 tok, ttft 1.3775 s, 640 tok at 63.12 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 1.77
+k1 mixed      rep 3           prompt 4357 tok, ttft 1.3786 s, 640 tok at 61.93 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 1.736
+== peak VRAM per GPU (MiB):
+  GPU0: 15732
+  GPU1: 15732
+== peak server RSS / lowest MemAvailable (MiB): 35 / 51464
+==== k=2 (experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp2.args), depth: 0, 13:44:19
+date: Thu Nov 26 01:44:19 PM UTC 2026
+label: k2, reps: 3
+kernel: 7.0.0-44-generic
+driver: 580.178.04
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp2.args
+== ready in 114.5 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 114.5 --label k2 --out experiments/2026-11-vllm-27b-tp2/runs/5-sweep/results.jsonl --reps 3 --kinds prose,structured,mixed --max-tokens 640
+k2 prose      rep 0 (warm-up) prompt 4328 tok, ttft 1.382 s, 640 tok at 65.26 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.081
+k2 prose      rep 1           prompt 4330 tok, ttft 1.366 s, 640 tok at 67.77 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.071
+k2 prose      rep 2           prompt 4328 tok, ttft 1.3838 s, 640 tok at 67.77 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.071
+k2 prose      rep 3           prompt 4329 tok, ttft 1.3726 s, 640 tok at 68.21 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.081
+k2 structured rep 0 (warm-up) prompt 4350 tok, ttft 1.3889 s, 640 tok at 91.78 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.811
+k2 structured rep 1           prompt 4350 tok, ttft 1.3736 s, 640 tok at 93.02 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.849
+k2 structured rep 2           prompt 4348 tok, ttft 1.3731 s, 640 tok at 92.58 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.827
+k2 structured rep 3           prompt 4348 tok, ttft 1.3924 s, 640 tok at 89.06 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.719
+k2 mixed      rep 0 (warm-up) prompt 4356 tok, ttft 1.3962 s, 640 tok at 74.21 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.266
+k2 mixed      rep 1           prompt 4358 tok, ttft 1.3982 s, 640 tok at 70.71 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.159
+k2 mixed      rep 2           prompt 4357 tok, ttft 1.3988 s, 640 tok at 70.95 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.166
+k2 mixed      rep 3           prompt 4357 tok, ttft 1.4013 s, 640 tok at 74.48 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.274
+== peak VRAM per GPU (MiB):
+  GPU0: 15736
+  GPU1: 15736
+== peak server RSS / lowest MemAvailable (MiB): 36 / 51299
+==== k=3 (experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp3.args), depth: 0, 13:48:28
+date: Thu Nov 26 01:48:28 PM UTC 2026
+label: k3, reps: 3
+kernel: 7.0.0-44-generic
+driver: 580.178.04
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp3.args
+== ready in 114.0 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 114.0 --label k3 --out experiments/2026-11-vllm-27b-tp2/runs/5-sweep/results.jsonl --reps 3 --kinds prose,structured,mixed --max-tokens 640
+k3 prose      rep 0 (warm-up) prompt 4329 tok, ttft 1.3864 s, 640 tok at 65.52 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.277
+k3 prose      rep 1           prompt 4331 tok, ttft 1.3693 s, 640 tok at 68.81 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.286
+k3 prose      rep 2           prompt 4330 tok, ttft 1.3745 s, 640 tok at 66.44 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.203
+k3 prose      rep 3           prompt 4328 tok, ttft 1.3916 s, 640 tok at 67.6 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.242
+k3 structured rep 0 (warm-up) prompt 4347 tok, ttft 1.3777 s, 640 tok at 103.5 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 3.441
+k3 structured rep 1           prompt 4351 tok, ttft 1.3981 s, 640 tok at 107.55 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 3.581
+k3 structured rep 2           prompt 4348 tok, ttft 1.3987 s, 640 tok at 105.84 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 3.516
+k3 structured rep 3           prompt 4350 tok, ttft 1.3988 s, 640 tok at 108.2 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 3.596
+k3 mixed      rep 0 (warm-up) prompt 4355 tok, ttft 1.3853 s, 640 tok at 77.37 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.578
+k3 mixed      rep 1           prompt 4356 tok, ttft 1.3859 s, 640 tok at 78.64 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.612
+k3 mixed      rep 2           prompt 4357 tok, ttft 1.3856 s, 640 tok at 70.33 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.332
+k3 mixed      rep 3           prompt 4358 tok, ttft 1.406 s, 640 tok at 71.9 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.384
+== peak VRAM per GPU (MiB):
+  GPU0: 15724
+  GPU1: 15724
+== peak server RSS / lowest MemAvailable (MiB): 36 / 51417
+==== k=4 (experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp4.args), depth: 1, 13:52:32
+date: Thu Nov 26 01:52:32 PM UTC 2026
+label: k4, reps: 3
+kernel: 7.0.0-44-generic
+driver: 580.178.04
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp4.args
+== ready in 78.6 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 78.6 --label k4 --out experiments/2026-11-vllm-27b-tp2/runs/5-sweep/results.jsonl --reps 3 --kinds prose,structured,mixed --max-tokens 640
+k4 prose      rep 0 (warm-up) prompt 4328 tok, ttft 1.3851 s, 640 tok at 63.02 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.261
+k4 prose      rep 1           prompt 4328 tok, ttft 1.3724 s, 640 tok at 61.29 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.196
+k4 prose      rep 2           prompt 4328 tok, ttft 1.4065 s, 640 tok at 65.55 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.349
+k4 prose      rep 3           prompt 4331 tok, ttft 1.3775 s, 640 tok at 64.84 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.327
+k4 structured rep 0 (warm-up) prompt 4348 tok, ttft 1.3827 s, 640 tok at 119.59 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.289
+k4 structured rep 1           prompt 4350 tok, ttft 1.3798 s, 640 tok at 121.22 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.354
+k4 structured rep 2           prompt 4351 tok, ttft 1.4109 s, 640 tok at 118.01 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.238
+k4 structured rep 3           prompt 4349 tok, ttft 1.409 s, 640 tok at 113.43 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.083
+k4 mixed      rep 0 (warm-up) prompt 4355 tok, ttft 1.4153 s, 640 tok at 76.19 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.731
+k4 mixed      rep 1           prompt 4357 tok, ttft 1.4116 s, 640 tok at 70.76 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.54
+k4 mixed      rep 2           prompt 4357 tok, ttft 1.4158 s, 640 tok at 75.88 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.736
+k4 mixed      rep 3           prompt 4357 tok, ttft 1.3869 s, 640 tok at 72.48 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.606
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/long-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 78.6 --label k4 --mode depth --out experiments/2026-11-vllm-27b-tp2/runs/5-sweep/depth.jsonl --targets 1000,32768,131072 --reps 2 --max-tokens 512
+k4: corpus 1527726 chars, needle obsidian-2824
+k4 depth 1000: 3228 chars at 4.25 chars/token
+k4 depth 1000 prose      rep 1: prompt 944 tok, ttft 0.288 s, 512 tok at 79.46 t/s | MTP acceptance length 2.839
+k4 depth 1000 prose      rep 2: prompt 944 tok, ttft 0.315 s, 512 tok at 76.5 t/s | MTP acceptance length 2.733
+k4 depth 1000 structured rep 1: prompt 959 tok, ttft 0.314 s, 512 tok at 116.19 t/s | MTP acceptance length 4.179
+k4 depth 1000 structured rep 2: prompt 957 tok, ttft 0.315 s, 512 tok at 119.08 t/s | MTP acceptance length 4.275
+k4 depth 32768: 105425 chars at 3.41 chars/token
+k4 depth 32768 prose      rep 1: prompt 32826 tok, ttft 13.408 s, 512 tok at 72.09 t/s | MTP acceptance length 2.7
+k4 depth 32768 prose      rep 2: prompt 32825 tok, ttft 13.386 s, 512 tok at 68.15 t/s | MTP acceptance length 2.552
+k4 depth 32768 structured rep 1: prompt 32843 tok, ttft 13.397 s, 512 tok at 112.01 t/s | MTP acceptance length 4.197
+k4 depth 32768 structured rep 2: prompt 32842 tok, ttft 13.386 s, 512 tok at 113.86 t/s | MTP acceptance length 4.275
+k4 depth 131072: 421579 chars at 3.39 chars/token
+k4 depth 131072 prose      rep 1: prompt 126597 tok, ttft 88.579 s, 512 tok at 69.83 t/s | MTP acceptance length 2.937
+k4 depth 131072 prose      rep 2: prompt 126597 tok, ttft 88.586 s, 512 tok at 66.77 t/s | MTP acceptance length 2.808
+k4 depth 131072 structured rep 1: prompt 126610 tok, ttft 88.513 s, 512 tok at 96.28 t/s | MTP acceptance length 4.079
+k4 depth 131072 structured rep 2: prompt 126613 tok, ttft 88.587 s, 512 tok at 88.05 t/s | MTP acceptance length 3.703
+== peak VRAM per GPU (MiB):
+  GPU0: 15790
+  GPU1: 15790
+== peak server RSS / lowest MemAvailable (MiB): 36 / 51113
+==== k=5 (experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp5.args), depth: 0, 14:04:06
+date: Thu Nov 26 02:04:07 PM UTC 2026
+label: k5, reps: 3
+kernel: 7.0.0-44-generic
+driver: 580.178.04
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp5.args
+== ready in 122.1 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 122.1 --label k5 --out experiments/2026-11-vllm-27b-tp2/runs/5-sweep/results.jsonl --reps 3 --kinds prose,structured,mixed --max-tokens 640
+k5 prose      rep 0 (warm-up) prompt 4328 tok, ttft 1.3845 s, 640 tok at 57.42 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.301
+k5 prose      rep 1           prompt 4330 tok, ttft 1.4142 s, 640 tok at 57.29 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.207
+k5 prose      rep 2           prompt 4330 tok, ttft 1.3835 s, 640 tok at 64.13 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.471
+k5 prose      rep 3           prompt 4331 tok, ttft 1.416 s, 640 tok at 56.89 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.195
+k5 structured rep 0 (warm-up) prompt 4349 tok, ttft 1.3886 s, 640 tok at 130.57 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 5.039
+k5 structured rep 1           prompt 4347 tok, ttft 1.4201 s, 640 tok at 128.55 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.961
+k5 structured rep 2           prompt 4349 tok, ttft 1.4178 s, 640 tok at 121.97 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.721
+k5 structured rep 3           prompt 4348 tok, ttft 1.4186 s, 640 tok at 118.54 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.593
+k5 mixed      rep 0 (warm-up) prompt 4356 tok, ttft 1.4248 s, 640 tok at 73.49 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.845
+k5 mixed      rep 1           prompt 4356 tok, ttft 1.4247 s, 640 tok at 67.49 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.606
+k5 mixed      rep 2           prompt 4356 tok, ttft 1.4241 s, 640 tok at 70.4 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.729
+k5 mixed      rep 3           prompt 4356 tok, ttft 1.3939 s, 284 tok at 100.6 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 3.878  [finish: stop]
+== peak VRAM per GPU (MiB):
+  GPU0: 15788
+  GPU1: 15788
+== peak server RSS / lowest MemAvailable (MiB): 36 / 51315
+==== k=6 (experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp6.args), depth: 0, 14:08:16
+date: Thu Nov 26 02:08:16 PM UTC 2026
+label: k6, reps: 3
+kernel: 7.0.0-44-generic
+driver: 580.178.04
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp6.args
+== ready in 118.6 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 118.6 --label k6 --out experiments/2026-11-vllm-27b-tp2/runs/5-sweep/results.jsonl --reps 3 --kinds prose,structured,mixed --max-tokens 640
+k6 prose      rep 0 (warm-up) prompt 4330 tok, ttft 1.3857 s, 640 tok at 52.66 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.238
+k6 prose      rep 1           prompt 4330 tok, ttft 1.3767 s, 640 tok at 57.71 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.374
+k6 prose      rep 2           prompt 4328 tok, ttft 1.4126 s, 640 tok at 55.66 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.282
+k6 prose      rep 3           prompt 4330 tok, ttft 1.3815 s, 640 tok at 55.26 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.266
+k6 structured rep 0 (warm-up) prompt 4349 tok, ttft 1.4201 s, 640 tok at 128.61 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 5.289
+k6 structured rep 1           prompt 4348 tok, ttft 1.4223 s, 640 tok at 126.57 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 5.228
+k6 structured rep 2           prompt 4348 tok, ttft 1.4174 s, 640 tok at 137.65 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 5.664
+k6 structured rep 3           prompt 4350 tok, ttft 1.4203 s, 640 tok at 118.84 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 4.878
+k6 mixed      rep 0 (warm-up) prompt 4357 tok, ttft 1.4322 s, 640 tok at 66.32 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.736
+k6 mixed      rep 1           prompt 4357 tok, ttft 1.3967 s, 640 tok at 61.11 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.529
+k6 mixed      rep 2           prompt 4354 tok, ttft 1.3949 s, 640 tok at 63.86 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.639
+k6 mixed      rep 3           prompt 4357 tok, ttft 1.4324 s, 640 tok at 63.33 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.602
+== peak VRAM per GPU (MiB):
+  GPU0: 15786
+  GPU1: 15786
+== peak server RSS / lowest MemAvailable (MiB): 36 / 51317
+==== k=7 (experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp7.args), depth: 0, 14:12:34
+date: Thu Nov 26 02:12:35 PM UTC 2026
+label: k7, reps: 3
+kernel: 7.0.0-44-generic
+driver: 580.178.04
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp7.args
+== ready in 120.6 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 120.6 --label k7 --out experiments/2026-11-vllm-27b-tp2/runs/5-sweep/results.jsonl --reps 3 --kinds prose,structured,mixed --max-tokens 640
+k7 prose      rep 0 (warm-up) prompt 4328 tok, ttft 1.3868 s, 640 tok at 54.57 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.471
+k7 prose      rep 1           prompt 4330 tok, ttft 1.3696 s, 640 tok at 53.58 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.341
+k7 prose      rep 2           prompt 4327 tok, ttft 1.4113 s, 640 tok at 50.98 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.226
+k7 prose      rep 3           prompt 4331 tok, ttft 1.4125 s, 640 tok at 54.37 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.383
+k7 structured rep 0 (warm-up) prompt 4349 tok, ttft 1.3775 s, 2 tok at None t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 3.0  [finish: stop]
+k7 structured rep 1           prompt 4350 tok, ttft 1.4181 s, 640 tok at 140.09 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 6.144
+k7 structured rep 2           prompt 4349 tok, ttft 1.4168 s, 640 tok at 129.08 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 5.673
+k7 structured rep 3           prompt 4348 tok, ttft 1.4163 s, 640 tok at 132.51 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 5.864
+k7 mixed      rep 0 (warm-up) prompt 4358 tok, ttft 1.4202 s, 640 tok at 61.93 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.716
+k7 mixed      rep 1           prompt 4355 tok, ttft 1.4193 s, 640 tok at 60.17 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.634
+k7 mixed      rep 2           prompt 4356 tok, ttft 1.4193 s, 640 tok at 54.97 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.402
+k7 mixed      rep 3           prompt 4356 tok, ttft 1.4201 s, 640 tok at 60.38 t/s | server: prompt - t/s, decode - t/s, drafts -/- | MTP acceptance length 2.645
+== peak VRAM per GPU (MiB):
+  GPU0: 15674
+  GPU1: 15674
+== peak server RSS / lowest MemAvailable (MiB): 36 / 51438

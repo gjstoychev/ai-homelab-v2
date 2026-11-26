@@ -3,6 +3,7 @@
 
     scripts/long-bench.py --url URL --label L --out results.jsonl --mode ttft [--targets 32768,131072] [--reps 3]
     scripts/long-bench.py --url URL --label L --out results.jsonl --mode job  [--job-tokens 32768] [--reps 3]
+    scripts/long-bench.py --url URL --label L --out results.jsonl --mode depth [--targets 1000,32768,131072] [--reps 2]
 
 The document: every *.md file of --corpus-dir (default: Strata's docs at the pinned tag) in sorted order, each under a
 "# FILE: name" line, cut to the size that gives the target prompt length, with one invented sentence (the needle) in
@@ -14,6 +15,10 @@ ttft: for each target, one calibration request on a short slice gives the charac
       prompt t/s (server timings), decode t/s after the prompt, and whether the needle came back.
       --unique-prefix: each request starts with its own random line, so no rep reuses an earlier one's prompt from a
       server-side prefix cache (vLLM's --enable-prefix-caching ignores cache_prompt).
+depth: decode deep in a context: for each target, a document of that size and two tasks on it (prose: an explanation,
+      structured: a JSON array), REPS each, thinking off, --max-tokens (default 512), every request with its own random
+      first line. Measured: TTFT, decode t/s, and the change of a Prometheus /metrics endpoint's speculative-decoding
+      counters per request (vLLM; scripts/oai-bench.py's spec_counters), so acceptance at each depth is known.
 job:  REPS runs of a four-turn conversation over a document of --job-tokens: summary, a list from the text, a script,
       the needle. Prompt reuse ON (the server's own caches, as an agent would have them); a random session tag at the
       start of every run, so a run does not reuse an earlier run's prompt. Measured: the wall time of the whole job,
@@ -33,6 +38,13 @@ from pathlib import Path
 
 NEEDLE_WORDS = ["cormorant", "tamarisk", "basilisk", "meridian", "quillwort", "obsidian"]
 QUESTION = "What is the passphrase for the archive mentioned in the document? Answer with the passphrase only."
+DEPTH_TASKS = {
+    "prose": "Explain in plain prose, at least 1,500 words, how the system described in the document above works and "
+             "how its parts fit together. No headings, no lists, no code.",
+    "structured": "Output only a JSON array of 60 objects, one per setting, option, flag or environment variable "
+                  "mentioned in the document above, each with the keys \"name\", \"kind\", \"default\", "
+                  "\"purpose\" and \"mentioned_in\". No text before or after the JSON.",
+}
 JOB_TURNS = [
     ("summary", "Summarize the document above in five bullet points.", 400),
     ("list", "Which environment variables starting with STRATA_ does the document mention? List up to ten, one line "
@@ -41,6 +53,15 @@ JOB_TURNS = [
                "the script.", 400),
     ("needle", QUESTION, 32),
 ]
+
+
+def oai_bench_spec():
+    """spec_counters and spec_delta from scripts/oai-bench.py (a hyphenated file name, so loaded by path)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("oai_bench", Path(__file__).with_name("oai-bench.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.spec_counters, mod.spec_delta
 
 
 def corpus(d):
@@ -128,13 +149,14 @@ def main():
     ap.add_argument("--url", required=True)
     ap.add_argument("--label", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--mode", choices=["ttft", "job"], default=os.environ.get("LONG_MODE", "ttft"))
+    ap.add_argument("--mode", choices=["ttft", "job", "depth"], default=os.environ.get("LONG_MODE", "ttft"))
     ap.add_argument("--reps", type=int, default=3)
     ap.add_argument("--targets", default=os.environ.get("LONG_TARGETS", "32768,131072"))
     ap.add_argument("--job-tokens", type=int, default=int(os.environ.get("LONG_JOB_TOKENS", "32768")))
     ap.add_argument("--corpus-dir", default=os.environ.get("LONG_CORPUS", str(Path.home() / "strata/v0.2.21/src/docs")))
     ap.add_argument("--load-s", type=float, default=None)
     ap.add_argument("--timeout", type=float, default=3600)
+    ap.add_argument("--max-tokens", type=int, default=512, help="depth mode: tokens to generate")
     ap.add_argument("--unique-prefix", action="store_true", default=os.environ.get("BENCH_UNIQUE_PREFIX") == "1")
     a = ap.parse_args()
 
@@ -147,7 +169,30 @@ def main():
     print(f"{a.label}: corpus {len(text)} chars, needle {needle_word}", flush=True)
 
     with open(a.out, "a") as f:
-        if a.mode == "ttft":
+        if a.mode == "depth":
+            spec_counters, spec_delta = oai_bench_spec()
+            for target in (int(x) for x in a.targets.split(",")):
+                n_chars, cpt = sized(a.url, text, target, a.timeout)
+                doc = text[:n_chars]
+                print(f"{a.label} depth {target}: {n_chars} chars at {cpt:.2f} chars/token", flush=True)
+                for kind, task in DEPTH_TASKS.items():
+                    for rep in range(1, a.reps + 1):
+                        tag = f"Request {uuid.uuid4().hex[:12]}.\n\n"
+                        before = spec_counters(a.url)
+                        out, m = chat(a.url, [{"role": "user", "content": tag + doc + "\n\n" + task}], a.max_tokens,
+                                      a.timeout, False)
+                        sp = spec_delta(before, spec_counters(a.url)) if before else None
+                        rec = {**meta, "target": target, "kind": kind, "rep": rep, "chars_per_token": round(cpt, 3),
+                               "unique_prefix": True, "spec": sp, "text": out[:200], **m,
+                               "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+                        f.write(json.dumps(rec) + "\n")
+                        f.flush()
+                        print(f"{a.label} depth {target} {kind:10s} rep {rep}: prompt {m['prompt_tokens']} tok, "
+                              f"ttft {m['ttft_s']} s, {m['completion_tokens']} tok at {m['decode_tps']} t/s"
+                              f"{' | MTP acceptance length ' + str(sp['acceptance_length']) if sp else ''}"
+                              f"{'' if m['finish_reason'] == 'length' else '  [finish: ' + str(m['finish_reason']) + ']'}",
+                              flush=True)
+        elif a.mode == "ttft":
             for target in (int(x) for x in a.targets.split(",")):
                 n_chars, cpt = sized(a.url, text, target, a.timeout)
                 doc = document(text, n_chars, needle)

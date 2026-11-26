@@ -118,3 +118,51 @@ What it shows:
 - The first-request TTFT after a start (1.39 s warm-up) equals the steady one: no extra warm-up cost on the first prompt.
 
 **Next:** step 5, the k sweep 0–7 (one restart per k) and decode at depth 0 / 32K / 131K for k=0 and k=4.
+
+## 5. k sweep and decode at depth (2026-11-26)
+
+New: `scripts/long-bench.py --mode depth` (a prose and a JSON task on a document of the target size, 512 tokens, thinking off, a random first line per request, the MTP counters per request); `scripts/sweep-client.py` (decode: prose, structured and mixed, thinking off, 640 tokens so the mixed answer reaches its JSON, 3 reps after a warm-up; with `SWEEP_DEPTH=1` also the depth pass at about 1K / 32K / 131K tokens, 2 reps per task); `scripts/run-sweep.sh` (one server start per k, depth for k=0 and 4); configs `fp8-mtp{1,2,3,5,6,7}.args` (only `num_speculative_tokens` differs from `fp8-mtp4.args`); `scripts/sweep-summary.py`. Requests that end before the token limit are left out of the means and counted.
+
+```
+experiments/2026-11-vllm-27b-tp2/scripts/run-sweep.sh        # from the repository root
+```
+
+(The sweep ran 13:26–14:17 UTC, eight server starts of 63–122 s each. Files: `runs/5-sweep/k<k>.*`, `results.jsonl`, `depth.jsonl`, `console.txt`, `summary.md`.)
+
+**Results** (thinking off, 640 tokens, about 4.3K-token prompt, means of 3 reps; the source's in brackets, its sweep with thinking on and its own prompts):
+
+| k | steps/s | prose t/s | structured t/s | mixed t/s | KV pool |
+|--:|--:|--:|--:|--:|--:|
+| 0 | 42.07 [41.92] | 42.07 [41.99] | 42.07 [41.99] | 42.07 [41.92] | 348,478 [351,618] |
+| 1 | 35.64 [35.94] | 60.13 [63.91] | 69.55 [70.27] | 62.55 [63.41] | 286,695 [290,655] |
+| 2 | 32.74 [33.26] | 67.92 [75.21] | 91.55 [95.40] | 72.05 [77.54] | 280,526 [285,321] |
+| 3 | 30.12 [30.74] | 67.62 [78.10] | 107.20 [108.73] | 73.62 [83.01] | 279,567 [284,319] |
+| 4 | 27.84 [28.57] | 63.89 [78.31] | 117.55 [124.89] | 73.04 [81.61] | 273,333 [278,927] |
+| 5 | 25.89 [26.77] | 59.44 [72.66] | 123.02 [135.58] | 68.94 [79.03] | 268,479 [274,815] |
+| 6 | 24.30 [25.19] | 56.21 [73.09] | 127.69 [135.36] | 62.77 [74.67] | 266,140 [272,533] |
+| 7 | 22.81 [23.80] | 52.98 [70.84] | 133.89 [138.08] | 58.51 [76.50] | 262,950 [268,596] |
+
+Acceptance length (prose / structured / mixed): k=4 2.29 / 4.22 / 2.62 [2.73 / 4.35 / –]; k=7 2.31 / 5.89 / 2.56 [2.96 / 5.76 / –]. One request (k=5, mixed, rep 3) ended after 284 tokens instead of 640 (finish "stop", a short answer, 100.6 t/s); it is left out of that cell's mean (`short` column of `summary.md`).
+
+Decode at depth (the depth pass's own prompts, 512 tokens; the source's table in brackets, its depths 0 / 32,768 / 131,072; ours 950 / 32,834 / 126,603 tokens, since the sizing aims 5 % under the target):
+
+| k | context | prose t/s | structured t/s | steps/s | acceptance prose / structured | TTFT |
+|--:|--:|--:|--:|--:|---|--:|
+| 0 | 1K | 42.25 [41.99] | 42.25 [42.00] | 42.25 | – | 0.3 s |
+| 0 | 32K | 40.25 [39.98] | 40.26 [39.98] | 40.26 | – | 12.8 s |
+| 0 | 127K | 35.08 [34.66] | 35.07 [34.66] | 35.08 [34.56] | – | 83.1 s |
+| 4 | 1K | 77.98 [80.10] | 117.63 [123.33] | 27.91 | 2.78 / 4.23 | 0.3 s |
+| 4 | 32K | 70.12 [69.60] | 112.94 [115.61] | 26.68 | 2.62 / 4.24 | 13.4 s |
+| 4 | 127K | 68.30 [68.83] | 92.16 [92.41] | 23.73 [24.5] | 2.87 / 3.88 | 88.6 s |
+
+What it shows:
+
+- **The engine reproduces.** Steps/s at every k is within 1–4 % of the source's (the lower the k, the closer). Without MTP, 42.07 against 41.92 steps/s, and at depth 42.25 / 40.25 / 35.08 against 41.99 / 39.98 / 34.66 t/s. At k=4 the depth numbers match to 1–4 % on prose, structured and steps/s (68.30 against 68.83 prose and 92.16 against 92.41 JSON at 127K / 131K). The KV pool is 0.9–2.4 % smaller at every k.
+- **The step-time law holds, with a slightly dearer draft position.** Linear fit over k=1..7 (all within 0.1 steps/s): step = 25.3 ms + 2.64 ms × k here against the source's 25.4 + 2.37 × k; measured k=0 step 23.8 ms against 23.9. The base is the same; each draft position costs 11 % more here. Not explained: drafting is a series of small kernels, so a slower host (i7-14700 against the 9800X3D) or the missing P2P could both do it; not tested.
+- **The speed-up shape follows acceptance, and acceptance follows the prompt.** Structured keeps climbing to k=7 (133.9 t/s, acceptance length 5.89; the source 138.1, 5.76). Prose on this prompt peaks at k=2–3 (67.9 / 67.6) and falls from k=4; the source's prose, with its prompt, peaks at k=4 (78.3). Our depth-pass prose task, a different prose prompt, gives acceptance 2.78 at 1K and 2.87 at 127K for k=4, the source's 2.80 and 2.88, and 78.0 t/s: so the prose peak depends on the prose, not on the engine. The mixed answer (about 400 words, then JSON) behaves like prose here.
+- **Decode at depth** loses 17 % without MTP and 12 % (prose) / 22 % (JSON) with k=4 from 1K to 127K. Step time at k=4: 35.8 / 37.5 / 42.1 ms at 1K / 32K / 127K; at k=0: 23.7 / 24.8 / 28.5 ms. The cost of the four draft positions grows from 12.2 ms to 13.6 ms (+12 %) over the same range, the source's depth effect (+35 % per position from 0 to 131K) is not as large here, though the fit differs (it used k=1..7 at each depth, we have k=0 and 4 only).
+- **Prefill is the open difference.** The 127K prompt takes 83.1 s without MTP (1,523 t/s) and 88.6 s with k=4 (1,429 t/s); the source's 249K needle took 246.7 s (1,011 t/s at a deeper context). Step 6 measures it at 249K.
+
+Not done in this step: the depth pass for k=1–3 and 5–7 (the source has all k); thinking on (step 4 has it for k=0 and 4).
+
+**Next:** step 6, the 249K needle (k=6, util 0.95, as the source).

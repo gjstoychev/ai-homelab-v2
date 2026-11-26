@@ -8,6 +8,8 @@ Status: **planned** (2026-11-25), after [`2026-11-strata`](../2026-11-strata/). 
 
 The public claims are about 1.4× Strata's decode with both engines exact (93 against 66 tok/s on one RTX 5080) and about 25 % less time on a real coding job. The only two-card RTX 5060 Ti number is 2,370 prompt / 161.3 decode tok/s on an IQ3_S pack, with no version, mode or RAM given (basalt.jgulfo.com community table).
 
+**Main question (as in `2026-11-strata`, added 2026-11-26): the best way to run this model on both cards with Basalt, and how it compares with Strata's best two-GPU setup** (layer split + MTP + 4 slots: 87.6 / 133.7 t/s for one chat, 172 t/s for four, a 126K-token prompt in 36 s, the four-turn job in 29 s).
+
 ## Pinned versions
 
 Nothing is updated during the experiment. Basalt releases every two days, has no backward-compatibility shims (0.5.7 turned `gpu: auto` and a GPU list without `gpu-mode` into errors) and names no stable release.
@@ -68,7 +70,11 @@ The same as `2026-11-strata`: `scripts/oai-bench.py` on `/v1/chat/completions`, 
 8. **`route-tail-skip` on** with the fastest exact setting: the speed it adds, for comparison with Strata's step 9.
 9. **Model 2 (UD-IQ3_XXS):** download at `fc72183`, then 6b and the fastest two-card mode. Watch the RAM tier: 46.8 GiB of experts minus what the GPUs hold, against about 50–55 GiB usable.
 10. **Quality check** with the ten prompts, against llama.cpp and Strata's answers.
-11. **Long context and the real job** with the fastest exact configuration, as in `2026-11-strata` step 12.
+11. **Two GPUs, every mode** (the same matrix as `2026-11-strata` step 13), with the shared clients:
+    - a. Long context: TTFT and needle at 32K and 128K, and the four-turn job, for `peer`, `split` and one GPU.
+    - b. `gpu-share` and the split point (uneven shares), `peer-reserve-mib`, and whatever two-card options Basalt 0.5.7 documents beyond those.
+    - c. Several requests at once (1, 2, 4, 8; `"parallel"`, which "needs `kv` `int8`" for Flash-Next) on one GPU, `peer` and `split`, short prompts and 4.3K-token prompts.
+    - d. The best Basalt setup per use, next to Strata's and llama.cpp's.
 12. **Write-up:** the cross-engine table (llama.cpp, Strata, Basalt on the same weights, same prompts), findings, `docs/stack.md`, README index.
 
 ## Disk

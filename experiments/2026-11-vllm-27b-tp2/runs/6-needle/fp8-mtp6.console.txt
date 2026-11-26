@@ -1,0 +1,18 @@
+date: Thu Nov 26 02:18:19 PM UTC 2026
+label: fp8-mtp6, reps: 3
+kernel: 7.0.0-44-generic
+driver: 580.178.04
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-mtp6.args
+== ready in 75.0 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/long-bench.py --url http://127.0.0.1:8080 --label fp8-mtp6 --mode ttft --out experiments/2026-11-vllm-27b-tp2/runs/6-needle/needle.jsonl --targets 262000 --reps 3 --unique-prefix --load-s 75.0
+fp8-mtp6: corpus 1527726 chars, needle obsidian-2824
+fp8-mtp6 262000: 885918 chars at 3.56 chars/token
+fp8-mtp6 262000 rep 1: HTTP 400: {"error":{"message":"This model's maximum context length is 262144 tokens. However, you requested 64 output tokens and your prompt contains at least 262081 input tokens, for a total of at least 262145 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (par
+== peak VRAM per GPU (MiB):
+  GPU0: 15786
+  GPU1: 15786
+== peak server RSS / lowest MemAvailable (MiB): 36 / 51109

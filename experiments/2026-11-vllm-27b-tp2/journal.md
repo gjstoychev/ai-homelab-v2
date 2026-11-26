@@ -166,3 +166,21 @@ What it shows:
 Not done in this step: the depth pass for k=1–3 and 5–7 (the source has all k); thinking on (step 4 has it for k=0 and 4).
 
 **Next:** step 6, the 249K needle (k=6, util 0.95, as the source).
+
+## 6. The long needle (2026-11-26)
+
+The source's needle: 249,450 prompt tokens, k=6, util 0.95, 246.7 s (1,011 t/s), recovered. `configs/fp8-mtp6.args` already has k=6 and util 0.95 (the KV pool: 266,140 tokens, 1.02× of the 262,144 context; the source 272,533, −2.4 %). New: `scripts/needle-client.py` (`long-bench.py --mode ttft`, one target, a random first line per request, 3 reps, into `needle.jsonl`), and `long-bench.py --chars` (a fixed document size in characters instead of the calibrated one).
+
+Three attempts, the first two with `NEEDLE_TARGET`, which sizes the document by calibration (`runs/6-needle/fp8-mtp6*.{cmd,out,console.txt}`):
+
+| Run | Document | Prompt tokens | Result |
+|---|---|---|---|
+| `fp8-mtp6`, target 262,000 | 885,918 chars (calibrated 3.56 chars/token) | 262,081 | **HTTP 400**: with 64 output tokens the request was 1 token over the 262,144 context; `long-bench.py` ends the target on an error, so no rep ran |
+| `fp8-mtp6-250k`, target 250,000 | 737,106 chars (calibrated 3.11) | 225,215 | 3 reps, TTFT 223.5 / 223.5 / 223.4 s, **1,008 t/s**, needle found 3/3 |
+| `fp8-mtp6-249k`, `--chars 835000` | 835,000 chars (estimated from the two runs above) | **252,872** | 3 reps, TTFT 272.1 / 272.2 / 272.2 s, **929 t/s**, needle found 3/3 |
+
+The calibration is noisy at this size (the corpus changes character along its length: the same text gave 3.56 and 3.11 chars/token on two prefixes), which is why the first two missed the target by +5 % and −10 %; the fixed size landed 1.4 % above the source's 249,450 tokens. Peak 126 W per card, 15.8 GB VRAM.
+
+**Result:** 272.2 s for 252,872 tokens against the source's 246.7 s for 249,450: **929 against 1,011 prompt tokens per second, 8 % slower** (the prompt is 1.4 % longer, which accounts for about 1 % of it: the rate falls with depth, 1,008 t/s average at 225K). That is the smallest of the prompt-reading gaps measured: −18 % at 0.5–4K, −27 % at 32K (TTFT 13.1 against 10.5 s with MTP, 12.4 s without), −8 % at 249K. The needle was recovered in every rep of both long runs. Decode after the prompt, 41–47 t/s for the 8-token answer, is not a decode measurement.
+
+**Next:** step 7, the recipe: v0.32.0, NVFP4 KV, util 0.94 (the source's KV pool: 474,032), decode, the needle.

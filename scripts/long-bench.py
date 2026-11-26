@@ -157,6 +157,10 @@ def main():
     ap.add_argument("--load-s", type=float, default=None)
     ap.add_argument("--timeout", type=float, default=3600)
     ap.add_argument("--max-tokens", type=int, default=512, help="depth mode: tokens to generate")
+    ap.add_argument("--chars", default=os.environ.get("LONG_CHARS"),
+                    help="ttft mode: document sizes in characters, one per target, instead of sizing by calibration "
+                         "(the calibration sample is noisy at 200K+ tokens: the same corpus gave 3.56 and 3.11 "
+                         "characters per token on two prefixes)")
     ap.add_argument("--unique-prefix", action="store_true", default=os.environ.get("BENCH_UNIQUE_PREFIX") == "1")
     a = ap.parse_args()
 
@@ -193,10 +197,15 @@ def main():
                               f"{'' if m['finish_reason'] == 'length' else '  [finish: ' + str(m['finish_reason']) + ']'}",
                               flush=True)
         elif a.mode == "ttft":
-            for target in (int(x) for x in a.targets.split(",")):
-                n_chars, cpt = sized(a.url, text, target, a.timeout)
+            fixed = [int(x) for x in a.chars.split(",")] if a.chars else None
+            for i, target in enumerate(int(x) for x in a.targets.split(",")):
+                if fixed:
+                    n_chars, cpt = fixed[i], None
+                else:
+                    n_chars, cpt = sized(a.url, text, target, a.timeout)
                 doc = document(text, n_chars, needle)
-                print(f"{a.label} {target}: {n_chars} chars at {cpt:.2f} chars/token", flush=True)
+                print(f"{a.label} {target}: {n_chars} chars"
+                      + (f" at {cpt:.2f} chars/token" if cpt else " (fixed)"), flush=True)
                 for rep in range(1, a.reps + 1):
                     tag = f"Request {uuid.uuid4().hex[:12]}.\n\n" if a.unique_prefix else ""
                     msgs = [{"role": "user", "content": tag + doc + "\n\n" + QUESTION}]
@@ -207,7 +216,7 @@ def main():
                         f.write(json.dumps({**meta, "target": target, "rep": rep, "error": f"HTTP {e.code}: {err}"}) + "\n")
                         print(f"{a.label} {target} rep {rep}: HTTP {e.code}: {err}", flush=True)
                         break
-                    rec = {**meta, "target": target, "rep": rep, "chars_per_token": round(cpt, 3),
+                    rec = {**meta, "target": target, "rep": rep, "chars_per_token": round(cpt, 3) if cpt else None, "chars": n_chars,
                            "needle": needle_word, "needle_found": needle_word in out, "text": out[:200],
                            "unique_prefix": a.unique_prefix, **m,
                            "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}

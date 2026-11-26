@@ -1,6 +1,6 @@
 # vLLM: Qwen3.8-27B on 2× RTX 5060 Ti with tensor parallelism, a reproduction
 
-Status: **in progress** (started 2026-11-26; phase A, steps 3–7 done). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
+Status: **in progress** (started 2026-11-26; phase A, steps 3–8 done except the 150 W cap). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
 
 ## Question
 
@@ -116,6 +116,17 @@ Steps/s is within 1–4 % of the source's at every k, and the step time follows 
 **Long needle** (step 6; k=6, util 0.95, MTP; journal step 6): 252,872 prompt tokens in 272.2 s (929 prompt t/s), needle recovered 3/3; the source: 249,450 tokens in 246.7 s (1,011 t/s). At 225,215 tokens: 223.5 s (1,008 t/s). The prompt-reading gap to the source is 8 % at this size, against 18–27 % at 0.5–32K.
 
 **The recipe** (step 7; v0.32.0, NVFP4 KV, util 0.94, k=4): KV pool 463,166 tokens (source 474,032), needle recovered at 252,877 tokens in 279.3 s (905 t/s; the source's NVFP4 needle 912.7 t/s). Against fp8 here: steps/s −6 / −5 / −2 % at 1K / 32K / 127K, prose acceptance −7 % (source −7.5 %), decode at 1K prose 67.9 against 78.0 t/s, JSON 108.4 against 117.6; time to first token the same (13.17 s at 32K, 89.3 s at 127K).
+
+**Two GPUs, other ways** (step 8; recipe, thinking off, 256 tokens; journal step 8, [`runs/8-parallel/summary.md`](runs/8-parallel/summary.md)). Total t/s with 1 / 2 / 4 requests at once, prose:
+
+| | 1 | 2 | 4 | TTFT at 32K |
+|---|--:|--:|--:|--:|
+| TP=2, `max-num-seqs` 1 | 44.1 | 43.9 | 44.5 | 13.2 s |
+| TP=2, `max-num-seqs` 2 (the recipe) | 44.2 | 68.6 | 70.0 | 13.1 s |
+| TP=2, `max-num-seqs` 4 | 45.6 | 69.4 | 94.0 | 13.2 s |
+| PP=2, `max-num-seqs` 4, 65,536 context | 31.3 | 53.2 | 86.0 | **9.3 s** |
+
+Tensor parallelism is faster for one request (decode per stream 61 against 36 t/s) and holds the full 262K context; pipeline parallelism, which needed five starts (the last stage runs out of KV memory: its pool is 108K tokens against 463K), catches up with several requests (structured at 4: 129 against 120 t/s) and reads a 32K prompt 29 % faster. The 150 W cap is not measured yet.
 
 More steps to come.
 

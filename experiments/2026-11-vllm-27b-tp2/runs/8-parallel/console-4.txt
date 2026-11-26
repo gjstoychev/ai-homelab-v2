@@ -1,0 +1,60 @@
+==== pp2p39-len98k-seqs4 (nvfp4-mtp4-pp2p39-len98k-seqs4.args), 15:59:30
+date: Thu Nov 26 03:59:30 PM UTC 2026
+label: pp2p39-len98k-seqs4, reps: 3
+kernel: 7.0.0-44-generic
+driver: 580.178.04
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/nvfp4-mtp4-pp2p39-len98k-seqs4.args
+== ready in 110.0 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 110.0 --label pp2p39-len98k-seqs4 --out experiments/2026-11-vllm-27b-tp2/runs/8-parallel/results.jsonl --reps 3 --kinds prose,structured --max-tokens 256 --concurrency 1,2,4
+pp2p39-len98k-seqs4-c1 prose      rep 0 (warm-up) x1: 0 tokens in 0.71 s = 0.0 t/s total; per stream ttft [None], decode [None]
+Traceback (most recent call last):
+  File "/home/llama/ai-homelab-v2/scripts/oai-bench.py", line 250, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/llama/ai-homelab-v2/scripts/oai-bench.py", line 204, in main
+    concurrent_runs(a)
+  File "/home/llama/ai-homelab-v2/scripts/oai-bench.py", line 235, in concurrent_runs
+    recs = [fu.result() for fu in futs]
+            ^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/llama/ai-homelab-v2/scripts/oai-bench.py", line 134, in one
+    for t, ev in stream(url, body, timeout):
+  File "/home/llama/ai-homelab-v2/scripts/oai-bench.py", line 101, in stream
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 521, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 630, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 559, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 500: Internal Server Error
+Traceback (most recent call last):
+  File "/home/llama/ai-homelab-v2/experiments/2026-11-vllm-27b-tp2/scripts/step8-client.py", line 34, in <module>
+    subprocess.run(cmd, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/usr/bin/python3', '/home/llama/ai-homelab-v2/scripts/oai-bench.py', '--url', 'http://127.0.0.1:8080', '--unique-prefix', '--load-s', '110.0', '--label', 'pp2p39-len98k-seqs4', '--out', 'experiments/2026-11-vllm-27b-tp2/runs/8-parallel/results.jsonl', '--reps', '3', '--kinds', 'prose,structured', '--max-tokens', '256', '--concurrency', '1,2,4']' returned non-zero exit status 1.
+!! pp2p39-len98k-seqs4 failed (exit 1)

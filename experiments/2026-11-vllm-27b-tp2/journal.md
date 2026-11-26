@@ -216,3 +216,45 @@ What it shows:
 - Peak power 183 W in one sample of the needle start (limit 180 W; sampling every 0.5 s).
 
 **Next:** step 8, two GPUs other ways: pipeline parallelism, `--max-num-seqs` 1 / 2 / 4 with 1, 2 and 4 requests at once, and the 150 W cap.
+
+## 8. Two GPUs, other ways (2026-11-26; the 150 W cap is still to do)
+
+Base: the recipe of step 7 (v0.32.0, NVFP4 KV, util 0.94, k=4, thinking off). `scripts/run-step8.sh` starts one configuration at a time, `scripts/step8-client.py` measures it on that start: `oai-bench.py --concurrency 1,2,4` (prose and structured, 256 tokens, 3 reps after a warm-up, a random first line per request; each level is a label `NAME-cN`) and one 32K-token prompt (2 reps). Configs: `nvfp4-mtp4.args` (the recipe, `--max-num-seqs 2`), `-seqs1`, `-seqs4`, and the pipeline-parallel ones below. Files: `runs/8-parallel/` (`results.jsonl`, `long.jsonl`, `summary.md` from `scripts/step8-summary.py`, `console-*.txt`, one set of `.cmd/.out/.gpu.csv/.ram.csv` per start).
+
+**Tensor parallelism, `--max-num-seqs` 1 / 2 / 4** (all groups in which every request ran to its token limit; total t/s = generated tokens over the group's wall time, first request sent to last stream closed; one request at once: 1.4 s of that is the prompt):
+
+| `max-num-seqs` | KV pool | prose, 1 / 2 / 4 requests | structured, 1 / 2 / 4 requests | TTFT at 32K |
+|--:|--:|--:|--:|--:|
+| 1 | 469,957 | 44.1 / 43.9 / 44.5 | 67.5 / 68.7 / 68.9 | 13.16 s |
+| 2 (the recipe) | 463,166 | 44.2 / 68.6 / 70.0 | 68.5 / 96.9 / 97.1 | 13.14 s |
+| 4 | 446,867 | 45.6 / 69.4 / **94.0** | 67.6 / 97.2 / 120.2 (one group; the others had a request that stopped early) | 13.16 s |
+
+- Total throughput rises only up to as many requests as there are slots: with `max-num-seqs` 1 two or four requests simply queue (4th request's first token at 19 s), with 2 the last of four waits 10 s, with 4 it waits 5.7 s. Per-stream decode falls as streams share the steps (prose 58 → 52 → 38 t/s at 1 / 2 / 4 requests with 4 slots), the total still rises.
+- Each extra slot costs KV pool (463K → 447K from 2 to 4 slots). Time to first token at 32K is the same for all three: one prompt is read at a time, whatever the slots.
+- Early stops: under concurrency 8 of the 36 structured streams of the TP runs ended early with a short answer (an error object, a single record, `[]`): the "Request n.i of a batch test" line at the top changes what the model answers. They are flagged in `results.jsonl` (`short`) and the groups containing them are left out of the totals above.
+
+**Pipeline parallelism** (`--pipeline-parallel-size 2` in place of `--tensor-parallel-size 2`, `--max-num-seqs 4`, MTP k=4, NVFP4 KV). It took five starts (`runs/8-parallel/pp2*.out`, `console-1.txt` … `console-5.txt`):
+
+| Start | Setting | Result |
+|---|---|---|
+| 1 | default 32 / 32 layers, util 0.94, 262,144 | **no KV memory on the last stage**: weights 13.52 GiB there against 9.65 GiB on the first (the output layer and the MTP head; tensor parallelism has 8.8 GiB on each card), "No available memory for the cache blocks" |
+| 2 | `VLLM_PP_LAYER_PARTITION=39,25` (layers on the stages; weights 11.06 / 12.12 GiB), 262,144 | KV memory 2.51 GiB, 3.11 needed: vLLM: at most 206,048 tokens |
+| 3 | 39 / 25, 196,608 | at most 115,808 tokens |
+| 4 | 39 / 25, 98,304 | started (pool 112,347), then **CUDA out of memory on the second card during the first request** (144 MiB free, 190 MiB asked): the profile run underestimates a live request |
+| 5 | `41,23`, util 0.92, 65,536 | **works**: pool 107,817 tokens, 1.65× of the context |
+
+So with MTP and NVFP4 KV, pipeline parallelism holds a pool of 108K tokens (tensor parallelism: 463K) and a 64K context on two 16 GB cards, against 262K. Measured on start 5 (not like for like: context 65,536, util 0.92, 41 / 23 layers):
+
+| | TP, 4 slots | PP, 4 slots |
+|---|--:|--:|
+| Decode per stream, 1 request, prose / structured | 60.7 / 108.1 | **36.0 / 66.8** (−41 / −38 %) |
+| Total, 2 requests, prose / structured | 69.4 / 97.2 | 53.2 / 81.2 |
+| Total, 4 requests, prose / structured | **94.0** / 120.2 (1 group) | 86.0 / **128.9** |
+| TTFT, ~4.3K prompt | 1.41 s | **1.08 s** |
+| TTFT, 32K prompt | 13.16 s | **9.29 s** (−29 %) |
+| Mean TTFT at 4 requests (prose) | 3.73 s | 2.59 s |
+
+- Pipeline parallelism loses a lot on one stream (every token goes through both cards one after the other), gains on the total as more requests keep both stages busy (prose 31 → 53 → 86 t/s at 1 / 2 / 4 requests, against 46 → 69 → 94), and **reads prompts faster: 9.29 s for 32K tokens, under the source's 10.5 s on tensor parallelism**. That supports the suspicion that tensor parallelism's all-reduces (no peer-to-peer, `NCCL_P2P_DISABLE=1`, so through host memory) are what slows prompt reading here; not tested (a run with another all-reduce path would settle it).
+- Peak VRAM 15,842 / 15,606 MiB; peak power sample 183 W (limit 180 W).
+
+**Not done:** the 150 W cap (needs `sudo nvidia-smi -pl 150` and a reset to 180 W by the user, in their own shell); pipeline parallelism without MTP, which might hold a longer context; pipeline parallelism at long contexts.

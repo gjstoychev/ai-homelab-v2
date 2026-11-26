@@ -64,3 +64,56 @@ NVMe 279 GB free with the Strata model (71 GB) in `~/models`; both Basalt packs 
 **Stopping:** `bin/basalt serve` runs the server as `python -m serve.server` with the engine as its child; SIGTERM to the server: "stopping … stopped", RAM and VRAM back to idle. `scripts/bench-run.sh` stops the whole process group, so it works unchanged. The engine log is in `~/.cache/basalt/<id>/engine.log`, copied next to each run.
 
 **Verdict:** works. 64.8 t/s decode on a short prompt without drafting (Strata's smoke test: 51.1 t/s, also mostly thinking tokens).
+
+## 6–7. One GPU, and two GPUs in peer and split mode (2026-11-26)
+
+**Why:** the same comparison as `2026-11-strata` steps 8 and 10: exact (no drafting) and with the drafter, one card and both, on the standard prose and JSON prompts.
+
+**Commands** (in `experiments/2026-11-basalt`, `B=~/basalt/v0.5.7/src`):
+
+```bash
+scripts/bench-run.sh runs/6-7-modes <run> 5 -- env -C $B bin/basalt serve --config configs/basalt-<run>.json --python .venv/bin/python
+```
+
+for `<run>` = `1gpu-nodraft`, `1gpu-mtp`, `peer-nodraft`, `peer-mtp`, `split-nodraft`, `split-mtp`. The UD-IQ3_XXS download ran at the same time (about 0.3 of a CPU core, NVMe writes, nothing on the GPUs).
+
+**Engine logs:** Basalt keeps one `engine.log` per model in `~/.cache/basalt/<id>/` and appends every start to it; it was split at each "basalt: system:" line into `runs/6-7-modes/<run>.engine.log`.
+
+**Placement** (engine logs):
+- One GPU: expert cache 6,661 slots (10.83 GiB), 6,017 with the MTP drafter; "experts live in VRAM 10.8 GiB (27%) … RAM 29.1 GiB (73%), file (SSD) 0.0 GiB".
+- Peer: "gpus: peer; RTX 5060 Ti (nvidia-smi 0) main, share 0.50; RTX 5060 Ti (nvidia-smi 1) peer, share 0.50 (bandwidth)". GPU 0 holds the dense weights, the KV and 6,270 experts (10.2 GiB); "peer GPU 1: 8458 experts, 13.61 GiB" (9,038 / 14.55 GiB with MTP). Experts: 26 % on GPU 0, 34 % on GPU 1, 40 % in RAM. "peer GPU 1 computes its experts' rows of each prompt chunk up to 2559 tokens". With MTP only 582 MiB stay free on GPU 1. `peer-exclusive` off (RAM holds all experts).
+- Split: "layers 0-23, 8317 experts (12.0 GiB); … layers 24-47, 6314 experts (11.4 GiB)" (7,307 on GPU 0 with MTP), cut by free VRAM. "pipelined windows: on"; with MTP, every guessed window was held ("4 launched, 4 held").
+- No lossy-flag warnings, nothing on the SSD. Peer mode used the most RAM: RSS 47 GiB, lowest MemAvailable 5.8 GB (split: 38–40 GiB, 12.5–14.2 GB).
+
+**Actual** (`runs/6-7-modes/summary.md`; all requests read their whole prompt and ran to 256 tokens):
+
+| Run | Kind | TTFT s | Prompt t/s | Decode t/s | Drafts accepted |
+|---|---|---|---|---|---|
+| 1 GPU, no drafting | prose | 2.32 | 1,871.7 | 72.3 ± 0.2 | – |
+| 1 GPU, no drafting | JSON | 2.37 | 1,838.9 | 71.7 ± 0.3 | – |
+| 1 GPU, MTP | prose | 2.36 | 1,845.6 | 104.8 ± 1.8 | 612 of 873 (70 %) |
+| 1 GPU, MTP | JSON | 2.41 | 1,813.5 | 170.5 ± 7.7 | 1,041 of 1,291 (81 %) |
+| peer, no drafting | prose | 2.31 | 1,875.6 | 77.4 ± 0.3 | – |
+| peer, no drafting | JSON | 2.36 | 1,850.4 | 78.4 ± 0.3 | – |
+| peer, MTP | prose | 2.34 | 1,855.3 | 113.1 ± 2.3 | 618 of 955 (65 %) |
+| peer, MTP | JSON | 2.39 | 1,826.2 | 193.3 ± 10.1 | 1,042 of 1,303 (80 %) |
+| split, no drafting | prose | 2.34 | 1,855.0 | 71.0 ± 1.4 | – |
+| split, no drafting | JSON | 2.37 | 1,839.4 | 71.5 ± 0.2 | – |
+| split, MTP | prose | 2.48 | 1,752.3 | 107.4 ± 4.1 | 620 of 940 (66 %) |
+| split, MTP | JSON | 2.51 | 1,739.4 | 184.5 ± 15.4 | 1,026 of 1,212 (85 %) |
+
+**Against Strata on the same weights** (Strata steps 8, 10, 10b; Strata's MTP ran `--spec 4`, Basalt's default is 8):
+
+| | Strata | Basalt | Basalt against Strata |
+|---|---|---|---|
+| 1 GPU, exact, prose / JSON | 62.8 / 62.9 | 72.3 / 71.7 | +15 % / +14 % |
+| 1 GPU, MTP, prose / JSON | 77.8 / 118.2 | 104.8 / 170.5 | +35 % / +44 % |
+| 2 GPUs, exact (best mode each: Strata helper cache, Basalt peer) | 66.9 / 66.6 | 77.4 / 78.4 | +16 % / +18 % |
+| 2 GPUs, MTP, prose (Strata helper + MTP, Basalt peer) | 93.4 | 113.1 | +21 % |
+| 2 GPUs, MTP, JSON (Strata pipelined split, Basalt peer) | 159.2 | 193.3 | +21 % |
+| Prompt t/s, 1 GPU | 1,779 | 1,872 | +5 % |
+
+**Verdict:**
+- Basalt is faster than Strata in every configuration: +14–18 % exact, +21–44 % with the drafter. Part of the drafter gap is the window (8 against 4 tokens); exact decoding has no drafter and still gains 15 %.
+- **Basalt's best two-card mode for one chat is peer**: +7 % exact and +8 % (prose) / +13 % (JSON) with MTP over one card. Split is no better than one card without drafting (71.0 against 72.3) and in between with MTP.
+- As with Strata, the second card adds little to one chat: 7–13 %.

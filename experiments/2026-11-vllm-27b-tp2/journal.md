@@ -375,3 +375,34 @@ What it shows:
 **Phase B so far:** the driver (595.91.07, the source's) fixes the KV memory gap and changes nothing in prompt reading or decode beyond noise. The prompt-reading gap (18–33 % at 0.5–32K, 8–10 % at 253K) is therefore something else: the NCCL path, the host, or how the source measured.
 
 **Next:** the NCCL P2P test (is `NCCL_P2P_DISABLE=1` needed here, and does enabling P2P change prompt reading?), then Strata/Basalt checks on 595.
+
+### 9d. The NCCL P2P test (2026-11-26)
+
+Question: is the slow prompt reading (TP=2 all-reduce through host memory) caused by `NCCL_P2P_DISABLE=1`, and does enabling P2P help? First the driver's view: `nvidia-smi topo -p2p r` under 595.91.07 still reads `CNS` (chipset not supported) between the cards, as on 580 (`docs/hardware.md`); `topo -m` shows `PHB` (through the CPU's host bridge), no NVLink. So no change was expected; the test is there to see what NCCL does and to put a measurement behind it.
+
+Configs (`configs/fp8-nomtp-p2pon.args`, `configs/fp8-nomtp-p2psys.args`, both `fp8-nomtp.args` with NCCL logging on, `NCCL_DEBUG=INFO`, `NCCL_DEBUG_SUBSYS=INIT,GRAPH,P2P,SHM`):
+
+- `p2pon`: `NCCL_P2P_DISABLE=0` (the baseline sets 1);
+- `p2psys`: also `NCCL_P2P_LEVEL=SYS` (try P2P at any distance).
+
+```
+BENCH_CLIENT=experiments/2026-11-vllm-27b-tp2/scripts/baseline-client.py scripts/bench-run.sh \
+  experiments/2026-11-vllm-27b-tp2/runs/9-driver595/p2p <config> 3 -- \
+  experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/<config>.args
+```
+
+Files: `runs/9-driver595/p2p/` (`summary.md`, the NCCL log in each `.out`). Three reps per kind instead of five, to keep it short.
+
+| | `P2P_DISABLE=1` (9b, 5 reps) | `P2P_DISABLE=0` | `P2P_DISABLE=0` + `LEVEL=SYS` |
+|---|---|---|---|
+| NCCL transport (from the log) | not logged | `Channel 00/01 : 0[0] -> 1[1] via SHM/direct` | same, and "P2P is disabled between connected GPUs 0 and 1" 18 times |
+| TTFT ~0.5K / 4K / 32K | 0.184 / 1.310 / 12.404 s | 0.185 / 1.308 / 12.413 s | 0.185 / 1.306 / 12.418 s |
+| Decode, shared prose / JSON | 42.35 / 42.33 | 42.35 / 42.32 | 42.37 / 42.34 |
+| Needle | 9/9 | 9/9 | 9/9 |
+| Ready | 62.4 s (MTP k=4) / 78.0 s | 62.9 s | 68.4 s |
+
+**Result: no difference at all** (TTFT within 0.1 %, decode within 0.1 %). NCCL moves the data through shared host memory (`SHM/direct`) whether or not P2P is "disabled" by the flag, because the driver offers no peer access between these cards; forcing `LEVEL=SYS` gets the message that P2P is disabled between the GPUs, and the same SHM channels. The `P2P_DISABLE=1` baseline's transport was not logged, but its timings equal the other two to the third digit, so it is the same path. vLLM's own all-reduce shortcuts are off here for other reasons (custom all-reduce disabled by flag; FlashInfer all-reduce "not supported for world_size=2"; the symmetric-memory communicator "Device capability 12.0 not supported").
+
+What this leaves for the prompt-reading gap (+33 % at 4K, +18 % at 32K, +10 % at 253K against the source): the flag is not it, and neither is the driver. Remaining: the host (CPU and memory: i7-14700 against the source's 9800X3D with DDR5, since all-reduce goes through host memory), and the source's measurement (not published). An all-reduce cost estimate or an NCCL all-reduce benchmark (`nccl-tests` over SHM at the prefill's message sizes) would say how much of the 12.4 s the host path takes; not run.
+
+**Next:** Strata and Basalt checks on 595 (one config each from the Flash-Next experiments), then the optional steps 10 (Basalt on the 27B), 11 (quality) and 12 (write-up).

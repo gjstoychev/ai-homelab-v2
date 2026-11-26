@@ -1,0 +1,50 @@
+date: Thu Nov 26 07:03:40 PM UTC 2026
+label: fp8-nomtp-p2psys, reps: 3
+kernel: 7.0.0-44-generic
+driver: 595.91.07
+gpu: 0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 180.00 W
+gpu: 1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 180.00 W
+page cache dropped: no (BENCH_SUDO not set)
+cpu power: not measured (BENCH_SUDO not set)
+command: experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/fp8-nomtp-p2psys.args
+== ready in 62.9 s
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 62.9 --label fp8-nomtp-p2psys --out experiments/2026-11-vllm-27b-tp2/runs/9-driver595/p2p/results.jsonl --reps 3 --kinds prose,structured --max-tokens 256
+fp8-nomtp-p2psys prose      rep 0 (warm-up) prompt 4329 tok, ttft 1.3443 s, 256 tok at 42.39 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+fp8-nomtp-p2psys prose      rep 1           prompt 4329 tok, ttft 1.3234 s, 256 tok at 42.37 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+fp8-nomtp-p2psys prose      rep 2           prompt 4327 tok, ttft 1.3249 s, 256 tok at 42.36 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+fp8-nomtp-p2psys prose      rep 3           prompt 4329 tok, ttft 1.3266 s, 256 tok at 42.37 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+fp8-nomtp-p2psys structured rep 0 (warm-up) prompt 4349 tok, ttft 1.3288 s, 256 tok at 42.35 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+fp8-nomtp-p2psys structured rep 1           prompt 4351 tok, ttft 1.3301 s, 256 tok at 42.35 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+fp8-nomtp-p2psys structured rep 2           prompt 4350 tok, ttft 1.3297 s, 256 tok at 42.34 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+fp8-nomtp-p2psys structured rep 3           prompt 4349 tok, ttft 1.3307 s, 256 tok at 42.34 t/s | server: prompt - t/s, decode - t/s, drafts -/-
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/oai-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 62.9 --label fp8-nomtp-p2psys-repro --out experiments/2026-11-vllm-27b-tp2/runs/9-driver595/p2p/results.jsonl --reps 3 --kinds prose,structured,mixed --max-tokens 800 --thinking
+fp8-nomtp-p2psys-repro prose      rep 0 (warm-up) prompt 4370 tok, ttft 1.3326 s, 800 tok at 42.26 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok
+fp8-nomtp-p2psys-repro prose      rep 1           prompt 4368 tok, ttft 1.3343 s, 800 tok at 42.27 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok
+fp8-nomtp-p2psys-repro prose      rep 2           prompt 4371 tok, ttft 1.3355 s, 800 tok at 42.27 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok
+fp8-nomtp-p2psys-repro prose      rep 3           prompt 4369 tok, ttft 1.3353 s, 800 tok at 42.26 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok
+fp8-nomtp-p2psys-repro structured rep 0 (warm-up) prompt 4390 tok, ttft 1.3531 s, 800 tok at 42.27 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok
+fp8-nomtp-p2psys-repro structured rep 1           prompt 4390 tok, ttft 1.3505 s, 800 tok at 42.26 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok
+fp8-nomtp-p2psys-repro structured rep 2           prompt 4388 tok, ttft 1.3522 s, 800 tok at 42.27 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok
+fp8-nomtp-p2psys-repro structured rep 3           prompt 4389 tok, ttft 1.3514 s, 800 tok at 42.26 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok
+fp8-nomtp-p2psys-repro mixed      rep 0 (warm-up) prompt 4398 tok, ttft 1.3532 s, 800 tok at 42.26 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok
+fp8-nomtp-p2psys-repro mixed      rep 1           prompt 4395 tok, ttft 1.3521 s, 800 tok at 42.27 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok
+fp8-nomtp-p2psys-repro mixed      rep 2           prompt 4397 tok, ttft 1.3517 s, 800 tok at 42.27 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok
+fp8-nomtp-p2psys-repro mixed      rep 3           prompt 4398 tok, ttft 1.3516 s, 800 tok at 42.26 t/s | server: prompt - t/s, decode - t/s, drafts -/- | reasoning 800 tok
+== /usr/bin/python3 /home/llama/ai-homelab-v2/scripts/long-bench.py --url http://127.0.0.1:8080 --unique-prefix --load-s 62.9 --label fp8-nomtp-p2psys --mode ttft --out experiments/2026-11-vllm-27b-tp2/runs/9-driver595/p2p/long.jsonl --targets 700,4500,34700 --reps 3
+fp8-nomtp-p2psys: corpus 1527726 chars, needle obsidian-2824
+fp8-nomtp-p2psys 700: 2130 chars at 4.48 chars/token
+fp8-nomtp-p2psys 700 rep 1: prompt 580 tok, ttft 0.172 s (server - t/s), decode 49.95 t/s, needle found: 'obsidian-2824'
+fp8-nomtp-p2psys 700 rep 2: prompt 577 tok, ttft 0.191 s (server - t/s), decode 49.92 t/s, needle found: 'obsidian-2824'
+fp8-nomtp-p2psys 700 rep 3: prompt 578 tok, ttft 0.191 s (server - t/s), decode 49.83 t/s, needle found: 'obsidian-2824'
+fp8-nomtp-p2psys 4500: 15387 chars at 3.77 chars/token
+fp8-nomtp-p2psys 4500 rep 1: prompt 4212 tok, ttft 1.299 s (server - t/s), decode 50.05 t/s, needle found: 'obsidian-2824'
+fp8-nomtp-p2psys 4500 rep 2: prompt 4208 tok, ttft 1.306 s (server - t/s), decode 50.14 t/s, needle found: 'obsidian-2824'
+fp8-nomtp-p2psys 4500 rep 3: prompt 4210 tok, ttft 1.313 s (server - t/s), decode 50.02 t/s, needle found: 'obsidian-2824'
+fp8-nomtp-p2psys 34700: 104124 chars at 3.18 chars/token
+fp8-nomtp-p2psys 34700 rep 1: prompt 32267 tok, ttft 12.421 s (server - t/s), decode 49.85 t/s, needle found: 'obsidian-2824'
+fp8-nomtp-p2psys 34700 rep 2: prompt 32267 tok, ttft 12.422 s (server - t/s), decode 49.98 t/s, needle found: 'obsidian-2824'
+fp8-nomtp-p2psys 34700 rep 3: prompt 32266 tok, ttft 12.412 s (server - t/s), decode 50.1 t/s, needle found: 'obsidian-2824'
+== peak VRAM per GPU (MiB):
+  GPU0: 15692
+  GPU1: 15692
+== peak server RSS / lowest MemAvailable (MiB): 36 / 51437

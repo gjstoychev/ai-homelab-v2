@@ -16,6 +16,16 @@ Sources (every number below is in one of them; all were rechecked against the ra
 
 **Engines can only be ranked per model.** Not every engine ran every model, and a 27B dense model, an 80B-class MoE and an 8B model are different problems on 16 GB cards. Where two engines did run the same model, the weights and prompts are the same (marked otherwise).
 
+Which engine ran which model, on two GPUs:
+
+| Engine | Qwen3.8-Flash-Next (MoE) | Qwen3.8-27B (dense) | dense 8B–32B, Qwen3 30B-A3B |
+|---|---|---|---|
+| llama.cpp | yes (`2026-11-strata`, `2026-11-llamacpp-flags`) | yes (vLLM step 17; Boardswap with short prompts) | yes (Boardswap) |
+| Strata | yes | **cannot**: v0.2.21's setup builds packs only for MoE families (Flash-Next variants, Qwen3.6-35B-A3B, HY4, Inkling) and its Qwen path accepts only the `qwen35moe` architecture; the 27B is `qwen35` (dense) | not supported |
+| Basalt | yes | yes (split mode; `peer` refused) | not run |
+| vLLM | not run | yes | not run |
+| Ollama | not run | yes (Boardswap, short prompts, layer split only) | yes (Boardswap) |
+
 ### Best two-GPU configuration per engine
 
 | Engine | Model | Best two-GPU configuration | One chat, t/s (prose / JSON) | Several requests, total t/s | Prompt |
@@ -256,7 +266,7 @@ Basalt against Strata, one chat: +16 % / +18 % exact, +21 % / +21 % drafted (bes
 
 vLLM against Basalt on the matched checkpoint: +46 % plain decode, +28 % drafted prose; Basalt +15 % drafted JSON and 1.4× / 2.4× / 2.5× faster prompts at 4K / 32K / 252K.
 
-llama.cpp ran other weights (Q4_K_M against NVFP4), so its column compares engines and quantizations together; prompts, client and driver are the same. It decodes at 86–87 % of vLLM's speed, above Basalt on prose and below on JSON, holds the full context, and its drafted output does not change; it reads prompts 2.3× slower than vLLM at 4K and 3.1× slower than Basalt at 252K, which also caps its several-request totals.
+Strata is not in this table because it cannot run the dense 27B (section 1). llama.cpp ran other weights (Q4_K_M against NVFP4), so its column compares engines and quantizations together; prompts, client and driver are the same. It decodes at 86–87 % of vLLM's speed, above Basalt on prose and below on JSON, holds the full context, and its drafted output does not change; it reads prompts 2.3× slower than vLLM at 4K and 3.1× slower than Basalt at 252K, which also caps its several-request totals.
 
 ### 4.3 Dense models up to 32B
 

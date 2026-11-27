@@ -2,7 +2,7 @@
  "version": 2,
  "models": [
   {
-   "model": "/home/llama/models/Qwen3.8-27B-NVFP4-matched.basalt",
+   "model": "/home/llama/models/qwen3.8-27b-nvfp4-matched-basalt/Qwen3.8-27B-NVFP4-matched.basalt",
    "gpu": "0,1",
    "gpu-mode": "split",
    "max-context": 200000,

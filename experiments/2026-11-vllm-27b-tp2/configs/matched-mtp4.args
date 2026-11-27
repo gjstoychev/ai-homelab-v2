@@ -1,6 +1,6 @@
 # fp8-mtp4.args on the matched checkpoint (nvidia/Qwen3.8-27B-NVFP4 482ca0f3, MODEL_DIR=~/models/qwen3.8-27b-nvidia-nvfp4;
 # step 16). Three changes, because the source's settings do not run on this checkpoint (journal 16): --max-model-len 180000
-# (at 262144 the KV check refuses at every utilization up to the 0.975 that still starts), --gpu_memory_utilization 0.93
+# (at 262144 the KV check refuses at every utilization tried up to 0.975; 0.99 is refused at start, 15.13 of 15.48 GiB free), --gpu_memory_utilization 0.93
 # and VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0 (at 0.95 without the estimate the first request runs out of memory,
 # 114 MiB asked with 105 MiB free). KV budget 3.33 GiB, the same as 0.95 with the estimate on; that simpler pair was not run.
 # Changes: --served-model-name bench (the shared clients' name), no --api-key.

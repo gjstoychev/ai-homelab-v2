@@ -11,7 +11,8 @@ drafted (configs/matched-basalt-split.json with max-context as below, no gpu-sha
   210000: error: ... GPU 0 takes layers 0-27 at share 0.50 and needs 14.9 GiB, 14.8 GiB free
   -> kept 200000 for configs/matched-basalt-split.json and (untested higher) matched-basalt-split-nodraft.json
 
-no drafter ("spec": 0), for the 252K needle (configs/matched-basalt-split-nodraft-254k.json, first at 262144):
+no drafter ("spec": 0), for the 252K needle (configs/matched-basalt-split-nodraft-254k.json; while it was at 262144 it was
+named matched-basalt-split-nodraft-262k.json, which is the name in refused-262144/split-nodraft-252k.cmd):
   262144, no share: error: GPU 0 takes layers 0-31 at share 0.50 and needs 14.9 GiB, 14.8 GiB free  (basalt/needle/refused-262144/)
   262144, "gpu-share": "49,51": error: GPU 1 takes layers 31-63 at share 0.51 and needs 14.9 GiB, 14.8 GiB free
   262144, "48,52": error: GPU 1 takes layers 30-63 at share 0.52 and needs 15.2 GiB, 14.8 GiB free
@@ -23,3 +24,5 @@ no drafter ("spec": 0), for the 252K needle (configs/matched-basalt-split-nodraf
 
 Weights loaded (engine log "basalt load: total"): 22,321,746,500 bytes / 1,288 tensors with the drafter,
 20,155,858,500 bytes / 1,203 tensors with "spec": 0 -- the drafter's tensors are not loaded when drafting is off.
+
+The pack was later moved into ~/models/qwen3.8-27b-nvfp4-matched-basalt/ (and archived); the configs point there now.

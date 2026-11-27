@@ -1,0 +1,22 @@
+Basalt pack conversion, step 16 (transcribed from the Claude Code session's tool output, 2026-11-26T22:18:35.174Z; the
+terminal output was not saved to a file at the time).
+
+$ cd ~/basalt-qwen35/v0.5.7/src
+$ time .venv/bin/python tools/convert/convert.py --checkpoint ~/models/qwen3.8-27b-nvidia-nvfp4 \
+    --drafter ~/models/qwen3.8-27b-dflash2 --out ~/models/Qwen3.8-27B-NVFP4-matched.basalt \
+    --name "Qwen3.8-27B NVFP4 (matched checkpoint)"
+writing sections:
+  tokenizer/chat_template.jinja                    0.000 GiB         9 MB/s
+  tokenizer/merges.txt                             0.003 GiB      1235 MB/s
+  tokenizer/token_type.json                        0.001 GiB      1251 MB/s
+  tokenizer/tokenizer.json                         0.000 GiB         3 MB/s
+  tokenizer/vocab.json                             0.005 GiB      1324 MB/s
+  gguf                                            21.211 GiB       624 MB/s
+  vision/mmproj                                    0.867 GiB      1183 MB/s
+  vision/text_vocab                                0.010 GiB      1550 MB/s
+  meta                                             0.008 GiB      1650 MB/s
+done: 9 sections, 22.119 GiB, 42.3 s -> /home/llama/models/Qwen3.8-27B-NVFP4-matched.basalt
+
+real	0m42.706s
+user	1m20.789s
+sys	0m33.674s

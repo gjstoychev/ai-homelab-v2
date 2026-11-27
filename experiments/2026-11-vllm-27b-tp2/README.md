@@ -24,7 +24,7 @@ The video and the repository pin the checkpoint on purpose: later revisions of `
 | NVIDIA driver, phase B | **595.91.07**, the source's: Ubuntu's `nvidia-driver-595-server-open` 595.91.07-0ubuntu0.24.04.1, on `apt-mark hold`, installed by hand and rebooted on kernel 7.0.0-44 | the same package family as phase A (server, open kernel module); `nvidia-persistenced` active |
 | NCCL | host 2.28.9 (nccl-tests only); in the vLLM images 2.30.7 (the loaded library; torch reports 2.29.7) | NCCL tests: nccl-tests v2.22.0 (`826b3e6`) |
 | Basalt for step 10 | v0.5.7 built with `BASALT_MODELS='qwen4exp;qwen35'` in `~/basalt-qwen35`; pack `jesdga/Qwen3.8-27B-Basalt` at `10c9a90e`, QUASAR NVFP4 weights, DFlash 2 drafter | not vLLM's checkpoint |
-| Matched checkpoint for step 16 | `nvidia/Qwen3.8-27B-NVFP4` at `482ca0f3832238542f8f5295dde86b5f22711d80`, 21.94 GB, MTP head; for Basalt converted with `tools/convert/convert.py` together with `z-lab/Qwen3.8-27B-DFlash2` at `50307d4c` | mixed precision: NVFP4 MLPs and lm_head, **FP8 attention projections**; not the pinned checkpoint's all-NVFP4 |
+| Matched checkpoint for step 16 | `nvidia/Qwen3.8-27B-NVFP4` at `482ca0f3832238542f8f5295dde86b5f22711d80`, 21.94 GB, MTP head; for Basalt converted with `tools/convert/convert.py` together with `z-lab/Qwen3.8-27B-DFlash2` at `50307d4c` | mixed precision: NVFP4 MLPs and lm_head, **FP8 attention projections** (the pinned checkpoint has them in NVFP4) |
 
 The source's host: Ubuntu 26.04, kernel 7.0.0-31, driver 595.91.07, CUDA 13.2 (on the host; the containers use their own 13.0.2). Here: Ubuntu 24.04.5, kernel 7.0.0-44 (since the reboot at 12:50 on 2026-11-26; the first, unfinished smoke try ran on 7.0.0-43), i7-14700. Inside Docker the host's CUDA toolkit does not matter; the driver does.
 
@@ -161,17 +161,17 @@ The new driver corrects vLLM's KV memory accounting (the pools now equal the sou
 
 **Quality check** (step 11; ten prompts, greedy, two repetitions, reference vLLM fp8 without MTP; [`runs/11-quality/quality.md`](runs/11-quality/quality.md)): every prompt's check passes in all five settings (vLLM fp8 with and without MTP, vLLM NVFP4 recipe, Basalt split with and without drafter). The wording differs: vLLM with MTP gives another text than without on 3 of 10 prompts (4 with the NVFP4 KV), Basalt's drafted text equals its undrafted text on all ten, and Basalt's QUASAR pack gives vLLM's text on 8 of 10.
 
-**Matched checkpoint** (step 16; both engines on `nvidia/Qwen3.8-27B-NVFP4`, vLLM fp8 KV, Basalt split int8 KV; journal 16, [`runs/16-matched-checkpoint/summary.md`](runs/16-matched-checkpoint/summary.md)). Neither engine holds the source's settings on this checkpoint: vLLM needs `--gpu_memory_utilization 0.965` without MTP, and with MTP k=4 tops out at 180,000 tokens (0.93, CUDA-graph estimate off); Basalt holds 200,000 with its drafter and 254,000 without.
+**Matched checkpoint** (step 16; both engines on `nvidia/Qwen3.8-27B-NVFP4`, vLLM fp8 KV, Basalt split int8 KV; journal 16, [`runs/16-matched-checkpoint/summary.md`](runs/16-matched-checkpoint/summary.md)). Neither engine holds the source's settings on this checkpoint: vLLM needs `--gpu_memory_utilization 0.965` without MTP, and with MTP k=4 runs at 180,000 tokens (0.93, CUDA-graph estimate off; 262,144 refused at every utilization that starts); Basalt runs 200,000 with its drafter (210,000 refused) and 254,000 without (262,144 refused).
 
 | | vLLM TP=2 | Basalt split |
 |---|---|---|
-| Decode, no drafting | **32.06 t/s** | 21.93 t/s |
+| Decode, no drafting, thinking off | **32.06 t/s** | 21.93 t/s |
 | Decode drafted, thinking off, prose / JSON | **53.64** / 96.79 (MTP k=4) | 41.76 / **111.13** (DFlash 2) |
 | TTFT ~4K / 32K, no drafting | 1.557 / 14.263 s | **1.101 / 5.897 s** |
 | 252K needle, no drafting | 272.3 s (929 t/s), found 3/3 | **110.0 s (2,299 t/s)**, found 3/3 |
 | Quality, ten prompts | all checks pass; MTP changes 4 texts | all checks pass; drafter changes none |
 
-The engine ratios are those of step 10 on different weights (plain decode vLLM +46 %, prompts Basalt 2.4–2.5×, JSON Basalt +15 %). The checkpoint itself is slower in vLLM than the pinned one: plain decode −24 % (42.3 → 32.1 t/s), MTP −17 % at the same acceptance, 32K prompt +15 %, the 252K prompt unchanged.
+The engine ratios are those of step 10 on different weights (plain decode vLLM +46 %; prompts Basalt 1.4× at 4K, 2.4–2.5× at 32K and 252K; JSON Basalt +15 %). The checkpoint itself is slower in vLLM than the pinned one: plain decode −24 % (42.3 → 32.1 t/s), MTP −17 % at the same acceptance, 32K prompt +15 %, the 252K prompt the same (272 s, MTP k=6 there, off here).
 
 ## Findings
 
@@ -195,7 +195,7 @@ It depends on what is read and what is written:
 - **Structured output:** Basalt's DFlash 2 drafter gets 128 t/s on JSON, 10 % above vLLM's MTP k=4, and loses on prose (−28 %).
 - **Several requests at once** (prose, total t/s at 1 / 2 / 4 requests): vLLM TP=2 with 4 slots 45.6 / 69.4 / 94.0 (totals rise only up to the slot count); Basalt split with DFlash 2, 4 slots, 163,840 context 39.6 / 57.5 / 84.1 (−11 % at 4), without the drafter 22.9 / 39.5 / 64.2. JSON: Basalt 89.6 / 90.3 / 103.3 against vLLM's 67.6 / 97.2 / 120.2: +33 % for one request, nothing gained from the second (a drafted window takes half a pass), −14 % at 4. Prompt reading is unchanged by the slots on both. The drafted 4-slot config does not start at 262,144 context (0.1 GiB short on GPU 0; journal 15).
 - **Basalt peer mode** does not start on these cards with the published pack (journal 13): the main card must hold the whole 16 GiB model, so `split` is the only two-card mode of the 27B here.
-- **Context:** vLLM TP=2 holds 262,144 tokens (NVFP4 KV: 463K-token pool); PP=2 only 65,536 with five starts to fit; Basalt split holds 262,144 with int8 KV. All of these are on the pinned and QUASAR checkpoints; on the heavier matched checkpoint (FP8 attention projections) vLLM with MTP holds 180,000 and Basalt 200,000 with its drafter, 254,000 without (step 16).
+- **Context:** vLLM TP=2 holds 262,144 tokens (NVFP4 KV: 463K-token pool); PP=2 only 65,536 with five starts to fit; Basalt split holds 262,144 with int8 KV. All of these are on the pinned and QUASAR checkpoints; on the heavier matched checkpoint (FP8 attention projections) vLLM with MTP runs at 180,000 and Basalt at 200,000 with its drafter, 254,000 without; 262,144 is refused in all three (step 16).
 - **Output stability:** Basalt's drafted text equals its undrafted text; vLLM's MTP changes the wording on 3 of 10 prompts (4 on the matched checkpoint; correctness checks pass everywhere).
 - **Not the weights:** on one checkpoint for both engines (step 16) the single-request orderings above hold, with ratios close to step 10's (several requests and PP=2 were not rerun): vLLM +46 % on plain decode and +28 % on drafted prose, Basalt 2.4× on a 32K prompt, 2.5× on the 252K needle, +15 % on drafted JSON.
 

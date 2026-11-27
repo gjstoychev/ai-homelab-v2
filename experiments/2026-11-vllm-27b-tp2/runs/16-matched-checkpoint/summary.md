@@ -52,6 +52,8 @@ Generated with `scripts/baseline-summary.py` (vllm/, basalt/) plus the needle fi
 
 ## 252K needle
 
+Decode after the needle is over an 8-token answer: indicative only.
+
 | engine, config | context | prompt tokens | n | TTFT s | prompt t/s | decode t/s after | found |
 |---|---|---|---|---|---|---|---|
 | vLLM matched-nomtp | 262,144 | 252875–252877 | 3 | 272.34 ± 0.01 | 929 | 36.9 | 3/3 |

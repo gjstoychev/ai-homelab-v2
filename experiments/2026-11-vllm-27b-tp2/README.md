@@ -154,10 +154,10 @@ The new driver corrects vLLM's KV memory accounting (the pools now equal the sou
 |---|---|---|
 | Decode, no drafting | 42.3 t/s | 24.95 t/s |
 | Decode drafted, thinking off, prose / JSON | 64.76 / 116.44 (MTP k=4) | 46.57 / 127.99 |
-| Decode drafted, thinking on, prose / structured / mixed | 67.82 / 85.76 / 78.25 | 51.40 / 80.03 / 57.58 |
+| Decode drafted, thinking on, prose / structured / mixed (not like for like: Basalt answers after 400 reasoning tokens, vLLM's 800 are all reasoning) | 67.82 / 85.76 / 78.25 | 51.40 / 80.03 / 57.58 |
 | TTFT ~0.5K / 4K / 32K (drafter or MTP on) | 0.197 / 1.347 / 13.112 s | 0.186 / 0.986 / 5.613 s |
 | 252K needle | 272.0 s (fp8, k=6), 279.1 s (NVFP4) | **114.5 s** (2,210 t/s), found 3/3 |
-| Peak VRAM per card | 15.7–15.8 GB | 14.4 / 14.8 GB |
+| Peak VRAM per card | 15,692–15,792 MiB (NVFP4 recipe 15,842) | 14,364 / 14,788 MiB |
 
 **Quality check** (step 11; ten prompts, greedy, two repetitions, reference vLLM fp8 without MTP; [`runs/11-quality/quality.md`](runs/11-quality/quality.md)): every prompt's check passes in all five settings (vLLM fp8 with and without MTP, vLLM NVFP4 recipe, Basalt split with and without drafter). The wording differs: vLLM with MTP gives another text than without on 3 of 10 prompts (4 with the NVFP4 KV), Basalt's drafted text equals its undrafted text on all ten, and Basalt's QUASAR pack gives vLLM's text on 8 of 10.
 

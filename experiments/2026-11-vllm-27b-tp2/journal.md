@@ -179,7 +179,7 @@ Three attempts, the first two with `NEEDLE_TARGET`, which sizes the document by 
 | `fp8-mtp6-250k`, target 250,000 | 737,106 chars (calibrated 3.11) | 225,215 | 3 reps, TTFT 223.5 / 223.5 / 223.4 s, **1,008 t/s**, needle found 3/3 |
 | `fp8-mtp6-249k`, `--chars 835000` | 835,000 chars (estimated from the two runs above) | **252,872** | 3 reps, TTFT 272.1 / 272.2 / 272.2 s, **929 t/s**, needle found 3/3 |
 
-The calibration is noisy at this size (the corpus changes character along its length: the same text gave 3.56 and 3.11 chars/token on two prefixes), which is why the first two missed the target by +5 % and −10 %; the fixed size landed 1.4 % above the source's 249,450 tokens. Peak 126 W per card, 15.8 GB VRAM.
+The calibration is noisy at this size (the corpus changes character along its length: the same text gave 3.56 and 3.11 chars/token on two prefixes), which is why the first two missed the target by +5 % and −10 %; the fixed size landed 1.4 % above the source's 249,450 tokens. Peak 126 W per card, 15,786 MiB VRAM.
 
 **Result:** 272.2 s for 252,872 tokens against the source's 246.7 s for 249,450: **929 against 1,011 prompt tokens per second, 8 % slower** (the prompt is 1.4 % longer, which accounts for about 1 % of it: the rate falls with depth, 1,008 t/s average at 225K). That is the smallest of the prompt-reading gaps measured: −18 % at 0.5–4K, −27 % at 32K (TTFT 13.1 against 10.5 s with MTP, 12.4 s without), −8 % at 249K. The needle was recovered in every rep of both long runs. Decode after the prompt, 41–47 t/s for the 8-token answer, is not a decode measurement.
 
@@ -363,7 +363,7 @@ Both ran back to back without a hitch (the step 7 path mistake is fixed, so one 
 | NVFP4 decode repro prose / structured / mixed | | 62.55 / 92.17 / 71.95 | 66.04 / 82.91 / 68.76 |
 | NVFP4 decode at 1K / 32K / 127K, prose (2 reps) | | 67.88 / 68.17 / 61.58 | 70.3 / 68.3 / 66.4 |
 | NVFP4 decode at 1K / 32K / 127K, structured | | 108.44 / 110.42 / 95.09 | 113.0 / 112.3 / 98.8 |
-| Peak VRAM per card (fp8 k=6 / NVFP4) | | 15.8 GB / 15,836 MiB | 15,842 / 15,842 MiB |
+| Peak VRAM per card (fp8 k=6 / NVFP4; corrected 2026-11-27, journal 16f) | | 15,786 / 15,836 MiB | 15,792 / 15,842 MiB |
 
 What it shows:
 
@@ -527,22 +527,24 @@ The same clients as step 4 and 6 (step 4's three passes, then the 252K needle). 
 |---|---|---|---|
 | Decode, no drafting, all kinds | 42.3 t/s | **24.95 t/s** (24.3 with thinking on) | 41.99 |
 | Decode drafted, shared prose / JSON (thinking off, 256) | 64.76 / 116.44 (MTP k=4) | 46.57 ± 1.91 / **127.99 ± 5.04** | |
-| Decode drafted, repro prose / structured / mixed (thinking on, 800) | 67.82 / 85.76 / 78.25 | 51.40 / 80.03 / 57.58 | 78.31 / 124.89 / 81.61 |
+| Decode drafted, repro prose / structured / mixed (thinking on, 800; not like for like, see below) | 67.82 / 85.76 / 78.25 | 51.40 / 80.03 / 57.58 | 78.31 / 124.89 / 81.61 |
 | TTFT ~0.5K (MTP / drafter on; off) | 0.197; 0.184 s | 0.186; 0.179 s | 0.141 s |
 | TTFT ~4K | 1.347; 1.310 s | **0.986; 0.940 s** | 0.987 s |
 | TTFT ~32K | 13.112; 12.404 s | **5.613; 5.193 s** | 10.521 s |
 | Prompt rate at 32K | 2,461 t/s | **5,749 t/s** (6,213 without drafter) | |
 | Needle, 252,887 tokens (3 reps) | 272.0 s (fp8 k=6); 279.1 s (NVFP4 recipe) | **114.5 s** (2,210 t/s), found 3/3 | 246.7 s (249,450 tokens); 274.8 s (NVFP4) |
-| Peak VRAM per card | 15.7–15.8 GB | 14.4 / 14.8 GB | |
+| Peak VRAM per card | 15,692–15,792 MiB (fp8; NVFP4 recipe 15,842) | 14,364 / 14,788 MiB (no drafter 13,160 / 13,388) | |
 | Ready | 62–78 s | 8.2 s (page cache warm) | |
 
 What it shows:
 
 - **Prompt reading is where Basalt wins, by a lot:** 1.4× at 4K, 2.2–2.4× at 32K, 2.4× at 252K (114.5 s against 272 s; and 2.2× faster than the source's own vLLM number). It is a pipeline over the cards, so no all-reduce goes through host memory (compare 9f/9g: that is about half of vLLM's prompt read), and the split hands a chunk's rows over once per chunk, not twice per layer. The prompt rate rises with length (3,113 → 4,272 → 5,749 t/s) as the pipeline fills; at 252K it is 2,210 t/s, in line with attention's cost growth.
 - **Plain decode is where vLLM wins:** 24.95 against 42.3 t/s. A pipeline split runs the cards one after the other for every token, and each card's layers wait for the other's; the Basalt guide prices it at 0.37 ms per layer the second card runs. Tensor parallelism (vLLM) runs both at once at the cost of the all-reduces, and at decode those are small (9f).
-- **Drafted decode: the drafter decides, and it depends on the prompt.** Basalt's DFlash 2 drafts structured output very well (128 t/s, 5.1× its plain decode; vLLM's MTP k=4: 116, 2.75×) and prose poorly (46.6 t/s, 1.9×; vLLM 64.8, 1.5× of a higher base). Net: JSON +10 % over vLLM, prose −28 %, repro mixed −26 %. That pattern (drafter strong where output repeats the prompt's shape) is the same one the vLLM runs showed with acceptance length.
+- **Drafted decode: the drafter decides, and it depends on the prompt.** Basalt's DFlash 2 drafts structured output very well (128 t/s, 5.1× its plain decode; vLLM's MTP k=4: 116, 2.75×) and prose poorly (46.6 t/s, 1.9×; vLLM 64.8, 1.5× of a higher base). Net: JSON +10 % over vLLM, prose −28 % (thinking off; the thinking-on rows do not compare the same text, see the correction below). That pattern (drafter strong where output repeats the prompt's shape) is the same one the vLLM runs showed with acceptance length.
 - Drafting costs prompt reading 6–8 % (TTFT 4K 0.986 against 0.940 s; the drafter reads the prompt too), as MTP does in vLLM (3–6 %).
 - Not compared here: output quality (the weights differ, QUASAR's QAT against vLLM's checkpoint; step 11), several requests at once, and `peer` mode on one card with a smaller context.
+
+**Correction (2026-11-27, found in the audit of step 16, journal 16f).** The thinking-on row ("repro", 800 tokens) is not like for like: Basalt stops reasoning at its default thinking budget of 400 tokens and writes an answer (`split.out` and `split-nodraft.out`: "thinking budget reached (400 tokens)" 12 times each; all 24 repro requests have an answer), while vLLM's 800 tokens are all reasoning. Drafting speed depends on the text, so Basalt's 51.40 / 80.03 / 57.58 t/s are not comparable with vLLM's 67.82 / 85.76 / 78.25, and the "repro mixed −26 %" first written here was withdrawn. The thinking-off rows are like for like. The VRAM row was also written as "15.7–15.8 GB" and "14.4 / 14.8 GB" (MiB divided by 1,000); it is now in MiB from the runs' `.gpu.csv`.
 
 **Next:** step 11, the quality check with the ten prompts.
 
@@ -635,10 +637,10 @@ Total t/s (generated tokens over the group's wall time, which for one request in
 
 | | prose | structured | Mean TTFT at 4 requests (prose) | TTFT at 32K | Peak VRAM per card |
 |---|--:|--:|--:|--:|--:|
-| Basalt split, no drafter, 4 slots, 262,144 | 22.9 / 39.5 / 64.2 | 22.9 / 38.4 / 64.1 | 2.72 s (max 4.96) | 5.20 s | 14.0 / 13.6 GB |
-| Basalt split, DFlash 2, 4 slots, 163,840 | 39.6 / 57.5 / **84.1** | 89.6 / 90.3 / 103.3 | 2.87 s (max 5.28) | 5.62 s | 13.9 / 14.0 GB |
-| vLLM TP=2, `max-num-seqs` 4, MTP k=4, NVFP4 KV (step 8) | 45.6 / 69.4 / **94.0** | 67.6 / 97.2 / 120.2 (1 group) | 3.73 s (max 5.66) | 13.16 s | 15.8 GB |
-| vLLM PP=2, `max-num-seqs` 4, 65,536 (step 8) | 31.3 / 53.2 / 86.0 | 52.2 / 81.2 / 128.9 | 2.59 s (max 3.89) | 9.29 s | 15.8 / 15.6 GB |
+| Basalt split, no drafter, 4 slots, 262,144 | 22.9 / 39.5 / 64.2 | 22.9 / 38.4 / 64.1 | 2.72 s (max 4.96) | 5.20 s | 13,860 / 14,044 MiB |
+| Basalt split, DFlash 2, 4 slots, 163,840 | 39.6 / 57.5 / **84.1** | 89.6 / 90.3 / 103.3 | 2.87 s (max 5.28) | 5.62 s | 14,036 / 13,644 MiB |
+| vLLM TP=2, `max-num-seqs` 4, MTP k=4, NVFP4 KV (step 8) | 45.6 / 69.4 / **94.0** | 67.6 / 97.2 / 120.2 (1 group) | 3.73 s (max 5.66) | 13.16 s | 15,836 MiB |
+| vLLM PP=2, `max-num-seqs` 4, 65,536 (step 8) | 31.3 / 53.2 / 86.0 | 52.2 / 81.2 / 128.9 | 2.59 s (max 3.89) | 9.29 s | 15,842 / 15,606 MiB |
 
 Decode per stream at 1 / 2 / 4 requests, Basalt drafted: prose 46.6 / 38.3 / 28.7 t/s, structured 137.9 / 79.3 / 42.4 (vLLM TP=2, 4 slots: prose 60.7 / 51.2 / 38.0, structured 108.1 / 88.3 / 62.5).
 
@@ -648,7 +650,9 @@ What it shows:
 - **With drafting the picture depends on the output.** Prose: 39.6 → 84.1 (2.1×), 11 % below vLLM TP at 4 requests (94.0), 13–17 % below at 1–2. Structured: **one request is the best case, 89.6 t/s total (138 per stream), 33 % above vLLM (67.6)**, but two requests add nothing (90.3: each stream falls to 79 t/s) and four reach 103.3, 14 % below vLLM's 120.2 (a single complete group there). The guide says why: a window of drafted rows takes 8 of the 16 rows a pass can carry, so only two drafted slots share a pass; a drafter that is excellent for one stream has little left to batch.
 - **Prompt reading is unchanged by the slots:** 32K in 5.20 s without and 5.62 s with the drafter (step 10, one slot: 5.19 / 5.61 s). A prompt is read by one slot at a time on both engines; Basalt's is 2.3–2.5× faster than vLLM TP=2 (13.16 s) and 1.6× faster than vLLM PP=2 (9.29 s).
 - **No stream answered early in Basalt's 112 requests** (0 short groups, against 7 of 63 structured TP streams in vLLM at step 8): the same prompts and the same "request n.i of a batch test" line. Two separate things, not explained here: vLLM's early stops came with MTP and batched drafts, Basalt's output does not depend on the batch (its guide says rows are bitwise independent).
-- Peak VRAM falls to 13.9–14.0 GB per card at 4 slots (the lower context and the unchanged weights; the vLLM runs sit at 15.8 GB because their pool takes what is left).
+- Peak VRAM at 4 slots is 13,644–14,044 MiB per card, below step 10's one-slot drafted run (14,364 / 14,788 MiB): the drafted config by its lower context, the undrafted one because `"spec": 0` does not load the drafter (journal 16c). The vLLM runs sit at 15,836–15,842 MiB because their pool takes what is left.
+
+**Correction (2026-11-27, audit of step 16, journal 16f):** the two Basalt rows first had their VRAM swapped and in loose "GB" (no drafter "14.0 / 13.6 GB", drafter "13.9 / 14.0 GB"); the runs' own output says no drafter 13,860 / 14,044 MiB, drafter 14,036 / 13,644 MiB (`split-nodraft-par4.console.txt`, `split-par4-163k.console.txt`). No other figure of step 15 depended on them.
 
 **Net for two cards and several clients:** vLLM TP=2 gives the best totals for prose from 1 to 4 requests (and holds 262K context with 463K pool), Basalt split the best single-stream JSON and by far the fastest prompts; at 4 requests both are within 11–14 % of each other, in the opposite direction for prose and JSON. Not tested: more than 4 slots (Basalt allows 8), the 4-slot start at 262,144 with the drafter (needs a different `gpu-share`), and a plain-decode vLLM at 4 slots for a like-for-like no-drafter comparison.
 
@@ -788,9 +792,9 @@ Asked for after the first commit (`88f1d37`): every number of step 16 checked ag
 
 - The pinned checkpoint does not carry FP8 KV scales: it declares FP8 KV with no scale tensors (vLLM uses 1.0). It is also not NVFP4 on literally every linear layer: both checkpoints leave the linear-attention gates `in_proj_a/b` and the MTP head unquantized.
 - "Basalt wins prompt reading by about 2.4× at every length" was wrong: 1.1× at 0.5K, 1.4× at 4K, 2.4–2.5× at 32K and 252K. The README said "prompts 2.4–2.5×" without the length.
-- The thinking-on comparison is not like for like (Basalt's 400-token thinking budget, see 16d); the same holds for step 10's table.
+- The thinking-on comparison is not like for like (Basalt's 400-token thinking budget, see 16d); the same held for step 10's table, now marked there, and its "repro mixed −26 %" is withdrawn.
 - "Decode after the 252K prompt" was a speed over an 8-token answer; removed (`baseline-summary.py` leaves it out for the same reason).
-- VRAM written as "GB" was MiB divided by 1,000 (15,830 MiB is 15.5 GiB, 16.6 GB); now in MiB. Steps 10 and 15 use the same loose "GB" in their tables and in the README; not changed there.
+- VRAM written as "GB" was MiB divided by 1,000 (15,830 MiB is 15.5 GiB, 16.6 GB); now in MiB. Steps 6, 9c, 10 and 15 and the README had the same loose "GB"; corrected there too on request, from each run's `.gpu.csv`, which found two real errors: step 15's two Basalt rows had their VRAM swapped, and step 9c gave the fp8 k=6 needle the NVFP4 run's 15,842 MiB (it peaked at 15,792). Corrections are noted in steps 10 and 15.
 - The conversion took 42.3 s by the converter's count (42.7 s was the wall time), and its command runs from Basalt's `src` directory; the output is now in `basalt/convert.txt`.
 - Smaller wording: free VRAM in MiB as Basalt prints it, the 0.975 allocation failure was at 220,000 tokens, the KV-check figure at 0.95 without the estimate is 3.62 GiB (3.64 is the worker's line), FP8 is about 1.8× NVFP4's bytes, not 2×, and the 252K comparison with the pinned checkpoint mixes MTP k=6 and no MTP.
 - Basalt's thinking budget and vLLM's empty answers checked in the files: 24 of 24 requests each way, step 10 the same.

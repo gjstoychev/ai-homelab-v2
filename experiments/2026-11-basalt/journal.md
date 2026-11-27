@@ -173,7 +173,7 @@ Decode with 126K behind it: 75–79 t/s on one card and split, 87–88 in peer m
 | One chat, exact | peer | 77.4 t/s | 66.9 | 53.1 |
 | One chat, MTP, prose / JSON | peer + MTP | 113.1 / 193.3 t/s | 93.4 / 159.2 | – |
 | 126K-token prompt | peer | 34.7 s | 36.3 s | 153.4 s |
-| Four-turn job | peer | 25.5 s | 29.0 s | 64.2 s |
+| Four-turn job | peer | 25.4 s | 29.0 s | 64.2 s |
 | 2 / 4 requests (short) | peer + MTP, 4 slots | 144 / 173 t/s | 113 / 173 | 86 / 117 |
 | 8 requests (short) | peer + MTP, 8 slots, `vram-reserve-mib` 1500 | 200.5 t/s | ≈ 229 | 151 |
 
@@ -240,4 +240,4 @@ README: status, the three-engine table, Basalt's two-GPU modes, the UD pack, fin
 
 ## Correction (2026-11-27)
 
-A recheck of the README against the run summaries (all eight regenerate identically from the raw files) found one imprecise statement: the UD-IQ3_XXS pack was "0–8 % slower than GSQ-RCO IQ3_XXS", but peer + MTP on JSON was 3.9 % faster (200.9 against 193.3 t/s, inside the GSQ run's ±10.1). The README now says so. Nothing else in the README differed from the summaries.
+A recheck of the README against the run summaries (all eight regenerate identically from the raw files) found one imprecise statement: the UD-IQ3_XXS pack was "0–8 % slower than GSQ-RCO IQ3_XXS", but peer + MTP on JSON was 3.9 % faster (200.9 against 193.3 t/s, inside the GSQ run's ±10.1). The README now says so. Nothing else in the README differed from the summaries. Building the cross-experiment analysis found one more: the peer job's mean is 25.4 s (25.37, 25.17, 25.79 s in `runs/11a-long/summary.md`), written as 25.5 s in the README and step 11a's table; both corrected.

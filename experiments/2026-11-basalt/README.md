@@ -105,7 +105,7 @@ Every number traces to a file in `runs/` and a step in the journal. All runs: ke
 | One chat, 2 GPUs, MTP | – | 93.4 / 159.2 | **113.1 / 193.3** | peer |
 | Prompt, 4.3K tokens (t/s) | 872 (1 GPU) | 1,878 (2 GPUs) | 1,876 (peer) | |
 | 126K-token prompt, time to first token | 153.4 s | 36.3 s | **34.7 s** | peer |
-| Four-turn job over a 32K document | 64.2 s | 29.0 s | **25.5 s** | peer |
+| Four-turn job over a 32K document | 64.2 s | 29.0 s | **25.4 s** | peer |
 | 2 / 4 requests at once (short, total t/s) | 86 / 117 | 113 / 173 | **144 / 173** | peer + MTP, 4 slots |
 | 8 requests at once | 151 | **≈ 229** | 200.5 | peer + MTP, 8 slots, `vram-reserve-mib` 1500 |
 | 4 requests at once, 4.3K-token prompts | 37 | **62** | 58 | split |

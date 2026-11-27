@@ -1,0 +1,4 @@
+basalt: system: Linux, CUDA driver 13.2 / runtime 13.0
+basalt: gpus: split; RTX 5060 Ti (nvidia-smi 0) main, share 0.50; RTX 5060 Ti (nvidia-smi 1) split, share 0.50 (free VRAM)
+basalt load: planning
+basalt: error: gpu-mode split: GPU 0 (RTX 5060 Ti) takes layers 0-31 at share 0.50 and needs 14.9 GiB, 14.8 GiB free; lower its gpu-share, max-context or parallel

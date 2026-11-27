@@ -1,0 +1,25 @@
+Basalt v0.5.7 (~/basalt-qwen35), pack ~/models/Qwen3.8-27B-NVFP4-matched.basalt (converted from nvidia/Qwen3.8-27B-NVFP4
+482ca0f3 + z-lab/Qwen3.8-27B-DFlash2 50307d4c), gpu-mode split, kv int8, parallel 1, driver 595.91.07, 180 W.
+Source: Basalt's own engine log for this pack (~/.cache/basalt/830f0ffae58a2d58/engine.log, written only by step 16),
+because the .out files of the refused drafted starts were overwritten by the next probe. In run order:
+
+drafted (configs/matched-basalt-split.json with max-context as below, no gpu-share):
+  262144: error: gpu-mode split: GPU 0 takes layers 0-27 at share 0.50 and needs 15.6 GiB, 14.8 GiB free
+  200000: loads. GPU 0 layers 0-27, head, drafter (14.8 GiB); GPU 1 layers 28-63 (14.6 GiB); 2284 MiB VRAM free
+  240000: error: ... GPU 0 takes layers 0-27 at share 0.50 and needs 15.3 GiB, 14.8 GiB free
+  220000: error: ... GPU 0 takes layers 0-27 at share 0.50 and needs 15.1 GiB, 14.8 GiB free
+  210000: error: ... GPU 0 takes layers 0-27 at share 0.50 and needs 14.9 GiB, 14.8 GiB free
+  -> kept 200000 for configs/matched-basalt-split.json and (untested higher) matched-basalt-split-nodraft.json
+
+no drafter ("spec": 0), for the 252K needle (configs/matched-basalt-split-nodraft-254k.json, first at 262144):
+  262144, no share: error: GPU 0 takes layers 0-31 at share 0.50 and needs 14.9 GiB, 14.8 GiB free  (basalt/needle/refused-262144/)
+  262144, "gpu-share": "49,51": error: GPU 1 takes layers 31-63 at share 0.51 and needs 14.9 GiB, 14.8 GiB free
+  262144, "48,52": error: GPU 1 takes layers 30-63 at share 0.52 and needs 15.2 GiB, 14.8 GiB free
+  262144, "47,53": error: GPU 1 takes layers 29-63 at share 0.53 and needs 15.4 GiB, 14.8 GiB free
+  262144, "46,54": error: GPU 1 takes layers 28-63 at share 0.54 and needs 15.7 GiB, 14.8 GiB free
+  254000, no share: loads. GPU 0 layers 0-31 (14.7 GiB); GPU 1 layers 32-63 (14.1 GiB); 2534 MiB VRAM free
+  (share probes: temporary copies in the scratchpad, `timeout 45 ... bin/basalt serve --config <copy>`, stopped at
+  planning; the 254000 probe loaded and was stopped; cards at 2 MiB after each)
+
+Weights loaded (engine log "basalt load: total"): 22,321,746,500 bytes / 1,288 tensors with the drafter,
+20,155,858,500 bytes / 1,203 tensors with "spec": 0 -- the drafter's tensors are not loaded when drafting is off.

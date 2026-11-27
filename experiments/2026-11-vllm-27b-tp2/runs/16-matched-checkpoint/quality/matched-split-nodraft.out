@@ -1,0 +1,41 @@
+[server] legend   pp=prompt read  tg=generation  c=cached  acc=drafts accepted  dl=tokens per window  hit=expert cache  pcie=routed experts over PCIe
+[server] bench  ctx=200000 kv=int8 prompt-cache=0 spec=0 temp=1.0 top_p=0.95 top_k=20
+[server] engine log: /home/llama/.cache/basalt/830f0ffae58a2d58/engine.log
+[server] ready    http://127.0.0.1:8080/v1  openai+anthropic  stats http://127.0.0.1:8080/
+[server] planning weight allocation
+[server] placed   ram 2.4GiB 1.3s
+[server] placed   cuda0 8.3GiB 2.6s
+[server] placed   cuda1 8.1GiB 4.5s
+[server] loaded   18.8GiB 4.7s  cuda0=8.3GiB cuda1=8.1GiB ram=2.4GiB
+[server] weights  loaded, ctx=200000 images=off
+[server] s1 done  pp=29/0c 0.1s  tg=4 21.6t/s  ttft=0.1s  end=stop
+[server] s1 done  pp=24/0c 0.1s  tg=3 22.2t/s  ttft=0.1s  end=stop
+[server] live | s1 tg=21/64 23.3t/s | total 23t/s
+[server] s1 done  pp=26/0c 0.1s  tg=35 22.2t/s  ttft=0.1s  end=stop
+[server] s1 done  pp=34/0c 0.1s  tg=10 22.2t/s  ttft=0.1s  end=stop
+[server] s1 done  pp=51/0c 0.1s  tg=13 22.2t/s  ttft=0.1s  end=stop
+[server] s1 done  pp=30/0c 0.1s  tg=4 22.2t/s  ttft=0.1s  end=stop
+[server] s1 done  pp=27/0c 0.1s  tg=7 22.2t/s  ttft=0.1s  end=stop
+[server] live | s1 tg=21/128 23.3t/s | total 23t/s
+[server] s1 done  pp=46/0c 0.1s  tg=51 22.2t/s  ttft=0.1s  end=stop
+[server] live | s1 tg=21/256 23.3t/s | total 23t/s
+[server] s1 done  pp=49/0c 0.1s  tg=38 22.2t/s  ttft=0.1s  end=stop
+[server] live | s1 tg=44/160 22.7t/s | total 23t/s
+[server] live | s1 tg=90/160 22.5t/s | total 22t/s
+[server] s1 done  pp=24/0c 0.1s  tg=95 22.2t/s  ttft=0.1s  end=stop
+[server] s1 done  pp=29/0c 0.1s  tg=4 22.2t/s  ttft=0.1s  end=stop
+[server] s1 done  pp=24/0c 0.1s  tg=3 22.2t/s  ttft=0.1s  end=stop
+[server] s1 done  pp=26/0c 0.1s  tg=35 22.2t/s  ttft=0.1s  end=stop
+[server] s1 done  pp=34/0c 0.1s  tg=10 22.2t/s  ttft=0.1s  end=stop
+[server] s1 done  pp=51/0c 0.1s  tg=13 22.2t/s  ttft=0.1s  end=stop
+[server] s1 done  pp=30/0c 0.1s  tg=4 22.2t/s  ttft=0.1s  end=stop
+[server] s1 done  pp=27/0c 0.1s  tg=7 22.2t/s  ttft=0.1s  end=stop
+[server] live | s1 tg=21/128 23.3t/s | total 23t/s
+[server] s1 done  pp=46/0c 0.1s  tg=51 22.2t/s  ttft=0.1s  end=stop
+[server] live | s1 tg=21/256 23.3t/s | total 23t/s
+[server] s1 done  pp=49/0c 0.1s  tg=38 22.2t/s  ttft=0.1s  end=stop
+[server] live | s1 tg=44/160 22.7t/s | total 23t/s
+[server] live | s1 tg=90/160 22.5t/s | total 22t/s
+[server] s1 done  pp=24/0c 0.1s  tg=95 22.2t/s  ttft=0.1s  end=stop
+[server] stopping (Ctrl+C again to force)
+[server] stopped

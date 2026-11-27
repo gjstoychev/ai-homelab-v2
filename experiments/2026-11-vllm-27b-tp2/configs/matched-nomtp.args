@@ -1,0 +1,46 @@
+# fp8-nomtp.args on the matched checkpoint (nvidia/Qwen3.8-27B-NVFP4 482ca0f3, MODEL_DIR=~/models/qwen3.8-27b-nvidia-nvfp4;
+# step 16). One change: --gpu_memory_utilization 0.965, because at 0.95 the KV check refuses 262144 (4.08 GiB needed,
+# 3.92 GiB available); at 0.965 the pool is 266,853 tokens (1.02x of the context).
+local/vllm-openai:v0.30.0
+NCCL_P2P_DISABLE=1
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+VLLM_ALLOW_LONG_MAX_MODEL_LEN=1
+VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE=67108864
+--served-model-name
+bench
+--tensor-parallel-size
+2
+--no-enable-flashinfer-autotune
+--disable_custom_all_reduce
+--load-format
+ipc_cache
+--trust-remote-code
+--kv-cache-dtype
+fp8
+--max-model-len
+262144
+--max-num-seqs
+2
+--compilation-config
+{"cudagraph_mode": "PIECEWISE"}
+--mamba-cache-dtype
+bfloat16
+--mamba-ssm-cache-dtype
+bfloat16
+--gpu_memory_utilization
+0.965
+--max-num-batched-tokens
+4096
+--enable-prefix-caching
+--enable-chunked-prefill
+--limit-mm-per-prompt
+{"video": 0}
+--mm-processor-kwargs
+{"max_pixels": 1000000}
+--reasoning-parser
+qwen3
+--tool-call-parser
+qwen3_xml
+--enable-auto-tool-choice
+--default-chat-template-kwargs
+{"preserve_thinking": true}

@@ -1,0 +1,216 @@
+basalt: system: Linux, CUDA driver 13.2 / runtime 13.0
+basalt: gpus: split; RTX 5060 Ti (nvidia-smi 0) main, share 0.50; RTX 5060 Ti (nvidia-smi 1) split, share 0.50 (free VRAM)
+basalt load: planning
+basalt qwen35: layer split: layers 0-31 (14.73 GiB) on CUDA0, 32-63 (14.05 GiB) on CUDA1
+basalt qwen35: 1203 tensors, 8.53 GiB on the GPU, 2.37 GiB of embedding in page-locked RAM; 6.80 GiB free
+basalt qwen35: layer split: 7.87 GiB of layers 32-63 on CUDA1
+basalt dense: layer split: CUDA1 runs layers 32-63 of every window and prompt chunk; its products planned as CUDA0's
+basalt load: total 20155858500
+basalt load: weights 0 20155858500
+basalt load: share cuda0 0 9164121892
+basalt load: share cuda1 0 8448939808
+basalt load: share ram 0 2542796800
+basalt load: stages cuda0 cuda1 ram
+basalt load: into cuda0
+basalt load: weights 218124288 20155858500
+basalt load: share cuda0 151015424 9164121892
+basalt load: weights 436228096 20155858500
+basalt load: share cuda0 268455936 9164121892
+basalt load: weights 654331904 20155858500
+basalt load: share cuda0 402673664 9164121892
+basalt load: weights 872435712 20155858500
+basalt load: share cuda0 536891392 9164121892
+basalt load: weights 1090539520 20155858500
+basalt load: share cuda0 671109120 9164121892
+basalt load: weights 1302425616 20155858500
+basalt load: share cuda0 799109136 9164121892
+basalt load: weights 1519383448 20155858500
+basalt load: share cuda0 898626456 9164121892
+basalt load: weights 1722454944 20155858500
+basalt load: share cuda0 1017811872 9164121892
+basalt load: weights 1937512236 20155858500
+basalt load: share cuda0 1115428652 9164121892
+basalt load: weights 2155026224 20155858500
+basalt load: share cuda0 1249056560 9164121892
+basalt load: weights 2356885308 20155858500
+basalt load: share cuda0 1350252348 9164121892
+basalt load: weights 2573155016 20155858500
+basalt load: share cuda0 1465858760 9164121892
+basalt load: weights 2779568852 20155858500
+basalt load: share cuda0 1571609300 9164121892
+basalt load: weights 2996429540 20155858500
+basalt load: share cuda0 1687806692 9164121892
+basalt load: weights 3199501032 20155858500
+basalt load: share cuda0 1806992104 9164121892
+basalt load: weights 3414558328 20155858500
+basalt load: share cuda0 1904608888 9164121892
+basalt load: weights 3632113280 20155858500
+basalt load: share cuda0 2038277760 9164121892
+basalt load: weights 3834587660 20155858500
+basalt load: share cuda0 2140088844 9164121892
+basalt load: weights 4050024984 20155858500
+basalt load: share cuda0 2288417304 9164121892
+basalt load: weights 4251863588 20155858500
+basalt load: share cuda0 2406369828 9164121892
+basalt load: weights 4468329900 20155858500
+basalt load: share cuda0 2505395628 9164121892
+basalt load: weights 4670352816 20155858500
+basalt load: share cuda0 2623532464 9164121892
+basalt load: weights 4874630600 20155858500
+basalt load: share cuda0 2743924168 9164121892
+basalt load: weights 5077702092 20155858500
+basalt load: share cuda0 2863109580 9164121892
+basalt load: weights 5292759388 20155858500
+basalt load: share cuda0 2960726364 9164121892
+basalt load: weights 5510314340 20155858500
+basalt load: share cuda0 3094395236 9164121892
+basalt load: weights 5712132464 20155858500
+basalt load: share cuda0 3195550064 9164121892
+basalt load: share ram 2542796800 2542796800
+basalt load: weights 5920906500 20155858500
+basalt load: share cuda0 3378109700 9164121892
+basalt load: weights 6137688212 20155858500
+basalt load: share cuda0 3594891412 9164121892
+basalt load: weights 6342838444 20155858500
+basalt load: share cuda0 3800041644 9164121892
+basalt load: weights 6559640640 20155858500
+basalt load: share cuda0 4016843840 9164121892
+basalt load: weights 6777195604 20155858500
+basalt load: share cuda0 4234398804 9164121892
+basalt load: weights 6979121128 20155858500
+basalt load: share cuda0 4436324328 9164121892
+basalt load: weights 7193826168 20155858500
+basalt load: share cuda0 4651029368 9164121892
+basalt load: weights 7398759312 20155858500
+basalt load: share cuda0 4855962512 9164121892
+basalt load: weights 7615758112 20155858500
+basalt load: share cuda0 5072961312 9164121892
+basalt load: weights 7818633016 20155858500
+basalt load: share cuda0 5275836216 9164121892
+basalt load: weights 8035238604 20155858500
+basalt load: share cuda0 5492441804 9164121892
+basalt load: weights 8249902684 20155858500
+basalt load: share cuda0 5707105884 9164121892
+basalt load: weights 8455073400 20155858500
+basalt load: share cuda0 5912276600 9164121892
+basalt load: weights 8671875588 20155858500
+basalt load: share cuda0 6129078788 9164121892
+basalt load: weights 8874750488 20155858500
+basalt load: share cuda0 6331953688 9164121892
+basalt load: weights 9091356076 20155858500
+basalt load: share cuda0 6548559276 9164121892
+basalt load: weights 9306040640 20155858500
+basalt load: share cuda0 6763243840 9164121892
+basalt load: weights 9511190872 20155858500
+basalt load: share cuda0 6968394072 9164121892
+basalt load: weights 9727993064 20155858500
+basalt load: share cuda0 7185196264 9164121892
+basalt load: weights 9930867964 20155858500
+basalt load: share cuda0 7388071164 9164121892
+basalt load: weights 10147473548 20155858500
+basalt load: share cuda0 7604676748 9164121892
+basalt load: weights 10362137636 20155858500
+basalt load: share cuda0 7819340836 9164121892
+basalt load: weights 10567308348 20155858500
+basalt load: share cuda0 8024511548 9164121892
+basalt load: weights 10784110544 20155858500
+basalt load: share cuda0 8241313744 9164121892
+basalt load: weights 11001665508 20155858500
+basalt load: share cuda0 8458868708 9164121892
+basalt load: weights 11203591024 20155858500
+basalt load: share cuda0 8660794224 9164121892
+basalt load: weights 11418296072 20155858500
+basalt load: share cuda0 8875499272 9164121892
+basalt load: weights 11623425828 20155858500
+basalt load: share cuda0 9080629028 9164121892
+basalt load: share cuda0 9164121892 9164121892
+basalt load: into cuda1
+basalt load: weights 11840228020 20155858500
+basalt load: share cuda1 133309328 8448939808
+basalt load: weights 12041988808 20155858500
+basalt load: share cuda1 335070116 8448939808
+basalt load: weights 12259708500 20155858500
+basalt load: share cuda1 552789808 8448939808
+basalt load: weights 12474393068 20155858500
+basalt load: share cuda1 767474376 8448939808
+basalt load: weights 12679543300 20155858500
+basalt load: share cuda1 972624608 8448939808
+basalt load: weights 12896345496 20155858500
+basalt load: share cuda1 1189426804 8448939808
+basalt load: weights 13113900652 20155858500
+basalt load: share cuda1 1406981960 8448939808
+basalt load: weights 13315825980 20155858500
+basalt load: share cuda1 1608907288 8448939808
+basalt load: weights 13530510544 20155858500
+basalt load: share cuda1 1823591852 8448939808
+basalt load: weights 13735660776 20155858500
+basalt load: share cuda1 2028742084 8448939808
+basalt load: weights 13952462976 20155858500
+basalt load: share cuda1 2245544284 8448939808
+basalt load: weights 14155829388 20155858500
+basalt load: share cuda1 2448910696 8448939808
+basalt load: weights 14369846304 20155858500
+basalt load: share cuda1 2662927612 8448939808
+basalt load: weights 14586648496 20155858500
+basalt load: share cuda1 2879729804 8448939808
+basalt load: weights 14791778252 20155858500
+basalt load: share cuda1 3084859560 8448939808
+basalt load: weights 15008580444 20155858500
+basalt load: share cuda1 3301661752 8448939808
+basalt load: weights 15212438384 20155858500
+basalt load: share cuda1 3505519692 8448939808
+basalt load: weights 15428060932 20155858500
+basalt load: share cuda1 3721142240 8448939808
+basalt load: weights 15642942100 20155858500
+basalt load: share cuda1 3936023408 8448939808
+basalt load: weights 15847895728 20155858500
+basalt load: share cuda1 4140977036 8448939808
+basalt load: weights 16064697920 20155858500
+basalt load: share cuda1 4357779228 8448939808
+basalt load: weights 16267572824 20155858500
+basalt load: share cuda1 4560654132 8448939808
+basalt load: weights 16484178408 20155858500
+basalt load: share cuda1 4777259716 8448939808
+basalt load: weights 16698883452 20155858500
+basalt load: share cuda1 4991964760 8448939808
+basalt load: weights 16904013204 20155858500
+basalt load: share cuda1 5197094512 8448939808
+basalt load: weights 17120815400 20155858500
+basalt load: share cuda1 5413896708 8448939808
+basalt load: weights 17323690292 20155858500
+basalt load: share cuda1 5616771600 8448939808
+basalt load: weights 17540295884 20155858500
+basalt load: share cuda1 5833377192 8448939808
+basalt load: weights 17754959968 20155858500
+basalt load: share cuda1 6048041276 8448939808
+basalt load: weights 17960130680 20155858500
+basalt load: share cuda1 6253211988 8448939808
+basalt load: weights 18176932876 20155858500
+basalt load: share cuda1 6470014184 8448939808
+basalt load: weights 18378693856 20155858500
+basalt load: share cuda1 6671775164 8448939808
+basalt load: weights 18596413364 20155858500
+basalt load: share cuda1 6889494672 8448939808
+basalt load: weights 18811097924 20155858500
+basalt load: share cuda1 7104179232 8448939808
+basalt load: weights 19016248160 20155858500
+basalt load: share cuda1 7309329468 8448939808
+basalt load: weights 19233050356 20155858500
+basalt load: share cuda1 7526131664 8448939808
+basalt load: weights 19451096832 20155858500
+basalt load: share cuda1 7744178140 8448939808
+basalt load: weights 19669308060 20155858500
+basalt load: share cuda1 7962389368 8448939808
+basalt load: weights 19883796008 20155858500
+basalt load: share cuda1 8176877316 8448939808
+basalt load: weights 20088946240 20155858500
+basalt load: share cuda1 8382027548 8448939808
+basalt load: share cuda1 8448939808 8448939808
+basalt load: into ram
+basalt loader: the cards' share is read (16.40 GiB in 4.5 s); RAM next
+basalt load: weights 20155858500 20155858500
+basalt: gpus: RTX 5060 Ti layers 0-31, head, drafter, their cells and state (14.7 GiB); RTX 5060 Ti layers 32-63, their cells and state (14.1 GiB)
+basalt serve: 2534 MiB of VRAM free with everything loaded
+basalt serve: prompt 252886 tokens = 0 reused + 252886 read in 109686 ms (2305.5 tok/s), 8 generated in 560 ms (14.3 tok/s), drafts accepted 0 of 0, 0 checkpoints
+basalt serve: prompt 252887 tokens = 0 reused + 252887 read in 109931 ms (2300.4 tok/s), 8 generated in 555 ms (14.4 tok/s), drafts accepted 0 of 0, 0 checkpoints
+basalt serve: prompt 252889 tokens = 0 reused + 252889 read in 109966 ms (2299.7 tok/s), 8 generated in 555 ms (14.4 tok/s), drafts accepted 0 of 0, 0 checkpoints

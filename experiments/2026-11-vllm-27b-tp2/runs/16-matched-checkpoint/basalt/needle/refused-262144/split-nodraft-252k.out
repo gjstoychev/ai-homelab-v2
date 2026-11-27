@@ -1,0 +1,8 @@
+[server] legend   pp=prompt read  tg=generation  c=cached  acc=drafts accepted  dl=tokens per window  hit=expert cache  pcie=routed experts over PCIe
+[server] bench  ctx=262144 kv=int8 prompt-cache=0 spec=0 temp=1.0 top_p=0.95 top_k=20
+[server] engine log: /home/llama/.cache/basalt/830f0ffae58a2d58/engine.log
+[server] ready    http://127.0.0.1:8080/v1  openai+anthropic  stats http://127.0.0.1:8080/
+[server] planning weight allocation
+[server] error: gpu-mode split: GPU 0 (RTX 5060 Ti) takes layers 0-31 at share 0.50 and needs 14.9 GiB, 14.8 GiB free; lower its gpu-share, max-context or parallel
+[server] engine log: /home/llama/.cache/basalt/830f0ffae58a2d58/engine.log
+[server] stopped

@@ -663,3 +663,119 @@ Asked for after step 15: does a different `gpu-share` let the drafted 4-slot con
 | 0.45 / 0.42 / 0.40 / 0.38 | GPU 1 from layer 23 / 20 / 19 / 17 | GPU 1 | 16.8 / 17.4 / 18.2 / 18.6 GiB | 14.7 GiB |
 
 The cut moves a whole layer at a time, and the two cuts on either side of the boundary each leave one card short: 0.1 GiB on GPU 0 with 27 layers there, 0.9 GiB on GPU 1 with 38 layers there. A layer moved to GPU 1 costs it about 0.8 GiB at this context and slot count (its weights, plus the KV of the attention layers and the recurrent state for four slots), so no share fits both. The levers left are the ones the refusal names besides the share (`max-context`, `parallel`; step 15 used 163,840) and one it does not name: `vram-reserve-mib` (default 700 MiB kept free on the main card for graphs and scratch, at least 128 on Linux), which could close GPU 0's 0.1 GiB gap. Not tried: lowering the reserve risks an out-of-memory error during a run rather than at the start.
+
+## 16. A matched checkpoint: vLLM and Basalt on the same weights (2026-11-26/27)
+
+Asked for after step 15b: steps 10, 11 and 15 compare the engines on different NVFP4 weights (vLLM the pinned gittensor checkpoint, Basalt the QUASAR pack), so part of every difference could be the weights. Started on the evening of 2026-11-26, paused for the night, finished on 2026-11-27. Files: `runs/16-matched-checkpoint/` (`summary.md`, `vllm/`, `basalt/`, `quality/`; the dead ends in their own subfolders).
+
+**The checkpoint.** `nvidia/Qwen3.8-27B-NVFP4` at `482ca0f3832238542f8f5295dde86b5f22711d80` has an MTP head (`mtp_num_hidden_layers: 1`, 15 `mtp.*` tensors, left unquantized) and is the checkpoint Basalt's `docs/model-file.md` converts, so one download serves both engines. Fetched with `scripts/hf-fetch.sh` into `~/models/qwen3.8-27b-nvidia-nvfp4` (15 files, 21.94 GB, checksums OK), with the drafter Basalt's docs pair with it, `z-lab/Qwen3.8-27B-DFlash2` at `50307d4c4cde6860d4eee73e2547cd786fe8e8a4` (3.85 GB, `~/models/qwen3.8-27b-dflash2`). Converted in 42.7 s:
+
+```
+~/basalt-qwen35/v0.5.7/src/.venv/bin/python tools/convert/convert.py --checkpoint ~/models/qwen3.8-27b-nvidia-nvfp4 \
+  --drafter ~/models/qwen3.8-27b-dflash2 --out ~/models/Qwen3.8-27B-NVFP4-matched.basalt \
+  --name "Qwen3.8-27B NVFP4 (matched checkpoint)"
+```
+
+(23,749,972,575 bytes, 9 sections). It is not the same quantization as the pinned checkpoint: its `hf_quant_config.json` says `MIXED_PRECISION` (modelopt 0.47.0.dev80), NVFP4 for the 64 layers' MLPs and the lm_head, **FP8 for every attention projection** (48 linear-attention layers × 3, 16 full-attention layers × 4), no KV scales. The pinned one is NVFP4 on every linear layer, with FP8 KV scales, 18.79 GB. So "matched" means both engines read the same file; it does not mean the earlier steps' numbers carry over.
+
+Same everything else as before: driver 595.91.07, kernel 7.0.0-44, 180 W, vLLM v0.30.0 image, Basalt v0.5.7 (`~/basalt-qwen35`), the clients of steps 4, 6 and 11.
+
+### 16a. vLLM: the configs and what it took to start them
+
+`configs/matched-nomtp.args` and `matched-mtp4.args` are copies of `fp8-nomtp.args` and `fp8-mtp4.args`; `vllm-serve.sh` takes the model from `MODEL_DIR`. Both refused to start at the source's `--gpu_memory_utilization 0.95` (the evening before; `vllm/0.95-failed/`): the KV check wants one full 262,144-token request, and this checkpoint's weights leave less memory for it.
+
+```
+MODEL_DIR=$HOME/models/qwen3.8-27b-nvidia-nvfp4 BENCH_CLIENT=experiments/2026-11-vllm-27b-tp2/scripts/baseline-client.py \
+  scripts/bench-run.sh experiments/2026-11-vllm-27b-tp2/runs/16-matched-checkpoint/vllm <config> 5 -- \
+  experiments/2026-11-vllm-27b-tp2/scripts/vllm-serve.sh experiments/2026-11-vllm-27b-tp2/configs/<config>.args
+```
+
+**A mistake of mine that cost five runs.** On the second morning I ran the configs without `MODEL_DIR`, so `vllm-serve.sh` mounted its default, the pinned checkpoint. The no-MTP run "worked" at 0.965 (42.4 t/s: the pinned checkpoint's number, which is what gave it away only later), and I spent four MTP runs (0.965, 0.96, 0.965 with `--max-model-len 256000`, 0.96 with `--max-num-seqs 1`) chasing out-of-memory errors on the first request, building a theory on the wrong model, before I read the `model:` line of the log. Those runs are in `vllm/wrong-model-debug/` with a note; they are not part of the comparison. What they do show, for the pinned checkpoint with MTP k=4: above 0.95 the first request runs out of memory (58–114 MiB asked, 41–103 MiB free), and neither a shorter context nor one slot changes that, because the KV pool takes the whole budget either way (292,514 tokens at 262,144, 292,800 at 256,000). Every run since has its `model:` line checked.
+
+With the right model:
+
+| Config | Util | CUDA-graph estimate | Context | Result |
+|---|---|---|---|---|
+| nomtp | 0.95 | on (default) | 262,144 | refused: 4.08 GiB KV needed, 3.92 available (max 251,200) |
+| **nomtp** | **0.965** | on | **262,144** | **runs**: pool 266,853 tokens (1.02×); baseline, needle and quality all clean |
+| mtp4 | 0.95 | on | 262,144 | refused: 4.51 needed, 3.33 available (max 189,952) |
+| mtp4 | 0.965 | on | 262,144 | refused: 4.51 needed, 3.56 available |
+| mtp4 | 0.95 | off | 262,144 | refused: 4.51 needed, 3.62 available (max 207,760) |
+| mtp4 | 0.97 / 0.975 | off | 262,144 | refused: 3.93 / 4.01 available (max 226,416 / 231,504) |
+| mtp4 | 0.99 | off | 262,144 | refused at start: 15.13 of 15.48 GiB free per card, 15.32 asked |
+| mtp4 | 0.975 | off | 220,000 | KV allocation failed: 4.02 GiB asked, 3.86 free |
+| mtp4 | 0.95 | off | 180,000 | started (pool 205,714); first request OOM, 114 MiB asked, 104.6 free |
+| **mtp4** | **0.93** | **off** | **180,000** | **runs**: pool 187,792 tokens (1.04×, 3.33 GiB); baseline and quality clean |
+
+"Estimate" is vLLM's CUDA-graph memory estimate (`VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS`, on by default since v0.21.0), which sets memory aside for the graphs before sizing the KV pool. The MTP variant needs 0.43 GiB more KV than the plain one for the same context (4.51 against 4.08 GiB; not broken down here), and the plain one already needs 0.965. So **the MTP config does not hold 262,144 tokens on this checkpoint at any utilization that starts**; at 0.975 the check offers 231,504 tokens and the allocation then fails anyway. Turning the estimate off gives the KV pool about 0.3 GiB more at the same utilization (3.33 → 3.64 GiB at 0.95); with that memory in the pool, the first request finds 105 MiB free and asks for 114. The working config's 3.33 GiB at 0.93 without the estimate is the same budget as 0.95 with it, so the source's 0.95 with `--max-model-len 180000` would very probably run too; I did not run it. Where the 114 MiB request comes from was not traced.
+
+I also mis-explained this while it happened. The previous header of `matched-mtp4.args` said the estimate "under-reserves" and blamed the MTP verify step for the 114 MiB; the first was built partly on the wrong-model runs and the second was a guess. The header now has only what the logs show.
+
+### 16b. vLLM results
+
+Same clients as step 4 (`baseline-client.py`: thinking off 256 tokens, thinking on 800, TTFT at 0.5K / 4K / 32K) and step 6 (`needle-client.py`, `NEEDLE_CHARS=835000`, on `matched-nomtp` only; the MTP config's 180,000 tokens cannot hold the 252K prompt):
+
+| | Pinned checkpoint (step 9b/9c) | Matched checkpoint |
+|---|---|---|
+| Decode, no MTP | 42.3 t/s | **32.06** (−24 %) |
+| MTP k=4, thinking off, prose / JSON | 64.76 / 116.44 | 53.64 ± 2.53 / 96.79 ± 4.84 (−17 % both) |
+| MTP acceptance length, prose / JSON | 2.30 / 4.17 | 2.31 / 4.21 |
+| MTP k=4, thinking on, prose / structured / mixed | 67.82 / 85.76 / 78.25 | 55.65 / 69.89 / 65.00 |
+| TTFT ~0.5K / 4K / 32K, no MTP | 0.184 / 1.310 / 12.404 s | 0.225 / 1.557 / 14.263 s (+15–22 %) |
+| 252K needle | 271.95 s (k=6) | 272.34 s (no MTP), 929 t/s, found 3/3 |
+| Peak VRAM per card | 15.8 GB | 15.8 GB |
+
+The MTP head of this checkpoint drafts as well as the pinned one (acceptance within 0.04); the drafted speed falls with the plain speed, so the step itself is slower. A plausible reason is the FP8 attention projections (twice NVFP4's bytes per weight, 17 % more weight bytes in all), but decode falls by more than that (24 %) and nothing here separates bytes from kernels. The 252K prompt takes the same time as on the pinned checkpoint while 32K takes 15 % longer: at that length attention over the cache dominates, and the KV cache is fp8 in both.
+
+### 16c. Basalt: the context that fits
+
+```
+BENCH_CLIENT=experiments/2026-11-vllm-27b-tp2/scripts/baseline-client.py scripts/bench-run.sh \
+  experiments/2026-11-vllm-27b-tp2/runs/16-matched-checkpoint/basalt <label> 5 -- env -C ~/basalt-qwen35/v0.5.7/src \
+  bin/basalt serve --config <abs path>/configs/matched-basalt-<label>.json --python .venv/bin/python
+```
+
+Configs `matched-basalt-split.json` (drafting on) and `matched-basalt-split-nodraft.json` (`"spec": 0`): step 10's, with the new pack. **Neither holds 262,144 tokens** (`basalt/context-probe.txt`, from Basalt's engine log, because I overwrote the refused starts' `.out` files from one probe to the next): with the drafter, GPU 0 (layers 0–27, head, drafter) needs 15.6 GiB against 14.8 free at 262,144, still 14.9 at 210,000, and fits at 200,000 (2.3 GiB free with everything loaded). Both baseline configs use 200,000; I did not probe the no-drafter config higher for the baseline (context does not change these short prompts).
+
+For the needle the no-drafter config was probed further (`basalt/needle/refused-262144/`, then planning-only probes in the same file): at 262,144 the cut gives GPU 0 layers 0–31 and leaves it 0.1 GiB short; `gpu-share` 0.49 moves one layer and leaves GPU 1 0.1 GiB short, 0.48–0.46 more. That is step 15b's pattern: no share fits both cards. At **254,000** (just above the needle's 252,886-token prompt) it loads with 2.5 GiB free: `configs/matched-basalt-split-nodraft-254k.json`.
+
+A correction to step 13 on the way: with `"spec": 0` Basalt does **not** load the drafter's tensors. This pack loads 1,203 tensors and 20,155,858,500 bytes without drafting, 1,288 and 22,321,746,500 with it; the QUASAR pack of steps 10–15 does the same in its engine log (17.56 against 19.72 GB). Step 13 says the drafter's weights stay on the card with `"spec": 0`; in `split` at least they do not. Step 13's refusals in `peer` were not re-checked; its conclusion (the main card cannot hold the model) does not depend on it.
+
+### 16d. Basalt results, next to vLLM on the same weights
+
+| | vLLM TP=2, fp8 KV | Basalt split, int8 KV |
+|---|---|---|
+| Context | 262,144 (no MTP); 180,000 (MTP) | 200,000 (drafter); 254,000 (no drafter, needle only) |
+| Decode, no drafting | **32.06** | 21.93 (vLLM +46 %) |
+| Drafted, thinking off, prose / JSON | **53.64** / 96.79 | 41.76 ± 2.61 / **111.13 ± 8.35** |
+| Drafted, thinking on, prose / structured / mixed | **55.65** / 69.89 / **65.00** | 47.74 / **72.71** / 51.00 |
+| TTFT ~0.5K / 4K / 32K, no drafting | 0.225 / 1.557 / 14.263 s | **0.204 / 1.101 / 5.897 s** |
+| TTFT same, drafting on | 0.237 / 1.597 / 14.952 s | **0.212 / 1.145 / 6.126 s** |
+| Prompt rate at 32K, no drafting | 2,262 t/s | **5,471 t/s** (2.42×) |
+| 252K needle, no drafting | 272.34 s (929 t/s), 3/3 | **109.99 s (2,299 t/s)**, 3/3 (2.48×) |
+| Decode after the 252K prompt | 36.9 t/s | 16.8 t/s |
+| Peak VRAM per card | 15.8 GB | 15.0 / 14.6 GB (drafter, 200K) |
+| Peak power per card | 124–140 W | 180–186 W (at the 180 W limit) |
+
+Against step 10 (different weights each side) the engine ratios hold: plain decode vLLM +46 % (step 10: +70 %), drafted prose vLLM +28 % (+39 %), drafted JSON Basalt +15 % (+10 %), 32K prompt Basalt 2.42× (2.39×), 252K prompt Basalt 2.48× (2.38×, drafting on there). The weights moved both engines in the same direction (Basalt's plain decode 24.95 → 21.93, −12 %; its 32K prompt +14 %), less than they moved vLLM. So **the step 10 conclusions were not an artefact of the weights**: on one file, vLLM wins plain and drafted prose decode, Basalt wins prompt reading by about 2.4× at every length and drafted JSON by 15 %.
+
+### 16e. Quality on the same weights
+
+`scripts/quality-check.py` (ten prompts, greedy, two repetitions) through `bench-run.sh` on all four configs, compared with `scripts/quality-compare.py --ref matched-nomtp` (`quality/quality.md`). A slip first: I started `matched-nomtp` with `0` reps, which `bench-run.sh` treats as "start and stop, no client"; it was deleted and rerun with 2.
+
+| prompt | vLLM no MTP (reference) | vLLM MTP k=4 | Basalt no drafter | Basalt drafter |
+|---|---|---|---|---|
+| arith, capital, primes, sort, author, german | = ✓ | = ✓ | = ✓ | = ✓ |
+| time | ✓ | ≠ ✓ | ≠ ✓ | ≠ ✓ |
+| json | ✓ | ≠ ✓ | ≠ ✓ | ≠ ✓ |
+| code | ✓ | ≠ ✓ | ≠ ✓ | ≠ ✓ |
+| explain | ✓ | ≠ ✓ | ≠ ✓ | ≠ ✓ |
+
+- Every check passes in all four, and each run's two repetitions are identical.
+- Basalt's drafted text equals its undrafted text on all ten (by hash), as in step 11.
+- vLLM with MTP differs from vLLM without it on 4 of 10 (step 11: 3).
+- The two plain-decoding paths, vLLM without MTP and Basalt without drafter, give the same text on 6 of 10 on the same weights. In step 11, on different weights, it was 8 of 10. With ten prompts that is not a difference worth reading; what it does show is that matching the weights does not make the engines' greedy texts match (the KV types still differ, fp8 against int8, and so do the kernels). Basalt's text equals vLLM-with-MTP's on 8 of 10 (all but json and explain), which says the same: which greedy tie wins is decided in the last bits.
+
+### What step 16 leaves
+
+Not run: the source's 0.95 with `--max-model-len 180000` for the MTP config (the likely simpler equivalent of 0.93 without the estimate), the Basalt no-drafter config above 200,000 for the baseline, a needle at 180,000 on vLLM MTP or at 200,000 on Basalt drafted, and anything that separates the FP8 attention projections' bytes from their kernels in vLLM's slower decode. The models stay in `~/models` for now (the two checkpoints and the pack, about 49.5 GB).

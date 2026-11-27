@@ -1,0 +1,19 @@
+{
+ "version": 2,
+ "models": [
+  {
+   "model": "/home/llama/models/Qwen3.8-27B-NVFP4-matched.basalt",
+   "gpu": "0,1",
+   "gpu-mode": "split",
+   "max-context": 200000,
+   "kv": "int8",
+   "prompt-cache": 0,
+   "alias": "bench"
+  }
+ ],
+ "server": {
+  "host": "127.0.0.1",
+  "port": 8080,
+  "totals-file": "none"
+ }
+}

@@ -605,7 +605,7 @@ The prompts of concurrent requests are read one after another (the per-stream TT
 - Layer split, MTP, 4 slots with `--batch-mtp --batch-groups 1` (`strata-2gpu-mtp-par4-batchmtp.json`): "--batch-mtp: 4 slot drafters on CUDA1 (53 MiB … each)". Total 86–89 t/s with 1 stream, 105–108 with 2, 128–131 with 4: **slower** than the pipelined default (112.4 and 172.2). The docs report the same where the cards hold the experts ("80.2 -> 62.7 tok/s … it pays only when the experts do not all fit in VRAM").
 - llama.cpp with 8 slots (`-np 8 -c 65536`, MoE cache 20,480 MiB): 150.6–151.8 t/s total with 8 streams, against about 229 for Strata's layer split with 8 slots.
 
-**More runs for 13b:** llama.cpp's two-GPU "best" with `-ts 45,55` (more layers on GPU1, whose compute buffer is smaller). With 23,552 MiB of cache GPU1 ran out of memory: the cache is split like the layers (GPU1 got 12,937 MiB; files `oom-cache23552-*`). With 21,000 MiB (GPU1 11,537, GPU0 9,446): 53.4 / 52.2 decode, 828 / 817 prompt, against 53.1 / 52.9 and 838 / 842 with the default split, and 2.6 GB of GPU0 left unused. No gain.
+**More runs for 13b:** llama.cpp's two-GPU "best" with `-ts 45,55` (more layers on GPU1, whose compute buffer is smaller). With 23,552 MiB of cache GPU1 ran out of memory: the cache is split like the layers (GPU1 got 12,937 MiB; files `oom-cache23552-*`). With 21,000 MiB (GPU1 11,537, GPU0 9,446): 53.4 / 52.2 decode, 828 / 817 prompt, against 53.1 / 52.9 and 838 / 842 with the default split, and GPU0 peaking at 13,156 MiB, 2,628 MiB below the default split's 15,784. No gain.
 
 ### 13f. The best two-GPU setup per use
 
@@ -641,3 +641,11 @@ The prompts of concurrent requests are read one after another (the per-stream TT
 ## 15. Write-up (2026-11-26)
 
 README: status, the run conditions, the table of two-GPU modes, findings, the recommended two-GPU setup and what was not measured. `docs/stack.md`: the Strata build and the changelog. Repository README: status.
+
+## Correction (2026-11-27): VRAM figures in GB
+
+A check across the repository (see `2026-11-vllm-27b-tp2`, journal 16f) found VRAM written as "GB" from MiB divided by 1,000 or rounded by eye. Corrected in place to MiB from the run files; the old wording:
+
+- "2.6 GB of GPU0 left unused" (13b, `-ts 45,55`): GPU0 peaked at 13,156 MiB, 2,628 MiB below the default split's 15,784 (`runs/13b-llamacpp-modes/2gpu-best-ts45-55.gpu.csv`, step 13b's table)
+
+RAM figures in GB (page cache, MemAvailable) have the same loose conversion and were not changed.

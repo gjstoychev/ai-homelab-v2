@@ -201,7 +201,7 @@ Sizes: 5257664 + 49448084864 + 37447971424 bytes = 80.93 GiB; shard 1 holds only
 
 **Actual:** all 49 layers on the GPUs with only their dense weights (CUDA0 980 MiB, CUDA1 1308 MiB), all experts and the n-gram embeddings mapped on the CPU (78726 MiB). Peak VRAM 1954 / 1804 MiB. Load 16.4 s (the fastest so far: only 2.3 GiB go to VRAM). Prompt **202.7 ± 1.6 t/s**, generation **24.4 ± 0.4 t/s** (warm-up 162.8 / 24.4). Page cache 53.3 GB. GPUs 90 W, CPU 61 W.
 
-**Verdict:** as expected for generation: between 0a (16.8) and 0b (38.8), with about 25 GB of VRAM now free for step 2's cache. Not expected: prompt processing dropped 40 % (341 → 203 t/s). Likely cause: each micro-batch (512 tokens) copies the experts it uses, nearly all of them, to the GPUs ("large batches still upload the experts they use", `docs/moe-cache.md`); the 4260-token prompt is 9 micro-batches, so about 9 full uploads, where `--fit` kept half of the experts on the GPUs. Step 4 (`-ub`) is where that should change.
+**Verdict:** as expected for generation: between 0a (16.8) and 0b (38.8), with about 27,900 MiB of VRAM free at step 1's peak (13,893 / 14,043 of 15,847 MiB per card) for step 2's cache. Not expected: prompt processing dropped 40 % (341 → 203 t/s). Likely cause: each micro-batch (512 tokens) copies the experts it uses, nearly all of them, to the GPUs ("large batches still upload the experts they use", `docs/moe-cache.md`); the 4260-token prompt is 9 micro-batches, so about 9 full uploads, where `--fit` kept half of the experts on the GPUs. Step 4 (`-ub`) is where that should change.
 
 ## 13. Qwen, step 2: the tuner (2026-11-24)
 
@@ -220,9 +220,9 @@ Sizes: 5257664 + 49448084864 + 37447971424 bytes = 80.93 GiB; shard 1 holds only
 
 Fitted machine: uploads 12.8 GiB/s, CPU 46.7 GiB/s, 15.23 ms per token for everything else. Predicted with a warm cache: 13440 MiB at share 0 48.0 t/s, 0.8 52.9, 0.95 53.7. **Recommended: `--moe-cache-mib 13440 --moe-cache-cpu-share 0.8` (52.9 t/s predicted).**
 
-**Finding: on two GPUs the tuner caps the cache at about half of what fits.** The cache is split across the GPUs like the layers (log: CUDA0 6794 MiB, CUDA1 6643 MiB for 13440), but the tuner sizes it from the first cache device only: `room = free - used - 512` with the free memory and the buffers of CUDA0 (`device_room()` and the lines after `run_server(... small ...)` in `scripts/moe-cache-tune.py`). With `-cmoe` each GPU has about 13.5 GB free, so about 6.5 GB per GPU stay unused. `--max-mib` can only lower the cap. Candidate upstream issue.
+**Finding: on two GPUs the tuner caps the cache at about half of what fits.** The cache is split across the GPUs like the layers (log: CUDA0 6794 MiB, CUDA1 6643 MiB for 13440), but the tuner sizes it from the first cache device only: `room = free - used - 512` with the free memory and the buffers of CUDA0 (`device_room()` and the lines after `run_server(... small ...)` in `scripts/moe-cache-tune.py`). With `-cmoe` the tuner finds room for 13,462 MiB on CUDA0 ("CUDA0 15708 MiB free, cache up to 13462 MiB", `2-tune.txt`), but each GPU then holds only about half of the 13,440 MiB cache (6,794 / 6,643), so about 6,700 MiB stay unused on CUDA0 and about as much on CUDA1. `--max-mib` can only lower the cap. Candidate upstream issue.
 
-**Decision:** step 2 measures the recommendation as is; an extra step 2b measures about twice the cache (25600 MiB, about 12.8 GB per GPU) at the same share 0.8, so only the size changes. Steps 3 to 5 build on the faster of the two.
+**Decision:** step 2 measures the recommendation as is; an extra step 2b measures about twice the cache (25,600 MiB, 12,800 MiB per GPU) at the same share 0.8, so only the size changes. Steps 3 to 5 build on the faster of the two.
 
 ## 14. Qwen, steps 2 and 2b: the MoE cache measured (2026-11-24)
 
@@ -357,7 +357,7 @@ Fitted machine: uploads 13.8 GiB/s, CPU 60.1 GiB/s, 51.39 ms per token for every
 
 **Verdict:** the tuner predicts only +8 % over `--fit` (0b, 14.5 t/s), against +36 % for Qwen. The CPU share matters far more than for Qwen (share 0 → 0.95: 11.1 → 15.9 t/s): with mmap and part of the experts on the NVMe, uploading a missed expert is expensive and the CPU reads host experts at 60 GiB/s against 13.8 GiB/s of uploads. Hit rates are much lower (64–71 % against 92 %): the cache holds 14 % of DeepSeek's experts against 26 % of Qwen's.
 
-**2b:** CUDA0 limits (step 1 peak 5110 MiB, about half of the cache): about 10 GB of cache per GPU with a 0.7 GB margin, 19968 MiB in total, same share 0.9.
+**2b:** CUDA0 limits (step 1 peak 5110 MiB, about half of the cache): 9,984 MiB of cache per GPU with about 750 MiB margin (15,847 − 5,110 − 9,984), 19968 MiB in total, same share 0.9.
 
 ## 22. DeepSeek, steps 2 and 2b: the MoE cache measured (2026-11-24)
 
@@ -396,7 +396,7 @@ Fitted machine: uploads 13.8 GiB/s, CPU 60.1 GiB/s, 51.39 ms per token for every
 
 Step 4 per request: prompt 211.8, 212.1, 261.7, 238.7, 228.1 t/s; generation 17.8, 19.7, 22.3, 19.7, 20.0 t/s.
 
-**Verdict:** `-ub 4096` makes prompts 1.8× faster, and DeepSeek's prompt processing beats `--fit` for the first time (+58 %). The 2.3 GB smaller cache costs nothing (4c matches 2b, and is steadier). Unlike Qwen, generation drops with `-ub 4096`: 19.9 against 22.3 t/s (−11 %, Welch t ≈ 2.8 over 5 requests each, probably real). Hypothesis: the NVMe tier. A large batch reads nearly all 74 GiB of experts from the mapped file, which pushes the warm experts out of the page cache; generation then fetches more of them from the NVMe. Qwen had no NVMe tier. Not verified: the runs do not record disk reads.
+**Verdict:** `-ub 4096` makes prompts 1.8× faster, and DeepSeek's prompt processing beats `--fit` for the first time (+58 %). The 2,304 MiB smaller cache (17,664 against 19,968 MiB) costs nothing (4c matches 2b, and is steadier). Unlike Qwen, generation drops with `-ub 4096`: 19.9 against 22.3 t/s (−11 %, Welch t ≈ 2.8 over 5 requests each, probably real). Hypothesis: the NVMe tier. A large batch reads nearly all 74 GiB of experts from the mapped file, which pushes the warm experts out of the page cache; generation then fetches more of them from the NVMe. Qwen had no NVMe tier. Not verified: the runs do not record disk reads.
 
 **DeepSeek has no single best configuration:** for long prompts step 4 (prompt 1.6×, generation 1.37× of `--fit`), for generation 4c (generation +54 %, prompt −13 %).
 
@@ -426,3 +426,15 @@ Prompt per request in 5: 193, 206, 231, 249, 220, 237, 262, 278, 275, 293 t/s (s
 ## Open points
 
 - **NCCL 2.28.9 is untested on these cards.** The newest `+cuda13.0` NCCL build in NVIDIA's repository is 2.28.9 (2026-11-24). In the board-swap benchmark 2.25.1 crashed llama.cpp's tensor split and 2.32.6 (a `+cuda12.9` build) worked. NCCL matters only for tensor split, which none of the five steps use (the experts sit in RAM); test it before tensor split is used with this build.
+
+## Correction (2026-11-27): VRAM figures in GB
+
+A check across the repository (see `2026-11-vllm-27b-tp2`, journal 16f) found VRAM written as "GB" from MiB divided by 1,000 or rounded by eye. Corrected in place to MiB from the run files; the old wording:
+
+- "about 25 GB of VRAM now free" (step 1 verdict): 27,936 MiB free at step 1's peak, from `1-cmoe.gpu.csv` and the 15,847 MiB per card in the log
+- "each GPU has about 13.5 GB free, so about 6.5 GB per GPU stay unused" (step 2): the tuner's 13,462 MiB of room on CUDA0, 6,700 MiB unused
+- "about 12.8 GB per GPU" (step 2b): 12,800 MiB
+- "about 10 GB of cache per GPU with a 0.7 GB margin" (DeepSeek 2b): 9,984 MiB per GPU, about 750 MiB margin
+- "The 2.3 GB smaller cache" (DeepSeek step 4): 2,304 MiB
+
+RAM figures in GB (page cache, MemAvailable) have the same loose conversion and were not changed.

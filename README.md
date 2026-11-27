@@ -28,7 +28,7 @@ Each experiment directory has a `README.md` (question, setup with the full stack
 | Path | Content |
 |---|---|
 | `experiments/<yyyy-mm>-<name>/` | One experiment each |
-| `analysis/` | Analyses across experiments, such as [`2026-11-two-gpus.md`](analysis/2026-11-two-gpus.md): every engine and two-GPU mode compared |
+| `analysis/` | Analyses across experiments, such as [`llm-engines-benchmark-rtx-5060-ti.md`](analysis/llm-engines-benchmark-rtx-5060-ti.md): every engine and two-GPU mode compared |
 | `docs/` | Hardware and software stack |
 | `scripts/` | Scripts shared by experiments, such as `build-llamacpp.sh` |
 | `work/` | Disposable scratch, not in git |

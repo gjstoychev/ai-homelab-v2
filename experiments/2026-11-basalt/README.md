@@ -120,7 +120,7 @@ Every number traces to a file in `runs/` and a step in the journal. All runs: ke
 | split | 71.0 | 107.4 | 184.5 | 121 / 165 | 35.8 s |
 | `gpu-share` 0.4,0.6 / 0.6,0.4 (split), 1,1 (peer) | 70.4–77.6 | – | – | – | – |
 
-**The UD-IQ3_XXS pack** (better quality, 46.8 GiB of experts): 0–8 % slower than GSQ-RCO IQ3_XXS; peer + MTP 112.3 / 200.9 t/s; fits in RAM in every mode.
+**The UD-IQ3_XXS pack** (better quality, 46.8 GiB of experts): 0–8 % slower than GSQ-RCO IQ3_XXS (one cell faster: peer + MTP JSON 200.9 against 193.3 t/s, inside the GSQ run's ±10.1); peer + MTP 112.3 / 200.9 t/s; fits in RAM in every mode.
 
 ## Findings
 

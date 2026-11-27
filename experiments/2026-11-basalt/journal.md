@@ -237,3 +237,7 @@ Step 6's one-GPU run again with no download running (`runs/6-7-modes-control/`):
 ## 12. Write-up (2026-11-26)
 
 README: status, the three-engine table, Basalt's two-GPU modes, the UD pack, findings, the recommended two-GPU setup, what was not measured. `docs/stack.md`: the Basalt build and the two packs. Repository README: status.
+
+## Correction (2026-11-27)
+
+A recheck of the README against the run summaries (all eight regenerate identically from the raw files) found one imprecise statement: the UD-IQ3_XXS pack was "0–8 % slower than GSQ-RCO IQ3_XXS", but peer + MTP on JSON was 3.9 % faster (200.9 against 193.3 t/s, inside the GSQ run's ±10.1). The README now says so. Nothing else in the README differed from the summaries.

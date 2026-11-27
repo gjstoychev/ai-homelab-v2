@@ -10,7 +10,7 @@ Sources (every number below is in one of them; all were rechecked against the ra
 | [`2026-11-llamacpp-flags`](../experiments/2026-11-llamacpp-flags/) | llama.cpp | Qwen3.8-Flash-Next (batiai IQ3_XXS), DeepSeek-V4-Flash (UD-IQ1_M) |
 | [`2026-11-strata`](../experiments/2026-11-strata/) | Strata, llama.cpp | Qwen3.8-Flash-Next (GSQ-RCO IQ3_XXS) |
 | [`2026-11-basalt`](../experiments/2026-11-basalt/) | Basalt | Qwen3.8-Flash-Next (GSQ-RCO and UD IQ3_XXS packs) |
-| [`2026-11-vllm-27b-tp2`](../experiments/2026-11-vllm-27b-tp2/) | vLLM, Basalt | Qwen3.8-27B (NVFP4) |
+| [`2026-11-vllm-27b-tp2`](../experiments/2026-11-vllm-27b-tp2/) | vLLM, Basalt, llama.cpp (step 17) | Qwen3.8-27B (NVFP4; GGUF Q4_K_M for llama.cpp) |
 
 ## 1. The answer
 
@@ -25,7 +25,7 @@ Sources (every number below is in one of them; all were rechecked against the ra
 | **llama.cpp** | Qwen3.8-Flash-Next | layer split, `-cmoe` + MoE cache 23,552 MiB, `-lm dio`, `-b/-ub 4096` | 53.1 / 52.9 (no drafting) | 117 (4, short), 151 (8, short) | 838 t/s; 126K in 153.4 s |
 | **vLLM** | Qwen3.8-27B | TP=2 + MTP k=4: fp8 KV on v0.30.0 for one chat; the NVFP4-KV recipe (v0.32.0) with `max-num-seqs` 4 for several requests | **64.8 / 116.4** | **94.0 / 120.2** (4, 4.3K prompts, NVFP4 KV) | 3,126 t/s at 4K; 252K in 272 s (k=6) |
 | **Basalt** | Qwen3.8-27B | `split` + DFlash 2 drafter, int8 KV | 46.6 / **128.0** | 84.1 / 103.3 (4, 4.3K prompts; 163,840 context) | **4,272 t/s at 4K; 252K in 114.5 s** |
-| **llama.cpp** | Qwen3.8-27B (Q4_K_M) | `-sm tensor` + MTP (custom image, NCCL 2.32.6) | 77.8 (~540-token prompt; not comparable, see 4.2) | not measured | 951 t/s (~540 tokens) |
+| **llama.cpp** | Qwen3.8-27B (Q4_K_M) | `-sm tensor` + MTP, default batch | 55.5 / 100.8 | 49.0 / 57.6 (4, 4.3K prompts) | 1,320 t/s at 4K; 252K in 360 s (q8_0 KV) |
 | **llama.cpp** | dense 8B–32B | `-sm tensor` | 8B 130.3, 14B 74.3, 32B 35.8 | not measured | 8B 4,518 t/s |
 | **Ollama** | dense 8B–32B, 27B | layer split (`OLLAMA_SCHED_SPREAD=1`; no tensor split) | 8B 82.2, 14B 44.0, 32B 20.1; 27B + MTP 42.8 | not measured | 8B 3,751 t/s |
 
@@ -34,7 +34,7 @@ Sources (every number below is in one of them; all were rechecked against the ra
 | Model | One chat | Structured output (JSON) | Long prompts | Several requests |
 |---|---|---|---|---|
 | Qwen3.8-Flash-Next (MoE) | **Basalt** peer + MTP: 113 t/s prose, 1.2× Strata's best, 2.1× llama.cpp's | **Basalt** peer + MTP: 193 t/s | **Basalt** peer: 126K in 34.7 s (Strata 36.3, llama.cpp 153.4) | up to 4: Basalt ≈ Strata (173 each); 8: **Strata** layer split (229 against 200.5) |
-| Qwen3.8-27B (dense) | **vLLM** TP=2 + MTP: 64.8 t/s prose (Basalt 46.6) | **Basalt** split + DFlash 2: 128.0 t/s (vLLM 116.4) | **Basalt** split: 2.4× vLLM at 32K, 2.4–2.5× at 252K | **vLLM** TP=2, 4 slots (NVFP4-KV recipe): 94.0 prose (Basalt 84.1) |
+| Qwen3.8-27B (dense) | **vLLM** TP=2 + MTP: 64.8 t/s prose (llama.cpp 55.5, Basalt 46.6) | **Basalt** split + DFlash 2: 128.0 t/s (vLLM 116.4, llama.cpp 100.8) | **Basalt** split: 2.4× vLLM at 32K, 2.4–2.5× at 252K (llama.cpp 3.1× slower than Basalt) | **vLLM** TP=2, 4 slots (NVFP4-KV recipe): 94.0 prose (Basalt 84.1, llama.cpp 49.0) |
 | dense 8B–32B | **llama.cpp** tensor split: 1.6–1.7× one card (8B–14B); Ollama cannot split tensors | same | llama.cpp tensor split | not measured |
 
 The same ordering holds when both engines read **one file** (step 16 of the vLLM experiment: `nvidia/Qwen3.8-27B-NVFP4` in both): vLLM +46 % plain decode and +28 % drafted prose, Basalt +15 % drafted JSON and 2.4–2.5× on prompts of 32K and more.
@@ -51,7 +51,7 @@ The same ordering holds when both engines read **one file** (step 16 of the vLLM
 | **TTFT** | time from request to first content token | the client |
 | **Acceptance length** | 1 + accepted draft tokens / drafts | the server's speculative-decoding counters |
 
-All Flash-Next and 27B runs use the same prompts: about 4,300 tokens in (a prose task and a JSON task on the same document), 256 tokens out, greedy, thinking off, nothing reused between requests. "Short" concurrency runs use a 63-token prompt. Boardswap's llama.cpp and Ollama runs use a ~540-token prompt (llama-server, Ollama) or llama-bench's synthetic 512-token prompt and 128 tokens.
+All Flash-Next and 27B runs (llama.cpp's included, step 17) use the same prompts: about 4,300 tokens in (a prose task and a JSON task on the same document), 256 tokens out, greedy, thinking off, nothing reused between requests. "Short" concurrency runs use a 63-token prompt. Boardswap's llama.cpp and Ollama runs use a ~540-token prompt (llama-server, Ollama) or llama-bench's synthetic 512-token prompt and 128 tokens.
 
 ### Drafting: tokens per second = steps per second × acceptance length
 
@@ -126,6 +126,17 @@ The same model is about 12 % faster at generation with the batiai quant (59.5, s
 | Qwen3.8 27B | – | 24.2 / 838 | 40.4 / 986 | (needs 2 cards) |
 | Qwen3.8 27B + MTP | – | 52.1 / 824 | **77.8 / 951** | |
 | Qwen3 30B-A3B (MoE) | – | 143.8 / 4,023 | **158.2** / 3,622 | |
+
+**Qwen3.8-27B with this analysis' prompts** (`2026-11-vllm-27b-tp2` step 17; llama.cpp v1.0.0, the same Q4_K_M GGUF; 4.3K-token prompt, 256 tokens; prose / JSON t/s):
+
+| Configuration | Decode | TTFT 4K / 32K | 4 requests, total | 252K needle |
+|---|---|---|---|---|
+| tensor split | 40.3 / 40.4 | 3.04 / 24.15 s | 49.4 / 49.3 | |
+| **tensor split + MTP** | **55.5 / 100.8** | 3.19 / 25.56 s | 49.0 / 57.6 | 359.9 s (q8_0 KV) |
+| tensor split + MTP, `-b/-ub 4096` | 57.9 / 100.0 | 3.34 / 26.83 s | | |
+| layer split + MTP | 37.4 / 66.9 | 3.06 / 24.95 s | | |
+
+At 540 tokens the same tensor split + MTP decodes at 77.8 t/s (Boardswap); at 4.3K, 55.5. Decode slows with context, and prose drafts worse than the short benchmark text. MTP's output equals the plain output on all ten quality prompts.
 
 ### 3.2 Ollama (0.32.14, `2026-11-boardswap`)
 
@@ -231,20 +242,21 @@ Basalt against Strata, one chat: +16 % / +18 % exact, +21 % / +21 % drafted (bes
 
 ### 4.2 Qwen3.8-27B (dense)
 
-| | vLLM best (TP=2) | Basalt best (split) | llama.cpp best (tensor split, Boardswap) |
+| | vLLM best (TP=2) | Basalt best (split) | llama.cpp best (tensor split + MTP, step 17) |
 |---|---|---|---|
 | Weights | NVFP4 (pinned / matched) | NVFP4 (QUASAR / matched) | GGUF Q4_K_M |
-| One chat, no drafting | **42.35** / 32.06 | 24.95 / 21.93 | 40.4 |
-| One chat, drafting, prose | **64.76** / 53.64 | 46.57 / 41.76 | 77.8 (~540-token prompt, ~50 % acceptance) |
-| One chat, drafting, JSON | 116.44 / 96.79 | **127.99** / 111.13 | not measured |
-| TTFT 4K / 32K (no drafting) | 1.310 / 12.404 s | **0.940 / 5.193 s** | not measured |
-| 252K needle | 271.95 s | **114.5 s** | not measured |
-| 4 requests, 4.3K prompts, prose / JSON | **94.0** / **120.2** (NVFP4-KV recipe, `max-num-seqs` 4) | 84.1 / 103.3 (QUASAR, 163,840 context) | not measured |
-| Context held | 262,144 (fp8 KV) | 262,144 (int8 KV) | 4,096 (as run) |
+| One chat, no drafting | **42.35** / 32.06 | 24.95 / 21.93 | 40.30 |
+| One chat, drafting, prose | **64.76** / 53.64 | 46.57 / 41.76 | 55.47 |
+| One chat, drafting, JSON | 116.44 / 96.79 | **127.99** / 111.13 | 100.84 |
+| TTFT 4K / 32K (no drafting) | 1.310 / 12.404 s | **0.940 / 5.193 s** | 3.036 / 24.150 s |
+| 252K needle | 271.95 s | **114.5 s** | 359.85 s (q8_0 KV) |
+| 4 requests, 4.3K prompts, prose / JSON | **94.0** / **120.2** (NVFP4-KV recipe, `max-num-seqs` 4) | 84.1 / 103.3 (QUASAR, 163,840 context) | 49.0 / 57.6 (`-np 4`) |
+| Context held | 262,144 (fp8 KV) | 262,144 (int8 KV) | 262,144 (q8_0 KV) |
+| Drafting changes the text (10 prompts) | 3–4 of 10 | 0 of 10 | 0 of 10 |
 
 vLLM against Basalt on the matched checkpoint: +46 % plain decode, +28 % drafted prose; Basalt +15 % drafted JSON and 1.4× / 2.4× / 2.5× faster prompts at 4K / 32K / 252K.
 
-**The llama.cpp column is not comparable**: other weights (Q4_K_M), a 540-token prompt instead of 4.3K, another client, driver 580. Its 77.8 t/s with tensor split + MTP is above vLLM's 64.8, which makes **llama.cpp tensor split + MTP on the 27B, measured with this analysis' prompts, the most important missing run** (section 6).
+llama.cpp ran other weights (Q4_K_M against NVFP4), so its column compares engines and quantizations together; prompts, client and driver are the same. It decodes at 86–87 % of vLLM's speed, above Basalt on prose and below on JSON, holds the full context, and its drafted output does not change; it reads prompts 2.3× slower than vLLM at 4K and 3.1× slower than Basalt at 252K, which also caps its several-request totals.
 
 ### 4.3 Dense models up to 32B
 
@@ -266,7 +278,7 @@ Only llama.cpp and Ollama ran them. llama.cpp's tensor split gives 1.58–1.69×
 
 ## 6. Gaps and runs worth adding
 
-1. **llama.cpp tensor split + MTP on Qwen3.8-27B with the 4.3K prompts** (and the same for Ollama), to place llama.cpp next to vLLM and Basalt on the dense model under the same conditions. Boardswap's 77.8 t/s suggests it could lead for one chat.
+1. ~~llama.cpp tensor split + MTP on Qwen3.8-27B with the 4.3K prompts~~: done (vLLM experiment, step 17). Still open: Ollama on the 27B with these prompts, and llama.cpp on NVFP4 weights (no GGUF of them).
 2. **Drafted several-request runs with 4.3K prompts on Flash-Next** (Strata and Basalt ran their long-prompt concurrency without drafting).
 3. **vLLM on Flash-Next**: not run (vLLM's MoE path with experts beyond 32 GB of VRAM was not part of these experiments).
 4. vLLM's MTP config on the matched checkpoint at the source's util 0.95 with 180,000 context (vLLM 16a).

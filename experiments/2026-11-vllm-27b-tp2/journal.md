@@ -799,3 +799,60 @@ Asked for after the first commit (`88f1d37`): every number of step 16 checked ag
 - Smaller wording: free VRAM in MiB as Basalt prints it, the 0.975 allocation failure was at 220,000 tokens, the KV-check figure at 0.95 without the estimate is 3.62 GiB (3.64 is the worker's line), FP8 is about 1.8× NVFP4's bytes, not 2×, and the 252K comparison with the pinned checkpoint mixes MTP k=6 and no MTP.
 - Basalt's thinking budget and vLLM's empty answers checked in the files: 24 of 24 requests each way, step 10 the same.
 - A recheck of every README across the repository afterwards (all generated summaries regenerate identically from the raw files in all five experiments; no table value or conclusion was wrong) left these wording corrections, made in this README and journal: steps/s within 0.4–4.2 % of the source's (written as 1–4 %), the source's step-time slope 2.38 ms (written as 2.37), NVFP4's prose acceptance cost −7.5 % at 1K but +2 % at 32K (written as −7 % without the depth), prose MTP decode 62–78 t/s depending on the prompt (written as 62–70 with 78.3 "at the top of our range"), and step 8b's mean power 82–89 W over the whole run, about 105–110 W while generating (written as 84–86 W).
+
+## 17. llama.cpp on the 27B with this experiment's prompts (2026-11-27)
+
+Asked for after the cross-experiment analysis (`analysis/2026-11-two-gpus.md`): the board-swap experiment measured llama.cpp's tensor split + MTP on Qwen3.8-27B at 77.8 t/s, above vLLM's 64.8, but with a ~540-token prompt, another client and other weights. This step measures llama.cpp with the clients of steps 4, 6, 8 and 11, so it sits next to vLLM and Basalt. Files: `runs/17-llamacpp27b/` (`summary.md`, `concurrency/`, `needle/`, `quality/`).
+
+**Setup.** The board-swap image (`local/llama.cpp:b12464-nccl`) was removed in step 0, so the native build of `2026-11-llamacpp-flags` runs it: llama.cpp **v1.0.0 (build 12359, `b1b770d9`)**, CUDA 13.0.88, the host's NCCL 2.28.9 (the official image's 2.25.1 was the one that crashed tensor split), on driver 595.91.07, 180 W. Model: Ollama's `qwen3.8:27b` blob `sha256-f5f1dd89…` (16,810,714,464 bytes, read in place from `/usr/share/ollama/.ollama/models/blobs/`, on the NVMe; GGUF `general.name` "Qwen3.8 27B 0814", **Q4_K - Medium**, MTP head included). Not the NVFP4 weights of vLLM and Basalt. Base options as in `2026-11-strata` (`-np 1 --cache-ram 0 -t 8 -lv 4`) plus `-ngl 99 -fa on -c 40960`; MTP as in the board-swap runs: `--spec-type draft-mtp --spec-draft-n-max 4 --spec-draft-backend-sampling`. KV cache f16 (the default). The clients send `cache_prompt: false`, so no prompt is reused.
+
+```
+M=/usr/share/ollama/.ollama/models/blobs/sha256-f5f1dd8920d417aac2718b0bda3403da274301efdd6760b4f0f4b864ff2ad57d
+BENCH_CLIENT=experiments/2026-11-vllm-27b-tp2/scripts/baseline-client.py scripts/bench-run.sh \
+  experiments/2026-11-vllm-27b-tp2/runs/17-llamacpp27b <label> 5 -- \
+  ~/llama.cpp/v1.0.0/build/bin/llama-server -m $M --host 127.0.0.1 --port 8080 -np 1 --cache-ram 0 -t 8 -c 40960 -lv 4 \
+  -ngl 99 -fa on -sm tensor|layer [-b 4096 -ub 4096] [--spec-type draft-mtp --spec-draft-n-max 4 --spec-draft-backend-sampling]
+```
+
+**17a–d, one request at a time** (`summary.md`; thinking off, 256 tokens unless "on"):
+
+| Configuration | Decode prose / JSON | Thinking on, prose / structured / mixed | Drafts accepted, prose / JSON | TTFT 0.5K / 4K / 32K | Peak VRAM per card |
+|---|---|---|---|---|---|
+| tensor split, no MTP | 40.30 / 40.40 | 40.37 / 40.39 / 40.37 | – | 0.580 / 3.036 / 24.150 s | 9,414 MiB |
+| **tensor split + MTP** | **55.47 / 100.84** | 60.01 / 80.95 / 70.30 | 30.2 % / 76.6 % | 0.598 / 3.191 / 25.560 s | 10,110 MiB |
+| tensor split + MTP, `-b/-ub 4096` | 57.94 / 99.98 | 61.81 / 74.07 / 67.36 | 32.9 % / 76.8 % | 0.528 / 3.339 / 26.834 s | 12,562 MiB |
+| layer split + MTP | 37.44 / 66.88 | 40.22 / 49.49 / 51.39 | 31.1 % / 76.1 % | 0.695 / 3.062 / 24.950 s | 9,508 / 10,800 MiB |
+
+The needle in each TTFT request was found 3/3 everywhere. "Drafts accepted" is accepted / drafted tokens from the server's timings (vLLM's k=4 equivalent: (acceptance length − 1) / 4 = 32 % prose, 79 % JSON in step 9b). With thinking on, llama-server puts all 800 tokens into the reasoning field and the answer stays empty, as in vLLM (Basalt stops at a 400-token budget, journal 10), so that row is like for like with vLLM's.
+
+What it shows:
+
+- **Tensor split + MTP is llama.cpp's best one-chat configuration, at 55.5 t/s prose and 100.8 JSON**, 86 % / 87 % of vLLM's 64.76 / 116.44 on its NVFP4 weights, and above Basalt's prose (46.6) but below its JSON (128.0). Board-swap's 77.8 t/s came from a 540-token prompt: decode slows with context, and here the TTFT requests at 0.5K decoded at 76 t/s, at 4K at 74, at 32K at 70 (128-token answers; the 256-token prose requests average 55, because prose drafts worse than the needle answer).
+- **Without MTP, 40.3 t/s**, near vLLM's 42.35. MTP adds 38 % on prose and 150 % on JSON.
+- **Prompt reading is llama.cpp's weak side: 4K in 3.0–3.2 s, 32K in 24–26 s**, 1,262–1,387 t/s, against vLLM's 1.31 / 12.4 s and Basalt's 0.94 / 5.19 s. Tensor split reads prompts no faster than layer split (1,320 against 1,375 t/s at 4K).
+- `-b/-ub 4096`, which made the MoE model's prompts 2.5× faster (`2026-11-llamacpp-flags`), makes this dense model's slightly slower (32K: 26.8 against 25.6 s) and leaves decode unchanged; the default batch stays.
+- Layer split + MTP decodes at 67 % / 66 % of tensor split's speed: for one chat the cards take turns.
+
+**17e–f, several requests** (`concurrency/`, `scripts/step8-client.py`, `-np 4 -c 139264` so each slot holds the 32K prompt; total t/s at 1 / 2 / 4 requests, 3 groups each, no short groups):
+
+| Configuration | Prose | JSON | TTFT at 4 requests, max | 32K TTFT | Peak VRAM per card |
+|---|---|---|---|---|---|
+| tensor split + MTP, 4 slots | 33.0 / 42.8 / 49.0 | 44.1 / 52.8 / 57.6 | 13.7 s | 25.63 s | 14,514 MiB |
+| tensor split, 4 slots, no MTP | 27.1 / 38.7 / 49.4 | 27.0 / 38.5 / 49.3 | 12.8 s | 24.19 s | 12,704 MiB |
+
+(`concurrency/summary.md`, written by `scripts/step8-summary.py`.) **Four requests reach 49 t/s total**, against vLLM's 94.0 / 120.2 (TP=2, 4 slots, NVFP4 KV) and Basalt's 84.1 / 103.3. The prompts are read one after another at about 3.2 s each, so the fourth stream waits up to 13.7 s before its first token; MTP does not stop the batching (49.0 against 49.4 prose without it) and still helps JSON.
+
+**17g, the 252K needle** (`needle/`, `NEEDLE_CHARS=835000`, `scripts/needle-client.py`). At f16 KV the full context would need about 17.5 GiB per card (from 17a/17e's VRAM per context), so this run uses **`-ctk q8_0 -ctv q8_0`** (llama.cpp's counterpart to vLLM's fp8 and Basalt's int8 KV) and `-c 262144`, otherwise 17a's tensor split + MTP:
+
+```
+NEEDLE_CHARS=835000 BENCH_CLIENT=experiments/2026-11-vllm-27b-tp2/scripts/needle-client.py scripts/bench-run.sh \
+  experiments/2026-11-vllm-27b-tp2/runs/17-llamacpp27b/needle tensor-mtp-q8kv-252k 3 -- \
+  ~/llama.cpp/v1.0.0/build/bin/llama-server -m $M --host 127.0.0.1 --port 8080 -np 1 --cache-ram 0 -t 8 -c 262144 -lv 4 \
+  -ngl 99 -fa on -sm tensor -ctk q8_0 -ctv q8_0 --spec-type draft-mtp --spec-draft-n-max 4 --spec-draft-backend-sampling
+```
+
+**252,876 tokens in 359.85 ± 0.24 s (703 t/s), needle found 3/3**, peak 15,000 MiB per card. llama.cpp holds the full context on two cards, and reads it 1.32× slower than vLLM (271.95 s) and 3.1× slower than Basalt (114.5 s). The prompt rate falls with length: 1,320 t/s at 4K, 1,262 at 32K, 703 at 252K (vLLM 3,126 / 2,461 / 930).
+
+**17h, quality** (`quality/quality.md`; `scripts/quality-check.py` through `bench-run.sh`, tensor split with and without MTP, `-c 40960`): every check passes, both repetitions identical, and **MTP's text equals the plain text on all ten prompts** (by hash), as with Basalt's drafter and unlike vLLM's MTP (3–4 of 10 differ, steps 11 and 16). Against the other engines (different weights, so wording only): llama.cpp's `time` and `code` answers equal Basalt's and vLLM-with-MTP's on the matched checkpoint, its `json` names the same person as Basalt's ("Elena Vance") in another layout.
+
+**Net for llama.cpp on the 27B:** the best configuration is tensor split + MTP with the default batch: 55.5 / 100.8 t/s for one chat (86–87 % of vLLM's, on other weights), the full 262K context with q8_0 KV, and output that does not change with drafting. It loses clearly on prompts (2.4× vLLM's time at 4K, 3.1× Basalt's at 252K) and therefore on several requests at once (49 t/s total at 4 against vLLM's 94). The board-swap number (77.8 t/s) holds only for short contexts. Not run: llama.cpp with the NVFP4 weights (no GGUF of them), and q8_0 KV at short context (the 252K run is the only q8_0 one).

@@ -1,6 +1,6 @@
 # vLLM: Qwen3.8-27B on 2× RTX 5060 Ti with tensor parallelism, a reproduction
 
-Status: **done** (2026-11-26), steps 0–12; later steps 13–16 on request (2026-11-26/27), the last a matched checkpoint for vLLM and Basalt. The findings are [below](#findings). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
+Status: **done** (2026-11-26), steps 0–12; later steps 13–17 on request (2026-11-26/27): a matched checkpoint for vLLM and Basalt (16) and llama.cpp on the 27B with the same prompts (17). The findings are [below](#findings). Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
 
 ## Question
 
@@ -173,6 +173,19 @@ The new driver corrects vLLM's KV memory accounting (the pools now equal the sou
 
 The engine ratios are those of step 10 on different weights (plain decode vLLM +46 %; prompts Basalt 1.4× at 4K, 2.4–2.5× at 32K and 252K; JSON Basalt +15 %). The checkpoint itself is slower in vLLM than the pinned one: plain decode −24 % (42.3 → 32.1 t/s), MTP −17 % at the same acceptance, 32K prompt +15 %, the 252K prompt the same (272 s, MTP k=6 there, off here).
 
+**llama.cpp on the 27B** (step 17; llama.cpp v1.0.0 build 12359, Ollama's `qwen3.8:27b` GGUF, **Q4_K_M**, not the NVFP4 weights; the clients of steps 4, 6, 8 and 11; journal 17, [`runs/17-llamacpp27b/`](runs/17-llamacpp27b/)):
+
+| | tensor split, no MTP | **tensor split + MTP** | layer split + MTP |
+|---|---|---|---|
+| Decode, thinking off, prose / JSON | 40.30 / 40.40 | **55.47 / 100.84** | 37.44 / 66.88 |
+| TTFT ~0.5K / 4K / 32K | 0.580 / 3.036 / 24.150 s | 0.598 / 3.191 / 25.560 s | 0.695 / 3.062 / 24.950 s |
+| 4 requests at once (4 slots), total prose / JSON | 49.4 / 49.3 | 49.0 / 57.6 | – |
+| 252K needle (q8_0 KV, `-c 262144`) | – | 359.85 s (703 t/s), found 3/3 | – |
+| Quality, ten prompts | all checks pass | all pass, text identical to no MTP | – |
+
+`-b/-ub 4096` leaves decode unchanged and makes 4K and 32K prompts 4–5 % slower. Board-swap's 77.8 t/s for tensor split + MTP was measured on a 540-token prompt; at 4.3K the same configuration decodes at 55.5 (prose).
+
+
 ## Findings
 
 ### What reproduces
@@ -190,13 +203,13 @@ The engine ratios are those of step 10 on different weights (plain decode vLLM +
 
 It depends on what is read and what is written:
 
-- **One chat, plain decode:** vLLM tensor parallelism: 42 t/s plain (24.95 for Basalt's split), and with MTP about 61 t/s per stream in step 8's runs.
+- **One chat, plain decode:** vLLM tensor parallelism: 42 t/s plain (24.95 for Basalt's split, 40.3 for llama.cpp's tensor split on Q4_K_M), and with MTP about 61 t/s per stream in step 8's runs; llama.cpp's tensor split + MTP reaches 86–87 % of vLLM's MTP speed (55.5 / 100.8 against 64.8 / 116.4, step 17).
 - **Prompt-heavy work (long documents, agents re-reading context):** pipelined prompt reading. vLLM PP=2 reads 32K in 9.3 s against 13.2 s with TP=2 (at a 40 % cost on one stream, 65K context only); **Basalt split reads 32K in 5.6 s and 252K in 114.5 s**, 2.2–2.4× faster than vLLM TP=2, because it passes a chunk's rows once instead of all-reducing twice per layer.
 - **Structured output:** Basalt's DFlash 2 drafter gets 128 t/s on JSON, 10 % above vLLM's MTP k=4, and loses on prose (−28 %).
-- **Several requests at once** (prose, total t/s at 1 / 2 / 4 requests): vLLM TP=2 with 4 slots 45.6 / 69.4 / 94.0 (totals rise only up to the slot count); Basalt split with DFlash 2, 4 slots, 163,840 context 39.6 / 57.5 / 84.1 (−11 % at 4), without the drafter 22.9 / 39.5 / 64.2. JSON: Basalt 89.6 / 90.3 / 103.3 against vLLM's 67.6 / 97.2 / 120.2: +33 % for one request, nothing gained from the second (a drafted window takes half a pass), −14 % at 4. Prompt reading is unchanged by the slots on both. The drafted 4-slot config does not start at 262,144 context (0.1 GiB short on GPU 0; journal 15).
+- **Several requests at once** (prose, total t/s at 1 / 2 / 4 requests): vLLM TP=2 with 4 slots 45.6 / 69.4 / 94.0 (totals rise only up to the slot count); llama.cpp tensor split + MTP, 4 slots, 33.0 / 42.8 / 49.0 (it reads the prompts one after another, step 17); Basalt split with DFlash 2, 4 slots, 163,840 context 39.6 / 57.5 / 84.1 (−11 % at 4), without the drafter 22.9 / 39.5 / 64.2. JSON: Basalt 89.6 / 90.3 / 103.3 against vLLM's 67.6 / 97.2 / 120.2: +33 % for one request, nothing gained from the second (a drafted window takes half a pass), −14 % at 4. Prompt reading is unchanged by the slots on both. The drafted 4-slot config does not start at 262,144 context (0.1 GiB short on GPU 0; journal 15).
 - **Basalt peer mode** does not start on these cards with the published pack (journal 13): the main card must hold the whole 16 GiB model, so `split` is the only two-card mode of the 27B here.
-- **Context:** vLLM TP=2 holds 262,144 tokens (NVFP4 KV: 463K-token pool); PP=2 only 65,536 with five starts to fit; Basalt split holds 262,144 with int8 KV. All of these are on the pinned and QUASAR checkpoints; on the heavier matched checkpoint (FP8 attention projections) vLLM with MTP runs at 180,000 and Basalt at 200,000 with its drafter, 254,000 without; 262,144 is refused in all three (step 16).
-- **Output stability:** Basalt's drafted text equals its undrafted text; vLLM's MTP changes the wording on 3 of 10 prompts (4 on the matched checkpoint; correctness checks pass everywhere).
+- **Context:** llama.cpp's tensor split holds 262,144 with q8_0 KV (step 17, the slowest prompt read of the three engines: 360 s for 252K). vLLM TP=2 holds 262,144 tokens (NVFP4 KV: 463K-token pool); PP=2 only 65,536 with five starts to fit; Basalt split holds 262,144 with int8 KV. All of these are on the pinned and QUASAR checkpoints; on the heavier matched checkpoint (FP8 attention projections) vLLM with MTP runs at 180,000 and Basalt at 200,000 with its drafter, 254,000 without; 262,144 is refused in all three (step 16).
+- **Output stability:** Basalt's and llama.cpp's drafted text equals their undrafted text; vLLM's MTP changes the wording on 3 of 10 prompts (4 on the matched checkpoint; correctness checks pass everywhere).
 - **Not the weights:** on one checkpoint for both engines (step 16) the single-request orderings above hold, with ratios close to step 10's (several requests and PP=2 were not rerun): vLLM +46 % on plain decode and +28 % on drafted prose, Basalt 2.4× on a 32K prompt, 2.5× on the 252K needle, +15 % on drafted JSON.
 
 ### Not measured
